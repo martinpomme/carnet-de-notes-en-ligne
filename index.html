@@ -293,17 +293,42 @@ tbody tr:hover{ background:#f9fafb }
 .group-note-score-lock{
   background:#f7fbff !important; color:#1e40af; font-weight:600;
 }
+
+/* ── Connexion & comptes ── */
+body.auth-pending header, body.auth-pending .topbar, body.auth-pending .container{ display:none !important }
+#loginOverlay{ position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center;
+ background:linear-gradient(135deg,#1e3a8a,#2563eb); padding:16px }
+body.auth-pending #loginOverlay{ display:flex }
+.login-card{ width:380px; max-width:100%; background:#fff; border-radius:14px; padding:28px 26px; box-shadow:0 20px 50px rgba(0,0,0,0.3) }
+.login-card h2{ margin:0 0 4px; font-family:Georgia,"Times New Roman",serif; color:#1e3a8a; font-size:26px }
+.login-card p.sub{ margin:0 0 18px; color:var(--muted); font-size:14px }
+.login-card label{ display:block; margin:12px 0 4px; font-weight:600; font-size:14px }
+.login-card input[type=text], .login-card input[type=password]{ width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:15px }
+.login-card .remember{ display:flex; align-items:center; gap:8px; margin:12px 0 16px; font-size:14px; font-weight:400 }
+.login-card button.btn-primary{ width:100%; padding:11px; font-size:15px; font-weight:600 }
+#loginError{ color:#b91c1c; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; padding:8px 10px; margin-top:12px; font-size:14px; display:none }
+#userLabel{ align-self:center; font-size:14px; opacity:0.95; margin-right:4px }
+#settingsMsg{ margin-top:10px; font-size:14px; color:#b91c1c; display:none }
+.hint{ font-size:12px; color:var(--muted); margin-top:4px }
+/* Mode élève : consultation uniquement */
+body.student-mode .locks, body.student-mode #manageSubjectsBtnTop, body.student-mode #manageCompetenciesBtn,
+body.student-mode #settingsBtn, body.student-mode .tab-btn[data-target="classesView"], body.student-mode #saveStatusBanner,
+body.student-mode #importBanner, body.student-mode #deleteStudentBtn, body.student-mode #appreciationWarning,
+body.student-mode .split-student > .panel:first-child, body.student-mode #appreciationsView .split > .panel:first-child,
+body.student-mode #addNoteBtn, body.student-mode #addGroupNoteBtn, body.student-mode #addCompBtn,
+body.student-mode #studentContent .subtabs, body.student-mode #prof,
+body.student-mode #noteDetailEditBtn, body.student-mode #noteDetailDeleteBtn{ display:none !important }
+body.student-mode .split-student, body.student-mode #appreciationsView .split{ grid-template-columns:1fr }
+body.student-mode .has-empty-eval::after, body.student-mode .has-hidden-eval::before{ display:none !important }
 </style>
 </head>
-<body>
+<body class="auth-pending">
 <header>
  <h1>Carnet de notes</h1>
  <div class="header-actions">
- <button class="icon-btn" id="exportBtn">📥Exporter</button>
- <label class="icon-btn" style="position:relative;">
- 📤Importer
- <input type="file" id="importFile" accept=".csv,text/csv" style="position:absolute;inset:0;opacity:0;cursor:pointer;">
- </label>
+ <span id="userLabel"></span>
+ <button class="icon-btn" id="settingsBtn" title="Paramètres du compte">⚙️</button>
+ <button class="icon-btn" id="logoutBtn" title="Se déconnecter">Déconnexion</button>
  </div>
 </header>
 <div class="topbar">
@@ -323,7 +348,7 @@ tbody tr:hover{ background:#f9fafb }
   <button class="btn" id="manageCompetenciesBtn" style="font-weight:600; border-color:#1e3a8a; color:#1e3a8a;">Compétences</button>
  </div>
  <div style="flex:1; display:flex; gap:8px; align-items:center;">
-  <div id="importBanner" class="import-banner" style="margin:0;">
+  <div id="importBanner" class="import-banner" style="margin:0;display:none;">
    Importer votre fichier de base pour reprendre votre saisie.
   </div>
   <div id="saveStatusBanner" class="save-status-banner" style="margin:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
@@ -343,6 +368,10 @@ tbody tr:hover{ background:#f9fafb }
      <div class="form-row">
       <input id="newFirst" placeholder="Prénom" style="flex:1;">
       <input id="newLast" placeholder="Nom" style="flex:1;">
+     </div>
+     <div class="form-row">
+      <input id="newLogin" placeholder="Identifiant élève" autocomplete="off" style="flex:1;">
+      <input id="newPwd" placeholder="Mot de passe élève" autocomplete="off" style="flex:1;">
      </div>
      <div class="form-row">
       <select id="newClassSelect" style="flex:1;"></select>
@@ -420,6 +449,42 @@ tbody tr:hover{ background:#f9fafb }
   </div>
  </section>
 </div>
+
+<div id="loginOverlay">
+ <form class="login-card" id="loginForm" autocomplete="on">
+  <h2>Carnet de notes</h2>
+  <p class="sub">Connectez-vous pour accéder à vos notes.</p>
+  <label for="loginUser">Identifiant</label>
+  <input type="text" id="loginUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+  <label for="loginPass">Mot de passe</label>
+  <input type="password" id="loginPass" name="password" autocomplete="current-password" required>
+  <label class="remember"><input type="checkbox" id="loginRemember"> Rester connecté sur cet appareil</label>
+  <button type="submit" class="btn btn-primary" id="loginBtn">Se connecter</button>
+  <div id="loginError"></div>
+ </form>
+</div>
+
+<div id="settingsModal" class="modal" aria-hidden="true" style="z-index:300;">
+ <div class="modal-card" role="dialog" aria-modal="true" style="width:440px;">
+  <div class="modal-header">
+   <h3>Paramètres du compte</h3>
+   <button class="modal-close" id="settingsClose">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="settingsForm" class="modal-form" autocomplete="off">
+    <label>Identifiant</label><input id="settingsUser">
+    <label>Nouveau mot de passe</label><input type="password" id="settingsPass" placeholder="Laisser vide pour ne pas changer" autocomplete="new-password">
+    <label>Confirmer le mot de passe</label><input type="password" id="settingsPass2" autocomplete="new-password">
+    <div id="settingsMsg"></div>
+    <div class="modal-actions">
+     <button type="button" class="btn" id="settingsCancel">Annuler</button>
+     <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
 <!-- ══════════════════════ MODALS ══════════════════════ -->
 <div id="noteFormModal" class="modal" aria-hidden="true">
  <div class="modal-card" role="dialog" aria-modal="true">
@@ -782,6 +847,9 @@ tbody tr:hover{ background:#f9fafb }
     <label>Prénom</label><input id="editFirst">
     <label>Nom</label><input id="editLast">
     <label>Classe</label><select id="editClassSelect"></select>
+    <label>Identifiant de connexion</label><input id="editLogin" autocomplete="off">
+    <label>Mot de passe de connexion</label><input id="editPwd" autocomplete="off">
+    <div class="hint">L'élève utilise ces identifiants pour consulter ses notes. Il ne peut pas les modifier. Les deux champs vides = pas de compte.</div>
     <div class="modal-actions">
      <button type="button" class="btn" id="editStudentCancel">Annuler</button>
      <button type="submit" class="btn btn-primary">Valider</button>
@@ -2589,8 +2657,8 @@ function dateKey(n){if(n.isoDate) return new Date(n.isoDate).getTime();const d=p
 function getSubjectCoef(subjectName){const sub=SUBJECT_REGISTRY.find(s=>(typeof s==='object'?s.name:s)===subjectName);return(typeof sub==='object'&&sub.coef!==undefined)?sub.coef:1;}
 
 // ── EXPORT / IMPORT ──────────────────────────────────────────────────────────
-document.getElementById("exportBtn").addEventListener("click",(e)=>{e.preventDefault();exportCSV();});
-document.getElementById("importFile").addEventListener("change",(e)=>{
+document.getElementById("exportBtn")?.addEventListener("click",(e)=>{e.preventDefault();exportCSV();});
+document.getElementById("importFile")?.addEventListener("change",(e)=>{
  const file=e.target.files[0]; if(!file) return;
  const reader=new FileReader();
  reader.onload=()=>{
@@ -2810,12 +2878,17 @@ document.getElementById("addStudentBtn").addEventListener("click",()=>{
  const last=document.getElementById("newLast").value.trim();
  const classId=document.getElementById("newClassSelect").value||"";
  if(!first||!last) return;
+ const login=document.getElementById("newLogin").value.trim(), pwd=document.getElementById("newPwd").value;
+ if(!login||!pwd){alert("Renseignez l'identifiant et le mot de passe de l'élève.");return;}
+ const loginErr=checkStudentLogin(login,null); if(loginErr){alert(loginErr);return;}
  const id=(first+'_'+last).toLowerCase().replace(/\s+/g,'_')+'_'+Math.random().toString(36).slice(2,6);
+ ACCOUNTS[id]={login,pwd};
  DATA.students.push({id,first,last,classId});
  DATA.notes[id]=[];
  if(classId){const cls=DATA.classes.find(c=>c.id===classId);if(cls&&!cls.memberIds.includes(id)) cls.memberIds.push(id);}
  document.getElementById("newFirst").value=""; document.getElementById("newLast").value="";
- renderStudentList();
+ document.getElementById("newLogin").value=""; document.getElementById("newPwd").value="";
+ renderStudentList(); saveData();
 });
 document.getElementById("studentSearch").addEventListener("input",renderStudentList);
 document.getElementById("studentList").addEventListener("change",(e)=>openStudent(e.target.value));
@@ -2824,8 +2897,8 @@ document.getElementById("deleteStudentBtn").addEventListener("click",()=>{
  const id=document.getElementById("studentList").value; if(!id) return;
  openConfirmModal({message:"Vous êtes sur le point de supprimer l'élève sélectionné ainsi que ses notes. Êtes-vous sûr ?",onConfirm:()=>{
   DATA.classes.forEach(c=>c.memberIds=c.memberIds.filter(mid=>mid!==id));
-  delete DATA.notes[id]; DATA.students=DATA.students.filter(s=>s.id!==id);
-  renderStudentList(); document.getElementById("studentContent").style.display="none"; document.getElementById("studentPlaceholder").style.display="block";
+  delete DATA.notes[id]; DATA.students=DATA.students.filter(s=>s.id!==id); delete ACCOUNTS[id];
+  renderStudentList(); saveData(); document.getElementById("studentContent").style.display="none"; document.getElementById("studentPlaceholder").style.display="block";
  }});
 });
 
@@ -7022,6 +7095,7 @@ function openEditStudentModal(){
  document.getElementById("editFirst").value=stu.first; document.getElementById("editLast").value=stu.last;
  document.getElementById("editClassSelect").innerHTML='<option value="">-</option>'+DATA.classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
  document.getElementById("editClassSelect").value=stu.classId||"";
+ document.getElementById("editLogin").value=ACCOUNTS[id]?.login||""; document.getElementById("editPwd").value=ACCOUNTS[id]?.pwd||"";
  editStudentModal.classList.add("open");editStudentModal.setAttribute("aria-hidden","false");
 }
 function closeEditStudentModal(){editStudentModal.classList.remove("open");editStudentModal.setAttribute("aria-hidden","true");}
@@ -7035,12 +7109,16 @@ document.getElementById("editStudentForm").addEventListener("submit",e=>{
  const newFirst=document.getElementById("editFirst").value.trim();
  const newLast=document.getElementById("editLast").value.trim();
  const newClass=document.getElementById("editClassSelect").value||"";
+ const newLogin=document.getElementById("editLogin").value.trim(), newPwd=document.getElementById("editPwd").value;
+ if((newLogin&&!newPwd)||(!newLogin&&newPwd)){alert("Renseignez l'identifiant ET le mot de passe (ou laissez les deux vides).");return;}
+ if(newLogin){const e2=checkStudentLogin(newLogin,id); if(e2){alert(e2);return;}}
+ if(newLogin) ACCOUNTS[id]={login:newLogin,pwd:newPwd}; else delete ACCOUNTS[id];
  if(stu.classId!==newClass){
   const oldCls=DATA.classes.find(c=>c.id===stu.classId); if(oldCls) oldCls.memberIds=oldCls.memberIds.filter(mid=>mid!==stu.id);
   const newClsObj=DATA.classes.find(c=>c.id===newClass); if(newClsObj&&!newClsObj.memberIds.includes(stu.id)) newClsObj.memberIds.push(stu.id);
  }
  Object.assign(stu,{first:newFirst,last:newLast,classId:newClass});
- closeEditStudentModal(); renderStudentList(); rerenderOpenStudent();
+ closeEditStudentModal(); renderStudentList(); rerenderOpenStudent(); saveData();
 });
 
 const editClassModal=document.getElementById("editClassModal");
@@ -8119,19 +8197,28 @@ window.onbeforeunload = function(e) {
   }
 };
 
-// ── SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────────────────
-// Collez ici l'URL de déploiement de l'application web Apps Script (se termine par /exec)
+// ── CONNEXION + SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbydF-Ikuwkqh0kTE2qzTUH4kcQHsXLPUd8AW3Skx29zTt9N2HA9QKpTVErTVrrkAMFQ/exec";
-const CLOUD = { enabled: CLOUD_URL.indexOf("https://")===0, ready:false, timer:null, saving:false, again:false, rev:0 };
+const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0 };
+const AUTH = { user:"", pass:"", role:"", studentId:"" };   // role : "prof" | "eleve"
+let ACCOUNTS = {};   // (prof uniquement) id élève -> {login, pwd}
 
-function cloudToken(reset){
- let t=null; try{t=localStorage.getItem("cloud_token");}catch(e){}
- if(reset||!t){
-  t=prompt("Mot de passe de synchronisation Google Sheets :")||"";
-  try{localStorage.setItem("cloud_token",t);}catch(e){}
- }
- return t;
+function authLoad(){
+ try{ const t=sessionStorage.getItem("carnet_auth")||localStorage.getItem("carnet_auth"); if(t){const o=JSON.parse(t); if(o&&o.u&&o.p) return o;} }catch(e){}
+ return null;
 }
+function authSave(u,p,remember){
+ const t=JSON.stringify({u,p});
+ try{ sessionStorage.setItem("carnet_auth",t); if(remember) localStorage.setItem("carnet_auth",t); else localStorage.removeItem("carnet_auth"); }catch(e){}
+}
+function authClear(){ try{sessionStorage.removeItem("carnet_auth");localStorage.removeItem("carnet_auth");}catch(e){} }
+
+async function api(action,extra){
+ const body=Object.assign({action,user:AUTH.user,pass:AUTH.pass},extra||{});
+ const r=await fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+ return r.json();
+}
+
 function cloudStatus(kind,msg){
  const b=document.getElementById("saveStatusBanner"); if(!b) return;
  b.classList.remove("modified","saved","pending"); b.style.display="";
@@ -8150,55 +8237,143 @@ function csvToLogicalLines(text){
  if(cur.trim()) lines.push(cur);
  return lines;
 }
-function cloudMirrorLocal(){
- try{
-  localStorage.setItem("carnet_notes_data",JSON.stringify(DATA));
-  localStorage.setItem("carnet_notes_subjects",JSON.stringify(SUBJECT_REGISTRY));
-  localStorage.setItem("carnet_notes_locks",JSON.stringify(LOCKED_PERIODS));
- }catch(e){}
+function cloudMirrorLocal(){ /* plus de copie locale des données (confidentialité) */ }
+
+function checkStudentLogin(login,exceptId){
+ const k=String(login||"").trim().toLowerCase();
+ if(k===String(AUTH.user).toLowerCase()) return "Cet identifiant est celui du compte professeur.";
+ for(const [sid,a] of Object.entries(ACCOUNTS)){
+  if(sid!==exceptId && String(a.login||"").trim().toLowerCase()===k){
+   const st=DATA.students.find(x=>x.id===sid);
+   return "Cet identifiant est déjà utilisé"+(st?" par "+st.first+" "+st.last:"")+".";
+  }
+ }
+ return "";
 }
+
 async function cloudPull(){
- const r=await fetch(CLOUD_URL+"?action=load&token="+encodeURIComponent(cloudToken()));
- const j=await r.json();
+ const j=await api("load");
  if(!j.ok) throw new Error(j.error||"erreur");
- CLOUD.rev=j.rev;
+ CLOUD.rev=j.rev; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
+ ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
   importCSV(j.lines.join("\n"));
   ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
-  rebuildUI(); updateTabWarningIndicators();
-  cloudMirrorLocal();
  }
+ rebuildUI(); updateTabWarningIndicators();
+ if(AUTH.role==="eleve") applyStudentMode();
  return j;
 }
-async function cloudInit(){
- if(!CLOUD.enabled) return;
- cloudStatus("pending","Chargement depuis Google Sheets…");
+
+function applyStudentMode(){
+ document.body.classList.add("student-mode");
+ const sid=AUTH.studentId;
+ const stu=DATA.students.find(s=>s.id===sid);
+ const lab=document.getElementById("userLabel"); if(lab) lab.textContent=stu?("👤 "+stu.first+" "+stu.last):"";
+ const t1=document.querySelector('.tab-btn[data-target="elevesView"]'); if(t1) t1.textContent="Mes notes";
+ const t3=document.querySelector('.tab-btn[data-target="appreciationsView"]'); if(t3) t3.textContent="Mon bulletin";
+ document.querySelector("#elevesView .card-header strong")?.replaceChildren(document.createTextNode("Mes notes"));
+ document.querySelector("#appreciationsView .card-header strong")?.replaceChildren(document.createTextNode("Mon bulletin"));
+ if(!stu){ document.getElementById("studentPlaceholder").textContent="Aucune donnée disponible pour ce compte."; return; }
+ const list=document.getElementById("studentList"); list.value=sid; openStudent(sid);
+ renderAppreciationStudentList();
+ const al=document.getElementById("appreciationStudentList"); if(al) al.value=sid;
+ openAppreciationStudent(sid);
+}
+function applyProfMode(){
+ const lab=document.getElementById("userLabel"); if(lab) lab.textContent="👤 "+AUTH.user;
+}
+
+async function tryLogin(user,pass,remember){
+ AUTH.user=user; AUTH.pass=pass; AUTH.role="";
  try{
-  const j=await cloudPull();
-  CLOUD.ready=true; IS_MODIFIED=false;
-  const ib=document.getElementById("importBanner");
-  if(j.lines && j.lines.length>1){ if(ib) ib.style.display="none"; }
-  else if(ib){ ib.textContent="Google Sheets est vide : importez votre fichier CSV de base pour l'initialiser."; }
-  cloudStatus("ok","Connecté à Google Sheets – "+cloudHour());
+  await cloudPull();
+  CLOUD.ready=(AUTH.role==="prof"); IS_MODIFIED=false;
+  authSave(user,pass,remember);
+  ["carnet_notes_data","carnet_notes_subjects","carnet_notes_locks","cloud_token"].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  document.body.classList.remove("auth-pending");
+  if(AUTH.role==="prof"){ applyProfMode(); cloudStatus("ok","Connecté à Google Sheets – "+cloudHour()); }
+  return "";
  }catch(e){
-  console.error("cloudInit:",e);
-  if(String(e.message).indexOf("token")>=0){ try{localStorage.removeItem("cloud_token");}catch(_){} }
-  cloudStatus("error","Google Sheets inaccessible ("+e.message+") – rechargez la page. Modifications NON synchronisées.");
+  console.error("login:",e);
+  AUTH.user=AUTH.pass=AUTH.role="";
+  const m=String(e.message||e);
+  return /identifiants/.test(m) ? "Identifiant ou mot de passe incorrect." : "Connexion impossible ("+m+"). Vérifiez votre connexion internet.";
  }
 }
+
+function showLoginError(msg){
+ const el=document.getElementById("loginError"); if(!el) return;
+ el.textContent=msg; el.style.display=msg?"block":"none";
+}
+
+async function bootAuth(){
+ const saved=authLoad();
+ if(saved){
+  const err=await tryLogin(saved.u,saved.p,!!localStorage.getItem("carnet_auth"));
+  if(!err) return;
+  authClear();
+  showLoginError(/incorrect/.test(err)?"Votre session a expiré, reconnectez-vous.":err);
+ }
+ document.getElementById("loginUser")?.focus();
+}
+
+document.getElementById("loginForm")?.addEventListener("submit",async(e)=>{
+ e.preventDefault();
+ const u=document.getElementById("loginUser").value.trim(), p=document.getElementById("loginPass").value;
+ const btn=document.getElementById("loginBtn"); btn.disabled=true; btn.textContent="Connexion…"; showLoginError("");
+ const err=await tryLogin(u,p,document.getElementById("loginRemember").checked);
+ btn.disabled=false; btn.textContent="Se connecter";
+ if(err){ showLoginError(err); document.getElementById("loginPass").value=""; document.getElementById("loginPass").focus(); }
+ else document.getElementById("loginPass").value="";
+});
+document.getElementById("logoutBtn")?.addEventListener("click",()=>{
+ if(IS_MODIFIED && AUTH.role==="prof" && !confirm("Des modifications sont encore en cours d'enregistrement. Se déconnecter quand même ?")) return;
+ IS_MODIFIED=false; authClear(); location.reload();
+});
+
+// ── Paramètres du compte professeur ──
+const settingsModal=document.getElementById("settingsModal");
+function closeSettings(){ settingsModal.classList.remove("open"); settingsModal.setAttribute("aria-hidden","true"); }
+function settingsMsg(t){ const m=document.getElementById("settingsMsg"); m.textContent=t; m.style.display=t?"block":"none"; }
+document.getElementById("settingsBtn")?.addEventListener("click",()=>{
+ if(AUTH.role!=="prof") return;
+ document.getElementById("settingsUser").value=AUTH.user;
+ document.getElementById("settingsPass").value=""; document.getElementById("settingsPass2").value="";
+ settingsMsg(""); settingsModal.classList.add("open"); settingsModal.setAttribute("aria-hidden","false");
+});
+document.getElementById("settingsClose")?.addEventListener("click",closeSettings);
+document.getElementById("settingsCancel")?.addEventListener("click",closeSettings);
+document.getElementById("settingsForm")?.addEventListener("submit",async(e)=>{
+ e.preventDefault();
+ const nu=document.getElementById("settingsUser").value.trim(), np=document.getElementById("settingsPass").value, np2=document.getElementById("settingsPass2").value;
+ if(!nu){ settingsMsg("L'identifiant ne peut pas être vide."); return; }
+ if(np!==np2){ settingsMsg("Les deux mots de passe ne correspondent pas."); return; }
+ if(nu===AUTH.user && !np){ closeSettings(); return; }
+ const clash=checkStudentLogin(nu,null); if(nu.toLowerCase()!==AUTH.user.toLowerCase() && clash.indexOf("professeur")<0 && clash){ settingsMsg(clash); return; }
+ try{
+  const j=await api("setProf",{newUser:nu,newPass:np});
+  if(!j.ok){ settingsMsg(j.error||"Erreur"); return; }
+  AUTH.user=j.user; if(np) AUTH.pass=np;
+  authSave(AUTH.user,AUTH.pass,!!localStorage.getItem("carnet_auth"));
+  applyProfMode(); closeSettings(); cloudStatus("ok","Identifiants mis à jour – "+cloudHour());
+ }catch(err){ settingsMsg("Échec de l'enregistrement ("+err.message+")"); }
+});
+
 function cloudSchedule(){
- if(!CLOUD.ready){ cloudStatus("error","Google Sheets non connecté – modifications NON synchronisées. Exportez le CSV par précaution."); return; }
+ if(AUTH.role!=="prof") return;
+ if(!CLOUD.ready){ cloudStatus("error","Google Sheets non connecté – modifications NON synchronisées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
  clearTimeout(CLOUD.timer); CLOUD.timer=setTimeout(()=>cloudPush(false),800);
 }
 async function cloudPush(force){
+ if(AUTH.role!=="prof") return;
  if(CLOUD.saving){ CLOUD.again=true; return; }
  CLOUD.saving=true; CLOUD.again=false;
  try{
   const lines=csvToLogicalLines(buildCSVText());
-  const r=await fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-   body:JSON.stringify({action:"save",token:cloudToken(),lines,baseRev:CLOUD.rev,force:!!force})});
-  const j=await r.json();
+  const accounts=DATA.students.filter(s=>ACCOUNTS[s.id]).map(s=>({id:s.id,login:ACCOUNTS[s.id].login,pwd:ACCOUNTS[s.id].pwd}));
+  const j=await api("save",{lines,accounts,baseRev:CLOUD.rev,force:!!force});
   if(j.ok){
    CLOUD.rev=j.rev;
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
@@ -8209,40 +8384,41 @@ async function cloudPush(force){
    if(confirm("Ces données ont été modifiées depuis un autre appareil ou onglet.\n\nOK = écraser avec CETTE version\nAnnuler = recharger la version de Google Sheets (vos dernières modifications ici seront perdues)")){
     CLOUD.rev=j.rev; return cloudPush(true);
    }else{ IS_MODIFIED=false; location.reload(); return; }
+  }else if(/identifiants/.test(j.error||"")){
+   CLOUD.saving=false; IS_MODIFIED=false; authClear();
+   alert("Vos identifiants ont changé (autre appareil ?). Reconnectez-vous."); location.reload(); return;
   }else throw new Error(j.error||"erreur");
  }catch(e){
   console.error("cloudPush:",e);
-  if(String(e.message).indexOf("token")>=0){ try{localStorage.removeItem("cloud_token");}catch(_){} }
+  if(/identifiant|compte/.test(String(e.message))) alert("Enregistrement refusé : "+e.message);
   cloudStatus("error","Échec de l'enregistrement Google Sheets ("+e.message+") – nouvelle tentative à la prochaine modification.");
  }
  CLOUD.saving=false;
 }
 // Au retour sur l'onglet : récupère les modifications faites ailleurs (si rien n'est en attente)
 document.addEventListener("visibilitychange",async()=>{
- if(document.visibilityState!=="visible"||!CLOUD.enabled||!CLOUD.ready||IS_MODIFIED||CLOUD.saving) return;
+ if(document.visibilityState!=="visible"||!AUTH.role||IS_MODIFIED||CLOUD.saving) return;
  try{
-  const r=await fetch(CLOUD_URL+"?action=rev&token="+encodeURIComponent(cloudToken()));
-  const j=await r.json();
-  if(j.ok && j.rev!==CLOUD.rev){ await cloudPull(); cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour()); }
+  const j=await api("rev");
+  if(j.ok && j.rev!==CLOUD.rev){ await cloudPull(); if(AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour()); }
  }catch(e){console.warn("cloud rev:",e);}
 });
 
 function saveData(){
- try{
-  localStorage.setItem("carnet_notes_data",JSON.stringify(DATA));
-  localStorage.setItem("carnet_notes_subjects",JSON.stringify(SUBJECT_REGISTRY));
-  localStorage.setItem("carnet_notes_locks",JSON.stringify(LOCKED_PERIODS));
-  IS_MODIFIED = true;
-  if(CLOUD.enabled) cloudSchedule(); else updateSaveStatusUI("modified");
- }catch(e){console.warn("localStorage:",e);}
+ if(AUTH.role!=="prof") return;   // les comptes élèves ne peuvent rien enregistrer
+ IS_MODIFIED=true;
+ cloudSchedule();
 }
-function loadData(){
- try{
-  const d=localStorage.getItem("carnet_notes_data");if(d){const p=JSON.parse(d);Object.assign(DATA,p);}
-  const s=localStorage.getItem("carnet_notes_subjects");if(s) SUBJECT_REGISTRY=JSON.parse(s);
-  const l=localStorage.getItem("carnet_notes_locks");if(l){const p=JSON.parse(l);Object.assign(LOCKED_PERIODS,p);}
- }catch(e){console.warn("loadData:",e);}
-}
+function loadData(){ /* les données viennent uniquement de Google Sheets après connexion */ }
+
+// Bulletin : lecture seule pour les élèves
+const _renderAppreciationUI=window.renderAppreciationUI;
+window.renderAppreciationUI=function(){
+ _renderAppreciationUI.apply(this,arguments);
+ if(AUTH.role==="eleve"){
+  document.querySelectorAll("#appreciationContent textarea").forEach(t=>{t.readOnly=true;t.removeAttribute("onblur");});
+ }
+};
 
 function ensureSubjectRegistry(){
  if(!Array.isArray(SUBJECT_REGISTRY)) SUBJECT_REGISTRY=[];
@@ -8900,8 +9076,8 @@ function runNonRegressionTests() {
   document.getElementById = originalGetElementById;
 }
 
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initApp();cloudInit();});
-else {initApp();cloudInit();}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initApp();bootAuth();});
+else {initApp();bootAuth();}
 </script>
 </body>
 </html>
