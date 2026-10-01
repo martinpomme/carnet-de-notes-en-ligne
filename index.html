@@ -8198,8 +8198,12 @@ window.onbeforeunload = function(e) {
 };
 
 // ── CONNEXION + SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbziu6cd7ODL18lWRDKQjV5xJ4ch7qGgh9A-dRTERzwUPI63eI5Z-EpKdzMMeyE1YS6N/exec";
-const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0 };
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbydF-Ikuwkqh0kTE2qzTUH4kcQHsXLPUd8AW3Skx29zTt9N2HA9QKpTVErTVrrkAMFQ/exec";
+const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, lastSnap:null, retryAt:0 };
+function cloudSnapshot(){
+ try{ return buildCSVText()+"\n#ACCOUNTS#"+JSON.stringify(DATA.students.map(s=>[s.id,ACCOUNTS[s.id]?.login||"",ACCOUNTS[s.id]?.pwd||""])); }
+ catch(e){ return null; }
+}
 const AUTH = { user:"", pass:"", role:"", studentId:"" };   // role : "prof" | "eleve"
 let ACCOUNTS = {};   // (prof uniquement) id élève -> {login, pwd}
 
@@ -8261,6 +8265,7 @@ async function cloudPull(){
   ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
  }
  rebuildUI(); updateTabWarningIndicators();
+ if(AUTH.role==="prof") CLOUD.lastSnap=cloudSnapshot();
  if(AUTH.role==="eleve") applyStudentMode();
  return j;
 }
@@ -8364,18 +8369,19 @@ function cloudSchedule(){
  if(AUTH.role!=="prof") return;
  if(!CLOUD.ready){ cloudStatus("error","Google Sheets non connecté – modifications NON synchronisées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
- clearTimeout(CLOUD.timer); CLOUD.timer=setTimeout(()=>cloudPush(false),800);
+ clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},800);
 }
 async function cloudPush(force){
  if(AUTH.role!=="prof") return;
  if(CLOUD.saving){ CLOUD.again=true; return; }
  CLOUD.saving=true; CLOUD.again=false;
  try{
+  const snap=cloudSnapshot();
   const lines=csvToLogicalLines(buildCSVText());
   const accounts=DATA.students.filter(s=>ACCOUNTS[s.id]).map(s=>({id:s.id,login:ACCOUNTS[s.id].login,pwd:ACCOUNTS[s.id].pwd}));
   const j=await api("save",{lines,accounts,baseRev:CLOUD.rev,force:!!force});
   if(j.ok){
-   CLOUD.rev=j.rev;
+   CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0;
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
    IS_MODIFIED=false;
    cloudStatus("ok","Enregistré dans Google Sheets à "+cloudHour());
@@ -8391,7 +8397,8 @@ async function cloudPush(force){
  }catch(e){
   console.error("cloudPush:",e);
   if(/identifiant|compte/.test(String(e.message))) alert("Enregistrement refusé : "+e.message);
-  cloudStatus("error","Échec de l'enregistrement Google Sheets ("+e.message+") – nouvelle tentative à la prochaine modification.");
+  cloudStatus("error","Échec de l'enregistrement Google Sheets ("+e.message+") – nouvelle tentative automatique dans quelques secondes.");
+  CLOUD.retryAt=Date.now()+8000;
  }
  CLOUD.saving=false;
 }
@@ -8403,6 +8410,17 @@ document.addEventListener("visibilitychange",async()=>{
   if(j.ok && j.rev!==CLOUD.rev){ await cloudPull(); if(AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour()); }
  }catch(e){console.warn("cloud rev:",e);}
 });
+
+// Sauvegarde automatique universelle : toute différence entre l'état affiché et le dernier état
+// enregistré (note, appréciation, classe, évaluation de classe, matière, verrou, compte…) déclenche l'envoi.
+function cloudWatch(){
+ if(AUTH.role!=="prof"||!CLOUD.ready||CLOUD.saving||CLOUD.timer&&!CLOUD._fired) return;
+ if(Date.now()<CLOUD.retryAt) return;
+ const cur=cloudSnapshot();
+ if(cur!==null && cur!==CLOUD.lastSnap){ IS_MODIFIED=true; cloudSchedule(); }
+}
+setInterval(cloudWatch,1500);
+["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,400);},true));
 
 function saveData(){
  if(AUTH.role!=="prof") return;   // les comptes élèves ne peuvent rien enregistrer
