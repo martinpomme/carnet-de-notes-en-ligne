@@ -8198,7 +8198,7 @@ window.onbeforeunload = function(e) {
 };
 
 // ── CONNEXION + SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbydF-Ikuwkqh0kTE2qzTUH4kcQHsXLPUd8AW3Skx29zTt9N2HA9QKpTVErTVrrkAMFQ/exec";
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbziu6cd7ODL18lWRDKQjV5xJ4ch7qGgh9A-dRTERzwUPI63eI5Z-EpKdzMMeyE1YS6N/exec";
 const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, lastSnap:null, retryAt:0 };
 function cloudSnapshot(){
  try{ return buildCSVText()+"\n#ACCOUNTS#"+JSON.stringify(DATA.students.map(s=>[s.id,ACCOUNTS[s.id]?.login||"",ACCOUNTS[s.id]?.pwd||""])); }
