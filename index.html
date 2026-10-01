@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<title>Carnet de notes</title>
+<title>Ecole Directe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{
@@ -320,11 +320,33 @@ body.student-mode #studentContent .subtabs, body.student-mode #prof,
 body.student-mode #noteDetailEditBtn, body.student-mode #noteDetailDeleteBtn{ display:none !important }
 body.student-mode .split-student, body.student-mode #appreciationsView .split{ grid-template-columns:1fr }
 body.student-mode .has-empty-eval::after, body.student-mode .has-hidden-eval::before{ display:none !important }
+
+/* Lignes de matières séparées (vision élève + compte élève) */
+#studentElevePeriodViews .matiere-line{ margin-bottom:0; padding:12px 16px; border-bottom:1px solid #e2e8f0 }
+#studentElevePeriodViews .eleveLines .matiere-line:first-child{ border-top:1px solid #e2e8f0 }
+/* Compte élève : bloc plus compact + légende à droite */
+body.student-mode .container{ max-width:1200px }
+body.student-mode #elevesView .split-student{ grid-template-columns:minmax(0,1fr) 270px; align-items:start }
+body.student-mode #studentContent .matiere-line{ grid-template-columns:170px 1fr 130px; padding:9px 14px }
+body.student-mode .stu-name{ display:none }
+body.student-mode .stu-class{ font-size:18px; font-weight:700; color:var(--text) !important }
+#studentLegend{ display:none; font-size:13px; line-height:1.35 }
+body.student-mode #studentLegend{ display:block }
+#studentLegend h4{ margin:0 0 8px; font-size:15px; color:#1e3a8a }
+#studentLegend h5{ margin:14px 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); border-top:1px solid var(--border); padding-top:10px }
+#studentLegend h5:first-of-type{ border-top:none; padding-top:0; margin-top:0 }
+#studentLegend .lg{ display:flex; align-items:center; gap:10px; margin:5px 0 }
+#studentLegend .lg .sample{ flex:0 0 74px; display:flex; align-items:center; justify-content:flex-start; gap:4px }
+#studentLegend .color-dot{ width:16px; height:16px; cursor:default }
+#studentLegend .color-dot:hover{ transform:none }
+#studentLegend .note-pill{ cursor:default }
+#studentLegend .lg-foot{ margin-top:12px; color:var(--muted); font-size:12px }
+@media (max-width:900px){ body.student-mode #elevesView .split-student{ grid-template-columns:1fr } }
 </style>
 </head>
 <body class="auth-pending">
 <header>
- <h1>Carnet de notes</h1>
+ <h1>Ecole Directe</h1>
  <div class="header-actions">
  <span id="userLabel"></span>
  <button class="icon-btn" id="settingsBtn" title="Paramètres du compte">⚙️</button>
@@ -389,6 +411,33 @@ body.student-mode .has-empty-eval::after, body.student-mode .has-hidden-eval::be
      <div id="studentPlaceholder" style="color:#64748b;">Sélectionne un élève pour saisir les notes.</div>
      <div id="studentContent" style="display:none;"></div>
     </div>
+    <div class="panel" id="studentLegend">
+     <h4>Légende</h4>
+     <h5>Notes</h5>
+     <div class="lg"><span class="sample"><span class="note-pill today">14</span></span><span>Nouvelle note (évaluation du jour)</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill important">14</span></span><span>Note importante</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill red">8</span></span><span>Note inférieure à 10/20</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">14<sub>/22</sub></span></span><span>Note sur un barème différent de 20</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">14<sup>(0,5)</sup></span></span><span>Coefficient différent de 1</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">(14)</span></span><span>Note non comptée dans la moyenne</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">14<span class="color-dot green" style="margin-left:4px"></span></span></span><span>Note associée à une compétence</span></div>
+     <h5>Résultats particuliers</h5>
+     <div class="lg"><span class="sample"><span class="note-pill">Abs</span></span><span>Absent(e)</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">Disp</span></span><span>Dispensé(e)</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">NE</span></span><span>Non évalué(e)</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill">NR</span></span><span>Non rendu</span></div>
+     <h5>Compétences</h5>
+     <div class="lg"><span class="sample"><span class="color-dot blue"></span></span><span><b>D</b> – Dépassé</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot green"></span></span><span><b>A</b> – Acquis</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot yellow"></span></span><span><b>PA</b> – Partiellement acquis</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot orange"></span></span><span><b>ECA</b> – En cours d'acquisition</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot red"></span></span><span><b>NA</b> – Non acquis</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot white"></span></span><span><b>Abs</b> – Absent(e)</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot cyan"></span></span><span><b>Disp</b> – Dispensé(e)</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot gray"></span></span><span><b>NE</b> – Non évalué(e)</span></div>
+     <div class="lg"><span class="sample"><span class="color-dot black"></span></span><span><b>NR</b> – Non rendu</span></div>
+     <div class="lg-foot">Clique sur une note pour voir son détail, ou sur la moyenne d'une matière pour voir les statistiques de la classe.</div>
+    </div>
    </div>
   </div>
  </section>
@@ -452,7 +501,7 @@ body.student-mode .has-empty-eval::after, body.student-mode .has-hidden-eval::be
 
 <div id="loginOverlay">
  <form class="login-card" id="loginForm" autocomplete="on">
-  <h2>Carnet de notes</h2>
+  <h2>Ecole Directe</h2>
   <p class="sub">Connectez-vous pour accéder à vos notes.</p>
   <label for="loginUser">Identifiant</label>
   <input type="text" id="loginUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
@@ -3349,8 +3398,8 @@ function openStudent(studentId){
 <div class="student-header-section">
  <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;">
   <div style="display:flex;align-items:center;gap:8px;">
-   <div style="font-weight:700;font-size:18px;">${stu.last} ${stu.first}</div>
-   <div style="color:#64748b;">${clsObj?.name||'-'}</div>
+   <div class="stu-name" style="font-weight:700;font-size:18px;">${stu.last} ${stu.first}</div>
+   <div class="stu-class" style="color:#64748b;">${clsObj?.name||'-'}</div>
   </div>
   <div style="display:flex;gap:8px;">
    <button class="btn btn-primary" id="downloadReleveBtn">📥 Relevé (PDF)</button>
@@ -8272,6 +8321,7 @@ async function cloudPull(){
 
 function applyStudentMode(){
  document.body.classList.add("student-mode");
+ guardStudentDownloads();
  const sid=AUTH.studentId;
  const stu=DATA.students.find(s=>s.id===sid);
  const lab=document.getElementById("userLabel"); if(lab) lab.textContent=stu?("👤 "+stu.first+" "+stu.last):"";
@@ -8429,13 +8479,52 @@ function saveData(){
 }
 function loadData(){ /* les données viennent uniquement de Google Sheets après connexion */ }
 
+// ── Compte élève : relevés / bulletins / appréciations seulement si le trimestre est verrouillé ──
+function periodLocked(p){
+ if(!p||p==="YEAR") return ["T1","T2","T3","T4"].every(k=>!!LOCKED_PERIODS[k]);
+ return !!LOCKED_PERIODS[p];
+}
+const LOCK_TIP="Disponible lorsque le trimestre est verrouillé par l'enseignant";
+function refreshStudentLockUI(){
+ if(AUTH.role!=="eleve") return;
+ const rel=document.getElementById("downloadReleveBtn");
+ if(rel){
+  const p=document.querySelector("#studentContent .period-btn.active")?.dataset.period||"T1";
+  const ok=periodLocked(p); rel.disabled=!ok; rel.title=ok?"":LOCK_TIP;
+ }
+ const bul=document.querySelector('#appreciationContent button[onclick^="downloadStudentBulletin"]');
+ if(bul){ const ok=periodLocked(CURRENT_APP_PERIOD); bul.disabled=!ok; bul.title=ok?"":LOCK_TIP; }
+}
+const _openStudent=window.openStudent;
+window.openStudent=function(){ _openStudent.apply(this,arguments); refreshStudentLockUI(); };
+document.addEventListener("click",e=>{
+ if(AUTH.role==="eleve" && e.target.closest && e.target.closest("#studentContent .period-btn")) setTimeout(refreshStudentLockUI,0);
+});
+function guardStudentDownloads(){
+ ["downloadStudentReleve","downloadStudentBulletin"].forEach(n=>{
+  const f=window[n]; if(typeof f!=="function"||f.__guarded) return;
+  const g=function(sid,p){ if(AUTH.role==="eleve"&&!periodLocked(p)){ alert(LOCK_TIP+"."); return; } return f.apply(this,arguments); };
+  g.__guarded=true; window[n]=g;
+ });
+}
+
 // Bulletin : lecture seule pour les élèves
 const _renderAppreciationUI=window.renderAppreciationUI;
 window.renderAppreciationUI=function(){
  _renderAppreciationUI.apply(this,arguments);
- if(AUTH.role==="eleve"){
-  document.querySelectorAll("#appreciationContent textarea").forEach(t=>{t.readOnly=true;t.removeAttribute("onblur");});
- }
+ if(AUTH.role!=="eleve") return;
+ const labels={T1:"Trimestre 1",T2:"Trimestre 2",T3:"Trimestre 3",T4:"Trimestre 4",YEAR:"Année"};
+ const locked=periodLocked(CURRENT_APP_PERIOD);
+ const h=document.querySelector("#appreciationContent h3"); if(h) h.textContent=labels[CURRENT_APP_PERIOD]||"";
+ document.querySelectorAll("#appreciationContent textarea").forEach(t=>{
+  const d=document.createElement("div"); const txt=locked?t.value.trim():"";
+  d.style.cssText="white-space:pre-wrap;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;min-height:40px;";
+  if(t.classList.contains("gen-app-input")) d.style.cssText+="border:2px solid #bae6fd;font-weight:600;";
+  if(txt) d.textContent=txt;
+  else{ d.textContent="Aucune appréciation disponible"; d.style.color="#94a3b8"; d.style.fontStyle="italic"; }
+  t.replaceWith(d);
+ });
+ refreshStudentLockUI();
 };
 
 function ensureSubjectRegistry(){
