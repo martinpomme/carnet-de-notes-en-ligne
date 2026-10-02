@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <title>Ecole Directe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -342,6 +343,92 @@ body.student-mode #studentLegend{ display:block }
 #studentLegend .note-pill{ cursor:default }
 #studentLegend .lg-foot{ margin-top:12px; color:var(--muted); font-size:12px }
 @media (max-width:900px){ body.student-mode #elevesView .split-student{ grid-template-columns:1fr } }
+
+/* ── Icônes d'alerte : toujours derrière l'en-tête bleu ── */
+.topbar{ position:relative; z-index:1 }
+.container{ position:relative; z-index:1 }
+/* ── Bouton d'import ── */
+.import-btn{ padding:8px 10px; border-radius:8px; border:1px solid #fff; background:#fff; color:#1e3a8a; cursor:pointer; display:inline-flex; align-items:center; justify-content:center }
+.import-btn:hover{ background:#e0e7ff }
+body.student-mode #importSheetBtn{ display:none !important }
+/* ── Statut d'enregistrement ── */
+.save-status-banner small{ font-weight:400; font-size:11px; opacity:.8; margin-left:8px }
+/* ── Listes modernes ── */
+.add-big{ width:100%; padding:11px 14px; margin-bottom:10px; font-weight:600; border-radius:10px }
+.modern-input,.modern-select{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px; color:var(--text) }
+.modern-select{ appearance:none; -webkit-appearance:none; margin-bottom:10px; cursor:pointer; padding-right:34px; background-repeat:no-repeat; background-position:right 12px center;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>") }
+.modern-input:focus,.modern-select:focus{ outline:2px solid #bfdbfe; border-color:#93c5fd }
+.pl{ border:1px solid var(--border); border-radius:12px; background:#fff; height:340px; overflow-y:auto; padding:6px }
+.pl-item{ padding:10px 12px; border-radius:8px; cursor:pointer; font-size:14.5px; line-height:1.25; user-select:none }
+.pl-item + .pl-item{ margin-top:2px }
+.pl-item:hover{ background:#f1f5f9 }
+.pl-item.sel{ background:#e0e7ff; color:#1e3a8a; font-weight:600 }
+.pl-item:focus-visible{ outline:2px solid #93c5fd }
+.pl-empty{ color:var(--muted); font-size:14px; text-align:center; padding:28px 10px }
+/* ── Import : récapitulatif ── */
+.imp-nav{ display:flex; align-items:center; gap:10px; margin-bottom:12px }
+.imp-head{ flex:1; text-align:center; min-width:0 }
+.imp-class{ font-size:18px; font-weight:700; color:#1e3a8a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.imp-meta{ font-size:12.5px; color:var(--muted); margin-top:2px }
+.imp-arrow{ width:42px; height:42px; flex:0 0 42px; border-radius:50%; border:1px solid var(--border); background:#fff; font-size:24px; line-height:1; cursor:pointer; color:#1e3a8a }
+.imp-arrow:hover:not([disabled]){ background:#e0e7ff }
+.imp-arrow[disabled]{ opacity:.35; cursor:default }
+.imp-table-wrap{ max-height:48vh; overflow:auto; border:1px solid var(--border); border-radius:10px }
+.imp-table-wrap table{ border-radius:0; font-size:14px; min-width:460px }
+.imp-table-wrap thead th{ position:sticky; top:0 }
+.imp-table-wrap tr.skip td{ color:#94a3b8; text-decoration:line-through }
+.imp-table-wrap td.warn{ color:#b45309; font-size:12.5px; text-decoration:none }
+.imp-dots{ display:flex; justify-content:center; gap:7px; margin:12px 0 2px }
+.imp-dot{ width:8px; height:8px; border-radius:50%; background:#cbd5e1 }
+.imp-dot.seen{ background:#93c5fd } .imp-dot.cur{ background:#1e3a8a; transform:scale(1.25) }
+.imp-hint{ text-align:center; font-size:12.5px; color:var(--muted); margin-top:6px }
+.imp-footer{ display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid var(--border) }
+
+/* ── Mobile / tablette ── */
+@media (max-width:900px){
+ header{ padding:10px 12px }
+ h1{ font-size:20px }
+ .header-actions{ gap:6px; align-items:center }
+ .icon-btn{ padding:7px 10px; font-size:13px }
+ .topbar{ margin:10px; gap:10px }
+ .tabs{ width:100%; gap:6px }
+ .tab-btn{ flex:1; padding:10px 6px; font-size:14px }
+ .import-btn{ flex:0 0 auto; padding:10px 12px }
+ .locks{ margin-left:0; width:100% }
+ .lock-btn{ flex:1; justify-content:center }
+ .top-actions{ margin-left:0 !important; width:100% }
+ .top-actions .btn{ flex:1 }
+ .status-wrap{ flex:none !important; width:100% }
+ .save-status-banner{ margin:0; padding:8px 12px; font-size:14px }
+ #saveStatusBanner{ white-space:normal !important }
+ .container{ margin:10px auto; padding:0 8px }
+ .split,.split-student{ grid-template-columns:minmax(0,1fr) }
+ .split>.panel,.split-student>.panel{ min-width:0; overflow-x:auto }
+ .card-header{ flex-wrap:wrap; gap:8px; padding:10px 12px }
+ .card-body{ padding:10px }
+ .matiere-line,body.student-mode #studentContent .matiere-line{ grid-template-columns:minmax(0,1fr) !important; gap:8px; padding:12px }
+ .avg-box{ flex-direction:row; justify-content:space-between; gap:10px }
+ .general-line{ justify-content:stretch }
+ .general-box{ width:100%; min-width:0 }
+ .subtabs,.period-tabs{ flex-wrap:wrap; gap:6px }
+ .search-row,.form-row{ flex-wrap:wrap }
+ .form-row input,.form-row select{ min-width:0 }
+ .modal-card{ width:96vw !important; max-width:96vw !important; max-height:94vh; overflow-y:auto }
+ .modal-body{ max-height:none; padding:12px }
+ .modal-actions{ flex-wrap:wrap }
+ input,select,textarea{ font-size:16px }
+ .btn,.subtab-btn,.period-btn{ min-height:38px }
+ .pl{ height:260px }
+ .login-card{ padding:22px 18px }
+ table{ font-size:13px }
+ thead th,tbody td{ padding:8px 6px }
+ .imp-table-wrap{ max-height:42vh }
+}
+@media (max-width:520px){
+ #userLabel{ display:none }
+ .btn{ padding:8px 10px }
+}
 </style>
 </head>
 <body class="auth-pending">
@@ -355,6 +442,10 @@ body.student-mode #studentLegend{ display:block }
 </header>
 <div class="topbar">
  <div class="tabs" id="mainTabs">
+  <button class="import-btn" id="importSheetBtn" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur">
+   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+  </button>
+  <input type="file" id="importFileInput" accept=".xlsx,.xls,.ods,.csv" style="display:none">
   <button class="tab-btn active" data-target="elevesView">Élèves</button>
   <button class="tab-btn" data-target="classesView">Classes</button>
   <button class="tab-btn" data-target="appreciationsView">Appréciations</button>
@@ -365,11 +456,11 @@ body.student-mode #studentLegend{ display:block }
   <button class="lock-btn" data-lock="T3">🔓 T3</button>
   <button class="lock-btn" data-lock="T4">🔓 T4</button>
  </div>
- <div style="margin-left:auto; display:flex; gap:8px;">
+ <div class="top-actions" style="margin-left:auto; display:flex; gap:8px;">
   <button class="btn" id="manageSubjectsBtnTop" style="font-weight:600; border-color:#1e3a8a; color:#1e3a8a;">Matières</button>
   <button class="btn" id="manageCompetenciesBtn" style="font-weight:600; border-color:#1e3a8a; color:#1e3a8a;">Compétences</button>
  </div>
- <div style="flex:1; display:flex; gap:8px; align-items:center;">
+ <div class="status-wrap" style="flex:1; display:flex; gap:8px; align-items:center;">
   <div id="importBanner" class="import-banner" style="margin:0;display:none;">
    Importer votre fichier de base pour reprendre votre saisie.
   </div>
@@ -387,22 +478,13 @@ body.student-mode #studentLegend{ display:block }
    </div>
    <div class="card-body split-student">
     <div class="panel">
-     <div class="form-row">
-      <input id="newFirst" placeholder="Prénom" style="flex:1;">
-      <input id="newLast" placeholder="Nom" style="flex:1;">
-     </div>
-     <div class="form-row">
-      <input id="newLogin" placeholder="Identifiant élève" autocomplete="off" style="flex:1;">
-      <input id="newPwd" placeholder="Mot de passe élève" autocomplete="off" style="flex:1;">
-     </div>
-     <div class="form-row">
-      <select id="newClassSelect" style="flex:1;"></select>
-      <button class="btn btn-primary" id="addStudentBtn">Ajouter</button>
-     </div>
+     <button class="btn btn-primary add-big" id="openAddStudentBtn" type="button">＋ Ajouter élève</button>
+     <select id="newClassSelect" class="modern-select" aria-label="Filtrer par classe"></select>
      <div class="search-row">
-      <input id="studentSearch" placeholder="Rechercher..." style="flex:1;">
+      <input id="studentSearch" class="modern-input" placeholder="Rechercher..." style="flex:1;">
      </div>
-     <select id="studentList" class="list-select" size="12"></select>
+     <div id="studentListUI" class="pl" role="listbox" aria-label="Liste des élèves"></div>
+     <select id="studentList" size="12" style="display:none"></select>
      <div class="form-row">
       <button class="btn" id="editStudentBtn">Modifier élève</button>
      </div>
@@ -446,20 +528,17 @@ body.student-mode #studentLegend{ display:block }
    <div class="card-header">
     <strong>Gestion des classes et des matières</strong>
     <div style="display:flex;gap:8px;">
-     <button class="btn btn-primary" id="previewClassBtn" style="background:#3b82f6; border-color:#3b82f6;">Aperçu</button>
      <button class="btn btn-danger" id="deleteClassBtn">Supprimer classe</button>
     </div>
    </div>
    <div class="card-body split">
     <div class="panel">
-     <div class="form-row">
-      <input id="newClassName" placeholder="Nom de la classe">
-      <button class="btn btn-primary" id="addClassBtn">Ajouter classe</button>
-     </div>
+     <button class="btn btn-primary add-big" id="addClassBtn" type="button">＋ Ajouter classe</button>
      <div class="search-row">
-      <input id="classSearch" placeholder="Rechercher classe..." style="flex:1;">
+      <input id="classSearch" class="modern-input" placeholder="Rechercher classe..." style="flex:1;">
      </div>
-     <select id="classList" class="list-select" size="12"></select>
+     <div id="classListUI" class="pl" role="listbox" aria-label="Liste des classes"></div>
+     <select id="classList" size="12" style="display:none"></select>
      <div class="form-row">
       <button class="btn" id="editClassBtn">Modifier classe</button>
      </div>
@@ -507,7 +586,7 @@ body.student-mode #studentLegend{ display:block }
   <input type="text" id="loginUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
   <label for="loginPass">Mot de passe</label>
   <input type="password" id="loginPass" name="password" autocomplete="current-password" required>
-  <label class="remember"><input type="checkbox" id="loginRemember"> Rester connecté sur cet appareil</label>
+  <div style="height:16px"></div>
   <button type="submit" class="btn btn-primary" id="loginBtn">Se connecter</button>
   <div id="loginError"></div>
  </form>
@@ -885,6 +964,48 @@ body.student-mode #studentLegend{ display:block }
  </div>
 </div>
 
+<div id="addStudentModal" class="modal" aria-hidden="true">
+ <div class="modal-card" style="width:440px" role="dialog" aria-modal="true">
+  <div class="modal-header"><h3 style="margin:0">Ajouter un élève</h3><button class="modal-close" id="addStudentClose" type="button">×</button></div>
+  <div class="modal-body">
+   <form id="addStudentForm" class="modal-form" autocomplete="off">
+    <label>Prénom</label><input id="newFirst" required>
+    <label>Nom</label><input id="newLast" required>
+    <label>Identifiant élève</label><input id="newLogin" autocomplete="off" autocapitalize="none" spellcheck="false" required>
+    <label>Mot de passe élève</label><input id="newPwd" autocomplete="off" required>
+    <label>Classe</label><select id="addStudentClassSelect"></select>
+    <div class="modal-actions"><button type="button" class="btn" id="addStudentCancel">Annuler</button><button type="submit" class="btn btn-primary">Ajouter</button></div>
+   </form>
+  </div>
+ </div>
+</div>
+<div id="addClassModal" class="modal" aria-hidden="true">
+ <div class="modal-card" style="width:420px" role="dialog" aria-modal="true">
+  <div class="modal-header"><h3 style="margin:0">Ajouter une classe</h3><button class="modal-close" id="addClassClose" type="button">×</button></div>
+  <div class="modal-body">
+   <form id="addClassForm" class="modal-form" autocomplete="off">
+    <label>Nom de la classe</label><input id="newClassName" required>
+    <div class="modal-actions"><button type="button" class="btn" id="addClassCancel">Annuler</button><button type="submit" class="btn btn-primary">Ajouter</button></div>
+   </form>
+  </div>
+ </div>
+</div>
+<div id="importModal" class="modal" aria-hidden="true" style="z-index:310;">
+ <div class="modal-card" style="width:720px" role="dialog" aria-modal="true">
+  <div class="modal-header"><h3 style="margin:0">Récapitulatif de l'import</h3><button class="modal-close" id="importClose" type="button">×</button></div>
+  <div class="modal-body">
+   <div class="imp-nav">
+    <button class="imp-arrow" id="impPrev" type="button" aria-label="Classe précédente">‹</button>
+    <div class="imp-head"><div id="impClassName" class="imp-class"></div><div id="impMeta" class="imp-meta"></div></div>
+    <button class="imp-arrow" id="impNext" type="button" aria-label="Classe suivante">›</button>
+   </div>
+   <div id="impTableWrap" class="imp-table-wrap"></div>
+   <div id="impDots" class="imp-dots"></div>
+   <div id="impHint" class="imp-hint"></div>
+  </div>
+  <div class="imp-footer"><button class="btn" id="impCancel" type="button">Annuler</button><button class="btn btn-primary" id="impValidate" type="button" style="display:none">Valider l'import</button></div>
+ </div>
+</div>
 <div id="editStudentModal" class="modal" aria-hidden="true">
  <div class="modal-card" role="dialog" aria-modal="true">
   <div class="modal-header">
@@ -2922,10 +3043,24 @@ function applyLocksEffects(){
 }
 
 // ── STUDENTS ─────────────────────────────────────────────────────────────────
-document.getElementById("addStudentBtn").addEventListener("click",()=>{
+const addStudentModal=document.getElementById("addStudentModal");
+function openAddStudentModal(){
+ const sel=document.getElementById("addStudentClassSelect");
+ sel.innerHTML='<option value="">- Aucune classe -</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+ sel.value=document.getElementById("newClassSelect").value||"";
+ ["newFirst","newLast","newLogin","newPwd"].forEach(i=>document.getElementById(i).value="");
+ addStudentModal.classList.add("open"); addStudentModal.setAttribute("aria-hidden","false");
+ setTimeout(()=>document.getElementById("newFirst").focus(),50);
+}
+function closeAddStudentModal(){addStudentModal.classList.remove("open");addStudentModal.setAttribute("aria-hidden","true");}
+document.getElementById("openAddStudentBtn").addEventListener("click",openAddStudentModal);
+document.getElementById("addStudentClose").addEventListener("click",closeAddStudentModal);
+document.getElementById("addStudentCancel").addEventListener("click",closeAddStudentModal);
+document.getElementById("addStudentForm").addEventListener("submit",(e)=>{
+ e.preventDefault();
  const first=document.getElementById("newFirst").value.trim();
  const last=document.getElementById("newLast").value.trim();
- const classId=document.getElementById("newClassSelect").value||"";
+ const classId=document.getElementById("addStudentClassSelect").value||"";
  if(!first||!last) return;
  const login=document.getElementById("newLogin").value.trim(), pwd=document.getElementById("newPwd").value;
  if(!login||!pwd){alert("Renseignez l'identifiant et le mot de passe de l'élève.");return;}
@@ -2935,10 +3070,9 @@ document.getElementById("addStudentBtn").addEventListener("click",()=>{
  DATA.students.push({id,first,last,classId});
  DATA.notes[id]=[];
  if(classId){const cls=DATA.classes.find(c=>c.id===classId);if(cls&&!cls.memberIds.includes(id)) cls.memberIds.push(id);}
- document.getElementById("newFirst").value=""; document.getElementById("newLast").value="";
- document.getElementById("newLogin").value=""; document.getElementById("newPwd").value="";
- renderStudentList(); saveData();
+ closeAddStudentModal(); renderStudentList(); saveData();
 });
+document.getElementById("newClassSelect").addEventListener("change",()=>renderStudentList());
 document.getElementById("studentSearch").addEventListener("input",renderStudentList);
 document.getElementById("studentList").addEventListener("change",(e)=>openStudent(e.target.value));
 document.getElementById("editStudentBtn").addEventListener("click",openEditStudentModal);
@@ -2954,13 +3088,14 @@ document.getElementById("deleteStudentBtn").addEventListener("click",()=>{
  function renderStudentList(){
   const list=document.getElementById("studentList");
   const term=(document.getElementById("studentSearch").value||"").toLowerCase();
+  const classFilter=document.getElementById("newClassSelect").value||"";
   list.innerHTML="";
   DATA.students.slice().sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first))
    .filter(s=>(`${s.last} ${s.first}`).toLowerCase().includes(term))
+   .filter(s=>!classFilter||s.classId===classFilter)
    .forEach(s=>{
-    const cls=DATA.classes.find(c=>c.id===s.classId);
     const opt=document.createElement("option"); opt.value=s.id;
-    opt.textContent=`${s.last} ${s.first}${cls?' ('+cls.name+')':""}`;
+    opt.textContent=`${s.last} ${s.first}`;
     
     // Check for missing or hidden evals for this student
     const sNotes = DATA.notes[s.id] || [];
@@ -2986,7 +3121,39 @@ document.getElementById("deleteStudentBtn").addEventListener("click",()=>{
     list.appendChild(opt);
    });
   renderClassSelects();
+  renderPrettyList("studentList","studentListUI","student");
  }
+
+// ── Listes modernes (le <select> caché reste la source de données) ──
+function renderPrettyList(selId,uiId,kind){
+ const sel=document.getElementById(selId), ui=document.getElementById(uiId); if(!sel||!ui) return;
+ const opts=[...sel.options];
+ if(ui.dataset.sel && !opts.some(o=>o.value===ui.dataset.sel)) ui.dataset.sel="";
+ ui.innerHTML="";
+ if(!opts.length){ ui.innerHTML='<div class="pl-empty">'+(kind==="student"?"Aucun élève":"Aucune classe")+'</div>'; return; }
+ opts.forEach(o=>{
+  const d=document.createElement("div");
+  d.className="pl-item"+(o.value===ui.dataset.sel?" sel":"");
+  d.dataset.value=o.value; d.textContent=o.textContent; d.tabIndex=0; d.setAttribute("role","option");
+  if(o.style.color) d.style.color=o.style.color;
+  ui.appendChild(d);
+ });
+ if(ui.dataset.sel) sel.value=ui.dataset.sel;
+}
+function bindPrettyList(selId,uiId,panelId){
+ const sel=document.getElementById(selId), ui=document.getElementById(uiId);
+ const pick=(t)=>{
+  const it=t.closest&&t.closest(".pl-item"); if(!it) return;
+  ui.dataset.sel=it.dataset.value;
+  ui.querySelectorAll(".pl-item.sel").forEach(x=>x.classList.remove("sel")); it.classList.add("sel");
+  sel.value=it.dataset.value; sel.dispatchEvent(new Event("change",{bubbles:true}));
+  if(window.matchMedia("(max-width:900px)").matches){ const pn=document.getElementById(panelId); if(pn) pn.scrollIntoView({behavior:"smooth",block:"start"}); }
+ };
+ ui.addEventListener("click",e=>pick(e.target));
+ ui.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(e.target); } });
+}
+bindPrettyList("studentList","studentListUI","studentPanel");
+bindPrettyList("classList","classListUI","classPanel");
 
 let LAST_ACTIVE_STUDENT_PERIOD="T1";
 let CURRENT_PREVIEW_CLASS_ID = null;
@@ -6264,28 +6431,32 @@ noteDetailClose.addEventListener("click",closeNoteDetailModal);
 noteDetailModal.addEventListener("click",e=>{});
 
 // ── CLASSES ───────────────────────────────────────────────────────────────────
+const addClassModal=document.getElementById("addClassModal");
+function closeAddClassModal(){addClassModal.classList.remove("open");addClassModal.setAttribute("aria-hidden","true");}
 document.getElementById("addClassBtn").addEventListener("click",()=>{
+ document.getElementById("newClassName").value="";
+ addClassModal.classList.add("open"); addClassModal.setAttribute("aria-hidden","false");
+ setTimeout(()=>document.getElementById("newClassName").focus(),50);
+});
+document.getElementById("addClassClose").addEventListener("click",closeAddClassModal);
+document.getElementById("addClassCancel").addEventListener("click",closeAddClassModal);
+document.getElementById("addClassForm").addEventListener("submit",(e)=>{
+ e.preventDefault();
  ensureSubjectRegistry();
  const name=document.getElementById("newClassName").value.trim(); if(!name) return;
  const id='cls_'+Math.random().toString(36).slice(2,8);
  DATA.classes.push({id,name,subjects:SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s),memberIds:[],evals:[]});
- document.getElementById("newClassName").value="";
- renderClassList(); renderClassSelects();
+ closeAddClassModal(); renderClassList(); renderClassSelects(); saveData();
 });
 document.getElementById("classSearch").addEventListener("input",renderClassList);
 document.getElementById("classList").addEventListener("change",(e)=>openClass(e.target.value));
 document.getElementById("editClassBtn").addEventListener("click",openEditClassModal);
-document.getElementById("previewClassBtn").addEventListener("click", () => {
-  const id = document.getElementById("classList").value;
-  if(!id) { alert("Sélectionnez une classe d'abord."); return; }
-  openPreviewClass(id);
-});
 document.getElementById("deleteClassBtn").addEventListener("click",()=>{
  const id=document.getElementById("classList").value; if(!id) return;
  const cls=DATA.classes.find(c=>c.id===id);
  openConfirmModal({message:`Supprimer la classe « ${cls?.name||'-'} » ?`,onConfirm:()=>{
   if(cls) Object.keys(DATA.notes).forEach(sid=>{DATA.notes[sid]=(DATA.notes[sid]||[]).filter(n=>!(n.classCommon&&n.classId===id));});
-  DATA.classes=DATA.classes.filter(c=>c.id!==id); renderClassList(); renderClassSelects(); renderClassPanelIfOpen();
+  DATA.classes=DATA.classes.filter(c=>c.id!==id); renderClassList(); renderClassSelects(); renderStudentList(); renderClassPanelIfOpen();
  }});
 });
 
@@ -6313,11 +6484,14 @@ function renderClassList(){
   
   list.appendChild(opt);
  });
+ renderPrettyList("classList","classListUI","class");
 }
 
 function renderClassSelects(){
  ensureSubjectRegistry();
- document.getElementById("newClassSelect").innerHTML='<option value="">- Classe -</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+ const _ncs=document.getElementById("newClassSelect"), _ncsPrev=_ncs.value;
+ _ncs.innerHTML='<option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+ if(_ncsPrev && DATA.classes.some(c=>c.id===_ncsPrev)) _ncs.value=_ncsPrev;
  const classSelect=document.getElementById("classSelect");
  if(classSelect) classSelect.innerHTML=DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
  const classSubject=document.getElementById("classSubject");
@@ -8257,7 +8431,7 @@ const AUTH = { user:"", pass:"", role:"", studentId:"" };   // role : "prof" | "
 let ACCOUNTS = {};   // (prof uniquement) id élève -> {login, pwd}
 
 function authLoad(){
- try{ const t=sessionStorage.getItem("carnet_auth")||localStorage.getItem("carnet_auth"); if(t){const o=JSON.parse(t); if(o&&o.u&&o.p) return o;} }catch(e){}
+ try{ try{localStorage.removeItem("carnet_auth");}catch(e){} const t=sessionStorage.getItem("carnet_auth"); if(t){const o=JSON.parse(t); if(o&&o.u&&o.p) return o;} }catch(e){}
  return null;
 }
 function authSave(u,p,remember){
@@ -8276,8 +8450,11 @@ function cloudStatus(kind,msg){
  const b=document.getElementById("saveStatusBanner"); if(!b) return;
  b.classList.remove("modified","saved","pending"); b.style.display="";
  b.classList.add(kind==="ok"?"saved":(kind==="pending"?"pending":"modified"));
- b.textContent=msg;
+ if(kind==="ok") b.innerHTML='Enregistré <small>'+cloudStamp()+'</small>';
+ else if(kind==="pending") b.textContent="Enregistrement...";
+ else b.textContent=msg;
 }
+function cloudStamp(){const d=new Date();return "le "+d.toLocaleDateString('fr-FR')+" à "+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function cloudHour(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 function csvToLogicalLines(text){
  const lines=[]; let cur="",q=false;
@@ -8293,10 +8470,10 @@ function csvToLogicalLines(text){
 function cloudMirrorLocal(){ /* plus de copie locale des données (confidentialité) */ }
 
 function checkStudentLogin(login,exceptId){
- const k=String(login||"").trim().toLowerCase();
- if(k===String(AUTH.user).toLowerCase()) return "Cet identifiant est celui du compte professeur.";
+ const k=String(login||"").trim();
+ if(k===String(AUTH.user)) return "Cet identifiant est celui du compte professeur.";
  for(const [sid,a] of Object.entries(ACCOUNTS)){
-  if(sid!==exceptId && String(a.login||"").trim().toLowerCase()===k){
+  if(sid!==exceptId && String(a.login||"").trim()===k){
    const st=DATA.students.find(x=>x.id===sid);
    return "Cet identifiant est déjà utilisé"+(st?" par "+st.first+" "+st.last:"")+".";
   }
@@ -8365,7 +8542,7 @@ function showLoginError(msg){
 async function bootAuth(){
  const saved=authLoad();
  if(saved){
-  const err=await tryLogin(saved.u,saved.p,!!localStorage.getItem("carnet_auth"));
+  const err=await tryLogin(saved.u,saved.p,false);
   if(!err) return;
   authClear();
   showLoginError(/incorrect/.test(err)?"Votre session a expiré, reconnectez-vous.":err);
@@ -8377,7 +8554,7 @@ document.getElementById("loginForm")?.addEventListener("submit",async(e)=>{
  e.preventDefault();
  const u=document.getElementById("loginUser").value.trim(), p=document.getElementById("loginPass").value;
  const btn=document.getElementById("loginBtn"); btn.disabled=true; btn.textContent="Connexion…"; showLoginError("");
- const err=await tryLogin(u,p,document.getElementById("loginRemember").checked);
+ const err=await tryLogin(u,p,false);
  btn.disabled=false; btn.textContent="Se connecter";
  if(err){ showLoginError(err); document.getElementById("loginPass").value=""; document.getElementById("loginPass").focus(); }
  else document.getElementById("loginPass").value="";
@@ -8405,19 +8582,19 @@ document.getElementById("settingsForm")?.addEventListener("submit",async(e)=>{
  if(!nu){ settingsMsg("L'identifiant ne peut pas être vide."); return; }
  if(np!==np2){ settingsMsg("Les deux mots de passe ne correspondent pas."); return; }
  if(nu===AUTH.user && !np){ closeSettings(); return; }
- const clash=checkStudentLogin(nu,null); if(nu.toLowerCase()!==AUTH.user.toLowerCase() && clash.indexOf("professeur")<0 && clash){ settingsMsg(clash); return; }
+ const clash=checkStudentLogin(nu,null); if(nu!==AUTH.user && clash.indexOf("professeur")<0 && clash){ settingsMsg(clash); return; }
  try{
   const j=await api("setProf",{newUser:nu,newPass:np});
   if(!j.ok){ settingsMsg(j.error||"Erreur"); return; }
   AUTH.user=j.user; if(np) AUTH.pass=np;
-  authSave(AUTH.user,AUTH.pass,!!localStorage.getItem("carnet_auth"));
+  authSave(AUTH.user,AUTH.pass,false);
   applyProfMode(); closeSettings(); cloudStatus("ok","Identifiants mis à jour – "+cloudHour());
  }catch(err){ settingsMsg("Échec de l'enregistrement ("+err.message+")"); }
 });
 
 function cloudSchedule(){
  if(AUTH.role!=="prof") return;
- if(!CLOUD.ready){ cloudStatus("error","Google Sheets non connecté – modifications NON synchronisées."); return; }
+ if(!CLOUD.ready){ cloudStatus("error","Non connecté – modifications NON enregistrées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
  clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},800);
 }
@@ -8437,7 +8614,7 @@ async function cloudPush(force){
    cloudStatus("ok","Enregistré dans Google Sheets à "+cloudHour());
   }else if(j.error==="conflict"){
    CLOUD.saving=false;
-   if(confirm("Ces données ont été modifiées depuis un autre appareil ou onglet.\n\nOK = écraser avec CETTE version\nAnnuler = recharger la version de Google Sheets (vos dernières modifications ici seront perdues)")){
+   if(confirm("Ces données ont été modifiées depuis un autre appareil ou onglet.\n\nOK = écraser avec CETTE version\nAnnuler = recharger la dernière version enregistrée (vos dernières modifications ici seront perdues)")){
     CLOUD.rev=j.rev; return cloudPush(true);
    }else{ IS_MODIFIED=false; location.reload(); return; }
   }else if(/identifiants/.test(j.error||"")){
@@ -8447,7 +8624,7 @@ async function cloudPush(force){
  }catch(e){
   console.error("cloudPush:",e);
   if(/identifiant|compte/.test(String(e.message))) alert("Enregistrement refusé : "+e.message);
-  cloudStatus("error","Échec de l'enregistrement Google Sheets ("+e.message+") – nouvelle tentative automatique dans quelques secondes.");
+  cloudStatus("error","Échec de l'enregistrement ("+e.message+") – nouvelle tentative automatique dans quelques secondes.");
   CLOUD.retryAt=Date.now()+8000;
  }
  CLOUD.saving=false;
@@ -8477,7 +8654,100 @@ function saveData(){
  IS_MODIFIED=true;
  cloudSchedule();
 }
-function loadData(){ /* les données viennent uniquement de Google Sheets après connexion */ }
+function loadData(){ /* les données viennent uniquement du serveur après connexion */ }
+
+// ── IMPORT D'UN TABLEUR (1 feuille = 1 classe) ───────────────────────────────
+(function(){
+ const fileIn=document.getElementById("importFileInput");
+ const modal=document.getElementById("importModal");
+ const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const findClass=n=>DATA.classes.find(c=>c.name.trim().toLowerCase()===n.trim().toLowerCase());
+ let SLIDES=[], idx=0, seen=new Set();
+ function closeImp(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");SLIDES=[];}
+ document.getElementById("importSheetBtn").addEventListener("click",()=>{
+  if(AUTH.role!=="prof") return;
+  if(typeof XLSX==="undefined"){alert("Le module d'import n'a pas pu être chargé. Vérifiez votre connexion internet puis rechargez la page.");return;}
+  fileIn.value=""; fileIn.click();
+ });
+ fileIn.addEventListener("change",async()=>{
+  const f=fileIn.files[0]; if(!f) return;
+  try{
+   const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+   const isCsv=/\.csv$/i.test(f.name);
+   SLIDES=[];
+   wb.SheetNames.forEach(name=>{
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:"",raw:false}).slice(1); // 1re ligne = en-têtes
+    const students=[];
+    rows.forEach(r=>{
+     const last=String(r[0]??"").trim(), first=String(r[1]??"").trim(), login=String(r[2]??"").trim(), pwd=String(r[3]??"").trim();
+     if(!last&&!first&&!login&&!pwd) return;
+     students.push({last,first,login,pwd,note:"",skip:false});
+    });
+    if(students.length) SLIDES.push({name:(isCsv?f.name.replace(/\.[^.]+$/,""):name).trim(),students});
+   });
+   if(!SLIDES.length){alert("Aucun élève trouvé dans ce fichier.\n\nFormat attendu : une feuille par classe (nom de la feuille = nom de la classe) ; colonnes Nom, Prénom, Identifiant, Mot de passe ; en-têtes sur la première ligne.");return;}
+   prepare(); idx=0; seen=new Set([0]);
+   modal.classList.add("open"); modal.setAttribute("aria-hidden","false"); render();
+  }catch(e){console.error(e);alert("Impossible de lire ce fichier ("+e.message+").");}
+ });
+ function prepare(){
+  const logins=new Set();
+  SLIDES.forEach(sl=>{
+   sl.existing=findClass(sl.name)||null;
+   sl.students.forEach(s=>{
+    if(!s.first||!s.last){s.skip=true;s.note="nom ou prénom manquant : ignoré";return;}
+    if(sl.existing && DATA.students.some(x=>x.classId===sl.existing.id&&x.first.toLowerCase()===s.first.toLowerCase()&&x.last.toLowerCase()===s.last.toLowerCase())){s.skip=true;s.note="déjà dans la classe : ignoré";return;}
+    if(!s.login&&!s.pwd){s.noAccount=true;s.note="sans compte";return;}
+    if(!s.login||!s.pwd){s.noAccount=true;s.note="identifiant ou mot de passe manquant : sans compte";return;}
+    const err=checkStudentLogin(s.login,null);
+    if(err||logins.has(s.login)){s.noAccount=true;s.note=(err||"identifiant en double dans le fichier")+" Importé sans compte.";return;}
+    logins.add(s.login);
+   });
+  });
+ }
+ function render(){
+  const sl=SLIDES[idx], n=sl.students.filter(s=>!s.skip).length;
+  document.getElementById("impClassName").textContent=sl.name;
+  document.getElementById("impMeta").textContent=n+" élève"+(n>1?"s":"")+" à importer · "+(sl.existing?"classe existante (les élèves seront ajoutés)":"nouvelle classe")+" · "+(idx+1)+"/"+SLIDES.length;
+  const hasNote=sl.students.some(s=>s.note);
+  document.getElementById("impTableWrap").innerHTML='<table><thead><tr><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Mot de passe</th>'+(hasNote?'<th>Remarque</th>':'')+'</tr></thead><tbody>'+
+   sl.students.map(s=>'<tr class="'+(s.skip?'skip':'')+'"><td>'+esc(s.last)+'</td><td>'+esc(s.first)+'</td><td>'+esc(s.login)+'</td><td>'+esc(s.pwd)+'</td>'+(hasNote?'<td class="warn">'+esc(s.note)+'</td>':'')+'</tr>').join("")+'</tbody></table>';
+  document.getElementById("impDots").innerHTML=SLIDES.map((_,i)=>'<span class="imp-dot'+(i===idx?' cur':(seen.has(i)?' seen':''))+'"></span>').join("");
+  document.getElementById("impPrev").disabled=idx===0;
+  document.getElementById("impNext").disabled=idx===SLIDES.length-1;
+  const all=seen.size===SLIDES.length;
+  document.getElementById("impValidate").style.display=all?"":"none";
+  document.getElementById("impHint").textContent=all?"":"Parcourez toutes les classes avec les flèches pour pouvoir valider.";
+ }
+ const go=d=>{const j=idx+d; if(j<0||j>=SLIDES.length) return; idx=j; seen.add(idx); render();};
+ document.getElementById("impPrev").addEventListener("click",()=>go(-1));
+ document.getElementById("impNext").addEventListener("click",()=>go(1));
+ document.getElementById("importClose").addEventListener("click",closeImp);
+ document.getElementById("impCancel").addEventListener("click",closeImp);
+ document.getElementById("impValidate").addEventListener("click",()=>{
+  let nS=0,nC=0,nNo=0;
+  SLIDES.forEach(sl=>{
+   let cls=findClass(sl.name);
+   if(!cls){
+    ensureSubjectRegistry();
+    cls={id:'cls_'+Math.random().toString(36).slice(2,8),name:sl.name,subjects:SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s),memberIds:[],evals:[]};
+    DATA.classes.push(cls); nC++;
+   }
+   sl.students.forEach(s=>{
+    if(s.skip) return;
+    let id; do{ id=(s.first+'_'+s.last).toLowerCase().replace(/\s+/g,'_')+'_'+Math.random().toString(36).slice(2,6); }while(DATA.students.some(x=>x.id===id));
+    DATA.students.push({id,first:s.first,last:s.last,classId:cls.id});
+    DATA.notes[id]=[];
+    if(!cls.memberIds.includes(id)) cls.memberIds.push(id);
+    if(s.noAccount) nNo++; else ACCOUNTS[id]={login:s.login,pwd:s.pwd};
+    nS++;
+   });
+  });
+  closeImp(); renderClassList(); renderClassSelects(); renderStudentList(); saveData();
+  alert(nS+" élève"+(nS>1?"s":"")+" importé"+(nS>1?"s":"")+", "+nC+" classe"+(nC>1?"s":"")+" créée"+(nC>1?"s":"")+"."+(nNo?"\n"+nNo+" sans compte (identifiant/mot de passe absent ou refusé) : à compléter via « Modifier élève ».":""));
+ });
+})();
+
 
 // ── Compte élève : relevés / bulletins / appréciations seulement si le trimestre est verrouillé ──
 function periodLocked(p){
@@ -8566,6 +8836,7 @@ function updateTabWarningIndicators(){
 
   // Appréciations manquantes
   let hasAnyMissingA = false;
+  const missingPeriodsA = new Set();
   const periodsToCheck = ["T1", "T2", "T3", "T4", "YEAR"];
   
   DATA.students.forEach(s => {
@@ -8573,7 +8844,6 @@ function updateTabWarningIndicators(){
     const clsSubjects = (cls?.subjects || []).map(sub => typeof sub === 'object' ? sub.name : sub);
     
     periodsToCheck.forEach(p => {
-      if (hasAnyMissingA) return;
       const averages = calculateStudentAverages(s.id, p);
       const hasAverages = averages.subjects.length > 0 || averages.general !== null;
       if (hasAverages) {
@@ -8585,18 +8855,19 @@ function updateTabWarningIndicators(){
           const avg = getStudentAverageForSubject(s.id, subName, p);
           if (avg !== null && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingSubjectApp = true;
         });
-        if (missingSubjectApp || !generalApp || generalApp.trim() === "") hasAnyMissingA = true;
+        if (missingSubjectApp || !generalApp || generalApp.trim() === "") missingPeriodsA.add(p);
       }
     });
   });
   
+  hasAnyMissingA = missingPeriodsA.size > 0;
   const tabBtnA = document.querySelector('.tab-btn[data-target="appreciationsView"]');
   if(tabBtnA) tabBtnA.classList.toggle("has-empty-eval", hasAnyMissingA);
 
   const appWarn = document.getElementById("appreciationWarning");
   if(appWarn) {
     appWarn.style.display = hasAnyMissingA ? "block" : "none";
-    appWarn.textContent = "⚠️ Des appréciations sont manquantes (tous trimestres confondus).";
+    appWarn.textContent = "⚠️ Des appréciations sont manquantes (" + periodsToCheck.filter(p => missingPeriodsA.has(p)).map(p => p === "YEAR" ? "Année" : p).join(", ") + ").";
   }
 
   // Sous-onglets Élève
