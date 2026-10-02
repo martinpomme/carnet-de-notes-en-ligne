@@ -9266,7 +9266,7 @@ async function cloudPull(){
   ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
  }
  rebuildUI(); updateTabWarningIndicators();
- if(AUTH.role==="prof") CLOUD.lastSnap=cloudSnapshot();
+ CLOUD.lastSnap=cloudSnapshot();
  if(AUTH.role==="eleve") applyStudentMode();
  return j;
 }
@@ -9296,7 +9296,7 @@ async function tryLogin(user,pass,remember){
  AUTH.user=user; AUTH.pass=pass; AUTH.role="";
  try{
   await cloudPull();
-  CLOUD.ready=(AUTH.role==="prof"); IS_MODIFIED=false;
+  CLOUD.ready=!!AUTH.role; IS_MODIFIED=false;
   authSave(user,pass,remember);
   ["carnet_notes_data","carnet_notes_subjects","carnet_notes_locks","cloud_token"].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
   document.body.classList.remove("auth-pending");
@@ -9369,13 +9369,13 @@ document.getElementById("settingsForm")?.addEventListener("submit",async(e)=>{
 });
 
 function cloudSchedule(){
- if(AUTH.role!=="prof") return;
+ if(!AUTH.role) return;
  if(!CLOUD.ready){ cloudStatus("error","Non connecté – modifications NON enregistrées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
  clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},800);
 }
 async function cloudPush(force){
- if(AUTH.role!=="prof") return;
+ if(!AUTH.role) return;
  if(CLOUD.saving){ CLOUD.again=true; return; }
  CLOUD.saving=true; CLOUD.again=false;
  try{
@@ -9425,16 +9425,16 @@ document.addEventListener("visibilitychange",()=>{
  if(document.visibilityState!=="visible") return;
  cloudCheckRemoteUpdates(true);
 });
-// Les comptes élèves se mettent aussi à jour automatiquement en arrière-plan
-// pour voir les nouveaux devoirs sans rechargement manuel.
+// Synchronisation légère en arrière-plan pour récupérer les nouveaux rendus,
+// devoirs et corrections sans rechargement manuel.
 setInterval(()=>{
- if(AUTH.role==="eleve" && document.visibilityState==="visible") cloudCheckRemoteUpdates(false);
+ if(AUTH.role && document.visibilityState==="visible") cloudCheckRemoteUpdates(false);
 },5000);
 
 // Sauvegarde automatique universelle : toute différence entre l'état affiché et le dernier état
 // enregistré (note, appréciation, classe, évaluation de classe, matière, verrou, compte…) déclenche l'envoi.
 function cloudWatch(){
- if(AUTH.role!=="prof"||!CLOUD.ready||CLOUD.saving||CLOUD.timer&&!CLOUD._fired) return;
+ if(!AUTH.role||!CLOUD.ready||CLOUD.saving||CLOUD.timer&&!CLOUD._fired) return;
  if(Date.now()<CLOUD.retryAt) return;
  const cur=cloudSnapshot();
  if(cur!==null && cur!==CLOUD.lastSnap){ IS_MODIFIED=true; cloudSchedule(); }
@@ -9443,7 +9443,7 @@ setInterval(cloudWatch,1500);
 ["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,400);},true));
 
 function saveData(){
- if(AUTH.role!=="prof") return;   // les comptes élèves ne peuvent rien enregistrer
+ if(!AUTH.role) return;
  IS_MODIFIED=true;
  cloudSchedule();
 }
@@ -11841,7 +11841,9 @@ function syncStudentHomeworkDate(force=false){
     ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
     ${submission && !test.options?.trainingMode ? `<p class="online-preview-note">Ce test a déjà été rendu. La correction sera disponible ici dès validation par l’enseignant.</p>` : ""}
     <div class="homework-quiz-actions" style="justify-content:flex-end;">
-     <button type="button" class="btn btn-primary" data-hw-action="start-quiz">${submission && !test.options?.trainingMode ? "Revoir" : "Démarrer"}</button>
+     ${submission && !test.options?.trainingMode
+      ? `<button type="button" class="btn" data-hw-action="close-quiz">Fermer</button>`
+      : `<button type="button" class="btn btn-primary" data-hw-action="start-quiz">Démarrer</button>`}
     </div>
    </div>
   `;
@@ -12429,10 +12431,9 @@ function syncStudentHomeworkDate(force=false){
    document.execCommand("hiliteColor",false,target.value);
   }
  });
- document.getElementById("homeworkView")?.addEventListener("click",e=>{
-  const btn=e.target.closest("[data-hw-action]");
-  if(!btn) return;
-  const action=btn.dataset.hwAction;
+function handleHomeworkActionClick(btn){
+ if(!btn) return;
+ const action=btn.dataset.hwAction;
   if(action==="select-date"){
    HOMEWORK_STATE.selectedDate=btn.dataset.date;
   if(AUTH.role==="eleve") HOMEWORK_STATE.studentDatePinned=true;
@@ -12499,7 +12500,19 @@ function syncStudentHomeworkDate(force=false){
   if(action==="open-correction"){
    openHomeworkCorrection(btn.dataset.homeworkId,btn.dataset.testId,btn.dataset.studentId);
   }
+}
+[
+ document.getElementById("homeworkView"),
+ homeworkQuizModal,
+ homeworkReviewModal,
+ homeworkCorrectionModal
+].forEach(container=>{
+ container?.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-hw-action]");
+  if(!btn) return;
+  handleHomeworkActionClick(btn);
  });
+});
 
  const originalBuildCSVText=buildCSVText;
  buildCSVText=function(){
