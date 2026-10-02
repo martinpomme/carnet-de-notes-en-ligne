@@ -9221,6 +9221,21 @@ async function api(action,extra){
  return r.json();
 }
 
+async function submitHomeworkSubmissionCloud(submission){
+ if(AUTH.role!=="eleve"){
+  saveData();
+  return submission;
+ }
+ const j=await api("submitHomeworkSubmission",{submission});
+ if(!j.ok) throw new Error(j.error||"erreur");
+ if(j.submissionId) submission.id=j.submissionId;
+ if(j.rev!=null) CLOUD.rev=Number(j.rev)||0;
+ CLOUD.retryAt=0;
+ IS_MODIFIED=false;
+ CLOUD.lastSnap=cloudSnapshot();
+ return submission;
+}
+
 function cloudStatus(kind,msg){
  const b=document.getElementById("saveStatusBanner"); if(!b) return;
  b.classList.remove("modified","saved","pending"); b.style.display="";
@@ -11928,7 +11943,7 @@ function syncStudentHomeworkDate(force=false){
   timer.textContent=`${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
   if(bar) bar.style.width=`${ratio*100}%`;
  }
- function finishHomeworkQuiz(reason){
+async function finishHomeworkQuiz(reason){
   const quiz=HOMEWORK_STATE.quiz;
   if(!quiz || quiz.submitted) return;
   quiz.submitted=true;
@@ -11943,7 +11958,8 @@ function syncStudentHomeworkDate(force=false){
   });
   const result=evaluateHomeworkAttempt(quiz.test, quiz.questions, answers);
   const existing=getHomeworkSubmission(quiz.homework.id, quiz.test.id, homeworkStudentId());
-  const persisted=upsertHomeworkSubmission({
+ const previous=existing ? JSON.parse(JSON.stringify(existing)) : null;
+ let persisted=upsertHomeworkSubmission({
    ...existing,
    id: existing?.id || makeUid("hws"),
    homeworkId: quiz.homework.id,
@@ -11958,7 +11974,16 @@ function syncStudentHomeworkDate(force=false){
    manualOverride: existing?.manualOverride || "",
    noteId: existing?.noteId || ""
   });
-  saveData();
+ try{
+  persisted=await submitHomeworkSubmissionCloud(persisted);
+  upsertHomeworkSubmission(persisted);
+ }catch(err){
+  if(previous) upsertHomeworkSubmission(previous);
+  else DATA.homeworkSubmissions=(DATA.homeworkSubmissions||[]).filter(item=>item.id!==persisted.id);
+  quiz.submitted=false;
+  alert("Le rendu n'a pas pu etre enregistre : "+(err.message||err));
+  return;
+ }
   renderHomeworkQuizResult(quiz.homework, quiz.test, persisted, result, reason);
   renderHomeworkView();
   renderOnlineTestsView();
@@ -12075,6 +12100,11 @@ function syncStudentHomeworkDate(force=false){
   `;
   setModalOpen(homeworkQuizModal,true);
  }
+function openHomeworkStudentSubmittedState(homework,test,submission){
+  const result=submission.autoResult || { total:getOnlineTestTotalPoints(test), earned:0, details:[], manualReview:!!test.options?.manualReviewRequired };
+  renderHomeworkQuizResult(homework,test,submission,result,"submitted");
+  setModalOpen(homeworkQuizModal,true);
+}
  function openHomeworkStudentTest(homeworkId,testId){
   const homework=getHomeworkById(homeworkId);
   const test=getHomeworkTest(testId);
@@ -12084,6 +12114,10 @@ function syncStudentHomeworkDate(force=false){
   document.getElementById("homeworkQuizTitle").textContent=`${test.title||"Test"} · ${homework.subject}`;
   if(submission?.publishedAt){
    openHomeworkStudentResult(homework,test,submission);
+   return;
+  }
+  if(submission?.submittedAt){
+   openHomeworkStudentSubmittedState(homework,test,submission);
    return;
   }
   HOMEWORK_STATE.quiz={
