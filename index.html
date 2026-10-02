@@ -5,6 +5,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Ecole Directe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -12,19 +15,25 @@
  --bg:#f6f8fb; --card:#ffffff; --text:#0f172a; --muted:#64748b;
  --primary:#2563eb; --border:#e5e7eb; --danger:#ef4444;
  --blueBox:#e0e7ff; --blueText:#1e3a8a;
+ --grad:linear-gradient(90deg,#1e40af,#2563eb);
+ --grad-v:linear-gradient(180deg,#2f6df0,#1e40af);
+ --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
 body{
  margin:0; background:var(--bg); color:var(--text);
- font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+ font-family:var(--font);
 }
+button,input,select,textarea{ font-family:inherit }
+input[type=checkbox],input[type=radio]{ accent-color:#2563eb }
+:focus-visible{ outline:2px solid #93c5fd; outline-offset:1px }
 header{
  position:sticky; top:0; z-index:10;
  background:linear-gradient(90deg,#1e40af,#2563eb); color:#fff;
  padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.25);
  display:flex; align-items:center; justify-content:space-between;
 }
-h1{margin:0; font-size:24px; font-weight:700; font-family:Georgia,"Times New Roman",serif }
+h1{margin:0; font-size:24px; font-weight:700; letter-spacing:-.01em }
 .header-actions{ display:flex; gap:8px }
 .icon-btn{
  padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.35);
@@ -59,7 +68,8 @@ h1{margin:0; font-size:24px; font-weight:700; font-family:Georgia,"Times New Rom
 .form-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px }
 .form-row input,.form-row select{ padding:8px; border:1px solid var(--border); border-radius:8px }
 .btn{ padding:8px 12px; border-radius:8px; border: 1px solid var(--border); background:#fff; cursor:pointer }
-.btn-primary{ background:var(--primary); color:#fff; border-color:var(--primary) }
+.btn-primary{ background:var(--grad); color:#fff; border-color:#1e40af; box-shadow:0 1px 3px rgba(30,64,175,.35); transition:filter .15s, box-shadow .15s }
+.btn-primary:hover:not([disabled]){ filter:brightness(1.1); box-shadow:0 3px 8px rgba(30,64,175,.35) }
 .btn-danger{ background:#fff; color:var(--danger); border-color:var(--danger) }
 .btn[disabled]{ opacity:0.6; cursor:not-allowed }
 .split{ display:grid; grid-template-columns:360px 1fr; gap:14px }
@@ -69,12 +79,12 @@ h1{margin:0; font-size:24px; font-weight:700; font-family:Georgia,"Times New Rom
 .list-select{ width:100%; height:280px }
 .subtabs{ display:flex; gap: 10px; margin-bottom:12px }
 .subtab-btn{ padding:8px 12px; border:1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer }
-.subtab-btn.active{ background:var(--primary); color:#fff; border-color:var(--primary) }
+.subtab-btn.active{ background:var(--grad); color:#fff; border-color:#1e40af }
 .subtab-view{ display:none }
 .subtab-view.active{ display:block }
 .period-tabs{ display:flex; gap:8px; margin-bottom:12px }
 .period-btn{ padding:6px 10px; border: 1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer; color:#1f2937 }
-.period-btn.active{ background:#2563eb; color:#fff; border-color:#2563eb }
+.period-btn.active{ background:var(--grad); color:#fff; border-color:#1e40af }
 .period-view{ display:none }
 .period-view.active{ display:block }
 table{ width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden }
@@ -132,7 +142,22 @@ tbody tr:hover{ background:#f9fafb }
 .modal-card{ width:760px; max-width:94%; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.25) }
 .modal-header{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border) }
 .modal-body{ padding: 12px 14px; color:#334155; max-height:70vh; overflow:auto }
-.modal-close{ background:none; border:none; font-size:20px; cursor:pointer; color:#64748b }
+.modal-close{
+ flex:0 0 34px; width:34px; height:34px; padding:0; border:none; border-radius:50%; cursor:pointer;
+ font-size:0; color:transparent; line-height:0;
+ background:#f1f5f9 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><path d='M2 2l10 10M12 2L2 12' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round'/></svg>") center/14px 14px no-repeat;
+ transition:background-color .15s, transform .2s;
+}
+.modal-close:hover{
+ background-color:#fee2e2; transform:rotate(90deg);
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><path d='M2 2l10 10M12 2L2 12' stroke='%23dc2626' stroke-width='1.8' stroke-linecap='round'/></svg>");
+}
+.modal-close:active{ transform:rotate(90deg) scale(.92) }
+.modal-card{ position:relative }
+.modal-card::before{ content:""; position:absolute; left:0; right:0; top:0; height:4px; background:var(--grad); pointer-events:none; z-index:2 }
+.modal-header{ padding-top:16px }
+.modal-header h3{ margin:0; font-size:18px; font-weight:700; color:#1e3a8a }
+body.student-mode #noteDetailActions, #noteDetailActions:not(:has(button:not([style*="display: none"]):not([style*="display:none"]))){ display:none !important }
 .modal-form label{ display:block; margin: 10px 0 4px }
 .modal-form input,.modal-form select{ width:100%; padding:8px; border:1px solid var(--border); border-radius:8px }
 .modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px }
@@ -301,7 +326,7 @@ body.auth-pending header, body.auth-pending .topbar, body.auth-pending .containe
  background:linear-gradient(135deg,#1e3a8a,#2563eb); padding:16px }
 body.auth-pending #loginOverlay{ display:flex }
 .login-card{ width:380px; max-width:100%; background:#fff; border-radius:14px; padding:28px 26px; box-shadow:0 20px 50px rgba(0,0,0,0.3) }
-.login-card h2{ margin:0 0 4px; font-family:Georgia,"Times New Roman",serif; color:#1e3a8a; font-size:26px }
+.login-card h2{ margin:0 0 4px; color:#1e3a8a; font-size:26px; font-weight:700 }
 .login-card p.sub{ margin:0 0 18px; color:var(--muted); font-size:14px }
 .login-card label{ display:block; margin:12px 0 4px; font-weight:600; font-size:14px }
 .login-card input[type=text], .login-card input[type=password]{ width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:15px }
@@ -310,6 +335,8 @@ body.auth-pending #loginOverlay{ display:flex }
 #loginError{ color:#b91c1c; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; padding:8px 10px; margin-top:12px; font-size:14px; display:none }
 #userLabel{ align-self:center; font-size:14px; opacity:0.95; margin-right:4px }
 #settingsMsg{ margin-top:10px; font-size:14px; color:#b91c1c; display:none }
+.btn-link{ border:none; background:none; padding:0; color:#1e40af; font-weight:600; cursor:pointer; font-size:inherit }
+.btn-link:hover{ text-decoration:underline }
 .hint{ font-size:12px; color:var(--muted); margin-top:4px }
 /* Mode élève : consultation uniquement */
 body.student-mode .locks, body.student-mode #manageSubjectsBtnTop, body.student-mode #manageCompetenciesBtn,
@@ -385,24 +412,75 @@ body.student-mode #importSheetBtn{ display:none !important }
 .imp-hint{ text-align:center; font-size:12.5px; color:var(--muted); margin-top:6px }
 .imp-footer{ display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid var(--border) }
 
+/* ── Onglets principaux : style intercalaire ── */
+.topbar{ max-width:1400px; margin:12px auto 0; padding:0 12px; gap:14px; align-items:flex-end; position:relative; z-index:2 }
+.container{ margin:0 auto 18px }
+.tabs{ gap:4px; align-items:flex-end }
+.import-btn{ align-self:center; margin:0 10px 6px 0 }
+.tab-btn{
+ font-size:15px; font-weight:600; letter-spacing:.005em; color:#1e3a8a;
+ padding:13px 32px 12px; border:1px solid #d3dff3; border-bottom:none; border-radius:14px 14px 0 0;
+ background:linear-gradient(180deg,#f7f9fe,#e4ecf9); cursor:pointer; position:relative;
+ transition:background .15s, color .15s;
+}
+.tab-btn:hover{ background:linear-gradient(180deg,#ffffff,#eaf1fc); color:#1e40af }
+.tab-btn.active{
+ background:#fff; color:#1e40af; border-color:var(--border); font-weight:700;
+ padding-bottom:14px; margin-bottom:-1px; z-index:3;
+ box-shadow:inset 0 4px 0 #2563eb, 0 -3px 8px rgba(30,64,175,.08);
+}
+body.student-mode .container .card{ border-top-left-radius:0 }
+.locks{ margin-left:20px; gap:6px; align-items:flex-end; margin-bottom:6px }
+.lock-item{ display:flex; flex-direction:column; align-items:center; gap:2px }
+.lock-label{ font-size:10px; font-weight:600; color:var(--muted); line-height:1; white-space:nowrap }
+.lock-btn{ padding:4px 12px; min-width:42px; justify-content:center; font-size:14px; line-height:1.3; border-radius:8px }
+.top-actions, .status-wrap{ margin-bottom:6px }
+.save-status-banner{ padding:3px 10px; font-size:12px; line-height:1.4; border-radius:6px }
+
+/* ── Onglets de période : intercalaires ── */
+.period-tabs{ display:flex; gap:4px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px; border-bottom:2px solid #d3dff3 }
+.period-tabs > .btn{ margin-bottom:6px }
+.period-tabs .period-btn{
+ font-size:14px; font-weight:600; padding:10px 22px; color:#1e3a8a;
+ border:2px solid #d3dff3; border-bottom:none; border-radius:12px 12px 0 0;
+ background:linear-gradient(180deg,#f7f9fe,#e6edf9);
+ transition:background .15s, color .15s;
+}
+.period-tabs .period-btn:hover{ background:linear-gradient(180deg,#fff,#eef4fd); color:#1e40af }
+.period-tabs .period-btn.active{
+ background:#fff; color:#1e40af; font-weight:700; padding-bottom:12px; margin-bottom:-2px;
+ box-shadow:inset 0 3px 0 #2563eb;
+}
+/* ── Sous-onglets : contrôle segmenté ── */
+.subtabs{ display:inline-flex; gap:2px; padding:4px; background:#eaf0fb; border-radius:12px; margin-bottom:14px }
+.subtabs .subtab-btn{ border:none; background:transparent; color:#334155; font-weight:600; padding:8px 18px; border-radius:9px; transition:background .15s, color .15s }
+.subtabs .subtab-btn:hover:not(.active){ background:rgba(255,255,255,.7); color:#1e40af }
+.subtabs .subtab-btn.active{ background:var(--grad); color:#fff; box-shadow:0 2px 6px rgba(37,99,235,.35) }
+
+/* ── Soulignement des nouvelles notes (cadre invisible élargi) ── */
+.note-pill.today{ padding:0 3px 4px !important; margin:0 -3px -3px !important; border-bottom:2px solid var(--primary) !important }
+.note-pill.today.important{ margin:0 -3px -3px !important }
+
 /* ── Mobile / tablette ── */
 @media (max-width:900px){
  header{ padding:10px 12px }
  h1{ font-size:20px }
  .header-actions{ gap:6px; align-items:center }
  .icon-btn{ padding:7px 10px; font-size:13px }
- .topbar{ margin:10px; gap:10px }
- .tabs{ width:100%; gap:6px }
- .tab-btn{ flex:1; padding:10px 6px; font-size:14px }
+ .topbar{ margin:10px 0 0; padding:0 8px; gap:8px }
+ .tabs{ width:100%; gap:3px; order:10 }
+ .tab-btn{ flex:1; padding:11px 4px 11px; font-size:14px }
+ .top-actions, .status-wrap, .locks{ margin-bottom:2px }
  .import-btn{ flex:0 0 auto; padding:10px 12px }
  .locks{ margin-left:0; width:100% }
- .lock-btn{ flex:1; justify-content:center }
+ .lock-item{ flex:1 }
+ .lock-btn{ width:100%; justify-content:center }
  .top-actions{ margin-left:0 !important; width:100% }
  .top-actions .btn{ flex:1 }
  .status-wrap{ flex:none !important; width:100% }
  .save-status-banner{ margin:0; padding:8px 12px; font-size:14px }
  #saveStatusBanner{ white-space:normal !important }
- .container{ margin:10px auto; padding:0 8px }
+ .container{ margin:0 auto 10px; padding:0 8px }
  .split,.split-student{ grid-template-columns:minmax(0,1fr) }
  .split>.panel,.split-student>.panel{ min-width:0; overflow-x:auto }
  .card-header{ flex-wrap:wrap; gap:8px; padding:10px 12px }
@@ -451,10 +529,10 @@ body.student-mode #importSheetBtn{ display:none !important }
   <button class="tab-btn" data-target="appreciationsView">Appréciations</button>
  </div>
  <div class="locks" id="locksBar">
-  <button class="lock-btn" data-lock="T1">🔓 T1</button>
-  <button class="lock-btn" data-lock="T2">🔓 T2</button>
-  <button class="lock-btn" data-lock="T3">🔓 T3</button>
-  <button class="lock-btn" data-lock="T4">🔓 T4</button>
+  <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1">🔓</button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 2</span><button class="lock-btn" data-lock="T2" title="Verrouiller / déverrouiller le trimestre 2">🔓</button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 3</span><button class="lock-btn" data-lock="T3" title="Verrouiller / déverrouiller le trimestre 3">🔓</button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 4</span><button class="lock-btn" data-lock="T4" title="Verrouiller / déverrouiller le trimestre 4">🔓</button></div>
  </div>
  <div class="top-actions" style="margin-left:auto; display:flex; gap:8px;">
   <button class="btn" id="manageSubjectsBtnTop" style="font-weight:600; border-color:#1e3a8a; color:#1e3a8a;">Matières</button>
@@ -837,7 +915,6 @@ body.student-mode #importSheetBtn{ display:none !important }
    <button class="btn" id="noteDetailDeleteBtn" style="color:#ef4444; border-color:#ef4444;">Supprimer</button>
    <button class="btn" id="noteDetailEditGroupBtn" style="display:none;background:#eff6ff;border-color:#93c5fd;color:#2563eb;">Modifier le groupe</button>
    <button class="btn btn-primary" id="noteDetailEditBtn">Modifier</button>
-   <button class="btn" id="noteDetailCloseBtn">Fermer</button>
   </div>
  </div>
 </div>
@@ -979,17 +1056,6 @@ body.student-mode #importSheetBtn{ display:none !important }
   </div>
  </div>
 </div>
-<div id="addClassModal" class="modal" aria-hidden="true">
- <div class="modal-card" style="width:420px" role="dialog" aria-modal="true">
-  <div class="modal-header"><h3 style="margin:0">Ajouter une classe</h3><button class="modal-close" id="addClassClose" type="button">×</button></div>
-  <div class="modal-body">
-   <form id="addClassForm" class="modal-form" autocomplete="off">
-    <label>Nom de la classe</label><input id="newClassName" required>
-    <div class="modal-actions"><button type="button" class="btn" id="addClassCancel">Annuler</button><button type="submit" class="btn btn-primary">Ajouter</button></div>
-   </form>
-  </div>
- </div>
-</div>
 <div id="importModal" class="modal" aria-hidden="true" style="z-index:310;">
  <div class="modal-card" style="width:720px" role="dialog" aria-modal="true">
   <div class="modal-header"><h3 style="margin:0">Récapitulatif de l'import</h3><button class="modal-close" id="importClose" type="button">×</button></div>
@@ -1032,17 +1098,23 @@ body.student-mode #importSheetBtn{ display:none !important }
 <div id="editClassModal" class="modal" aria-hidden="true">
  <div class="modal-card" role="dialog" aria-modal="true">
   <div class="modal-header">
-   <h3>Modifier classe</h3>
-   <button class="modal-close" id="editClassClose">×</button>
+   <h3 id="editClassTitle">Modifier classe</h3>
+   <button class="modal-close" id="editClassClose" type="button">×</button>
   </div>
   <div class="modal-body">
    <form id="editClassForm" class="modal-form">
     <label>Nom de la classe</label><input id="editClassName">
-    <label>Matières (registre global)</label>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 4px;">
+     <label style="margin:0;">Matières et coefficients</label>
+     <span style="font-size:13px;">
+      <button type="button" class="btn-link" id="editClassCheckAll">Tout cocher</button> ·
+      <button type="button" class="btn-link" id="editClassCheckNone">Tout décocher</button>
+     </span>
+    </div>
     <div id="editClassSubjects" style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:8px;"></div>
     <div class="modal-actions">
      <button type="button" class="btn" id="editClassCancel">Annuler</button>
-     <button type="submit" class="btn btn-primary">Valider</button>
+     <button type="submit" class="btn btn-primary" id="editClassSubmit">Valider</button>
     </div>
    </form>
   </div>
@@ -1066,9 +1138,6 @@ body.student-mode #importSheetBtn{ display:none !important }
     <button class="btn" id="btnOpenEditDataPopup" style="flex:1; font-weight:600; background:#f8fafc;">Modifier les données ⚙️</button>
    </div>
    <div id="manageCompHierarchy" style="max-height:400px; overflow:auto; border:1px solid var(--border); border-radius:8px; padding:10px;"></div>
-   <div class="modal-actions">
-    <button type="button" class="btn" id="manageCompetenciesCancel">Fermer</button>
-   </div>
   </div>
  </div>
 </div>
@@ -1087,9 +1156,6 @@ body.student-mode #importSheetBtn{ display:none !important }
     <select id="editCompSubDomainFilter" style="width:200px;"><option value="">Tous les Sous-Domaines</option></select>
    </div>
    <div id="editCompDataList" style="max-height:500px; overflow:auto; border:1px solid var(--border); border-radius:8px;"></div>
-  </div>
-  <div class="modal-actions">
-   <button type="button" class="btn" id="editCompDataCancel">Fermer</button>
   </div>
  </div>
 </div>
@@ -1133,9 +1199,6 @@ body.student-mode #importSheetBtn{ display:none !important }
     <thead><tr><th>Matière</th><th>Coef</th><th>Actions</th></tr></thead>
     <tbody id="manageSubjectsTbody"></tbody>
    </table>
-   <div class="modal-actions">
-    <button type="button" class="btn" id="manageSubjectsCancel">Fermer</button>
-   </div>
   </div>
  </div>
 </div>
@@ -1169,9 +1232,6 @@ body.student-mode #importSheetBtn{ display:none !important }
   </div>
   <div class="modal-body">
    <div id="statsBody"></div>
-   <div class="modal-actions">
-    <button type="button" class="btn" id="statsCloseBtn">Fermer</button>
-   </div>
   </div>
  </div>
 </div>
@@ -3028,7 +3088,8 @@ function refreshLocksUI(){
  document.querySelectorAll(".lock-btn").forEach(btn=>{
   const k=btn.dataset.lock; btn.classList.toggle("locked",!!LOCKED_PERIODS[k]);
   const label = k.startsWith("T") ? "Trimestre " + k.slice(1) : k;
-  btn.textContent=(LOCKED_PERIODS[k]?"🔒 ":"🔓 ")+label;
+  btn.textContent=LOCKED_PERIODS[k]?"🔒":"🔓";
+  btn.title=label+(LOCKED_PERIODS[k]?" : verrouillé (cliquer pour déverrouiller)":" : déverrouillé (cliquer pour verrouiller)");
  });
 }
 function applyLocksEffects(){
@@ -3971,7 +4032,7 @@ function renderProfViewForPeriod(studentId,periodKey){
       const editBtn=document.getElementById('noteDetailEditBtn');
       const deleteBtn=document.getElementById('noteDetailDeleteBtn');
       const editGroupBtn=document.getElementById('noteDetailEditGroupBtn');
-      const closeBtn=document.getElementById('noteDetailCloseBtn');
+      const closeBtn=document.getElementById('noteDetailCloseBtn')||{};
 
       if(isClassG){
        editBtn.style.display='none';
@@ -4091,7 +4152,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
       const editBtn=document.getElementById('noteDetailEditBtn');
       const deleteBtn=document.getElementById('noteDetailDeleteBtn');
       const editGroupBtn=document.getElementById('noteDetailEditGroupBtn');
-      const closeBtn=document.getElementById('noteDetailCloseBtn');
+      const closeBtn=document.getElementById('noteDetailCloseBtn')||{};
 
       if(isClassGroup){
        editBtn.style.display='none';
@@ -6388,7 +6449,7 @@ function showNoteDetailByObj(n, studentId){
   const editBtn=document.getElementById("noteDetailEditBtn");
   const deleteBtn=document.getElementById("noteDetailDeleteBtn");
   const editGroupBtn=document.getElementById("noteDetailEditGroupBtn");
-  const closeBtn=document.getElementById("noteDetailCloseBtn");
+  const closeBtn=document.getElementById("noteDetailCloseBtn")||{};
 
   if(n.classCommon){
     editBtn.style.display="none";
@@ -6431,23 +6492,7 @@ noteDetailClose.addEventListener("click",closeNoteDetailModal);
 noteDetailModal.addEventListener("click",e=>{});
 
 // ── CLASSES ───────────────────────────────────────────────────────────────────
-const addClassModal=document.getElementById("addClassModal");
-function closeAddClassModal(){addClassModal.classList.remove("open");addClassModal.setAttribute("aria-hidden","true");}
-document.getElementById("addClassBtn").addEventListener("click",()=>{
- document.getElementById("newClassName").value="";
- addClassModal.classList.add("open"); addClassModal.setAttribute("aria-hidden","false");
- setTimeout(()=>document.getElementById("newClassName").focus(),50);
-});
-document.getElementById("addClassClose").addEventListener("click",closeAddClassModal);
-document.getElementById("addClassCancel").addEventListener("click",closeAddClassModal);
-document.getElementById("addClassForm").addEventListener("submit",(e)=>{
- e.preventDefault();
- ensureSubjectRegistry();
- const name=document.getElementById("newClassName").value.trim(); if(!name) return;
- const id='cls_'+Math.random().toString(36).slice(2,8);
- DATA.classes.push({id,name,subjects:SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s),memberIds:[],evals:[]});
- closeAddClassModal(); renderClassList(); renderClassSelects(); saveData();
-});
+document.getElementById("addClassBtn").addEventListener("click",()=>openClassModal(true));
 document.getElementById("classSearch").addEventListener("input",renderClassList);
 document.getElementById("classList").addEventListener("change",(e)=>openClass(e.target.value));
 document.getElementById("editClassBtn").addEventListener("click",openEditClassModal);
@@ -7345,21 +7390,31 @@ document.getElementById("editStudentForm").addEventListener("submit",e=>{
 });
 
 const editClassModal=document.getElementById("editClassModal");
-function openEditClassModal(){
+let CLASS_MODAL_CREATE=false;
+function openEditClassModal(){ openClassModal(false); }
+function openClassModal(isNew){
  ensureSubjectRegistry();
- const id=document.getElementById("classList").value; if(!id) return;
- const cls=DATA.classes.find(c=>c.id===id); if(!cls) return;
+ CLASS_MODAL_CREATE=!!isNew;
+ let cls;
+ if(isNew){
+  // Nouvelle classe : toutes les matières du registre cochées par défaut, coefs globaux
+  cls={name:"",subjects:SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s),subjectCoefs:{}};
+ }else{
+  const id=document.getElementById("classList").value; if(!id) return;
+  cls=DATA.classes.find(c=>c.id===id); if(!cls) return;
+ }
+ document.getElementById("editClassTitle").textContent=isNew?"Ajouter une classe":"Modifier classe";
+ document.getElementById("editClassSubmit").textContent=isNew?"Ajouter":"Valider";
  document.getElementById("editClassName").value=cls.name;
- 
+
  // Coefs spécifiques par classe
  if(!cls.subjectCoefs) cls.subjectCoefs = {};
 
  document.getElementById("editClassSubjects").innerHTML=SUBJECT_REGISTRY.map(s=>{
   const name=typeof s==='object'?s.name:s;
   const globalCoef=typeof s==='object'?s.coef:1;
-  
-  // Logic: if class has a specific coef, use it. Else use global.
-  // We'll also store the "original" global coef to detect if it changed at source later.
+
+  // Si la classe a un coef spécifique on l'utilise, sinon le coef global.
   const currentCoef = cls.subjectCoefs[name]?.coef !== undefined ? cls.subjectCoefs[name].coef : globalCoef;
 
   return `<div style="display:flex;align-items:center;gap:12px;padding:4px 0;border-bottom:1px solid #f1f5f9;">
@@ -7372,20 +7427,30 @@ function openEditClassModal(){
   </div>`;
  }).join("");
  editClassModal.classList.add("open");editClassModal.setAttribute("aria-hidden","false");
+ if(isNew) setTimeout(()=>document.getElementById("editClassName").focus(),50);
 }
 function closeEditClassModal(){editClassModal.classList.remove("open");editClassModal.setAttribute("aria-hidden","true");}
 document.getElementById("editClassClose").addEventListener("click",closeEditClassModal);
 document.getElementById("editClassCancel").addEventListener("click",closeEditClassModal);
+document.getElementById("editClassCheckAll").addEventListener("click",()=>document.querySelectorAll("#editClassSubjects input[type='checkbox']").forEach(i=>i.checked=true));
+document.getElementById("editClassCheckNone").addEventListener("click",()=>document.querySelectorAll("#editClassSubjects input[type='checkbox']").forEach(i=>i.checked=false));
 editClassModal.addEventListener("click",e=>{});
 document.getElementById("editClassForm").addEventListener("submit",e=>{
  e.preventDefault();
- const id=document.getElementById("classList").value; if(!id) return;
- const cls=DATA.classes.find(c=>c.id===id); if(!cls) return;
- cls.name=document.getElementById("editClassName").value.trim();
- 
+ let cls;
+ const name=document.getElementById("editClassName").value.trim();
+ if(CLASS_MODAL_CREATE){
+  if(!name) return;
+  cls={id:'cls_'+Math.random().toString(36).slice(2,8),name,subjects:[],memberIds:[],evals:[],subjectCoefs:{}};
+ }else{
+  const id=document.getElementById("classList").value; if(!id) return;
+  cls=DATA.classes.find(c=>c.id===id); if(!cls) return;
+  cls.name=name;
+ }
+
  // Matières sélectionnées
  cls.subjects=Array.from(document.querySelectorAll("#editClassSubjects input[type='checkbox']:checked")).map(i=>i.dataset.name);
- 
+
  // Sauvegarde des coefs spécifiques
  if(!cls.subjectCoefs) cls.subjectCoefs = {};
  document.querySelectorAll(".class-subject-coef").forEach(inp => {
@@ -7403,13 +7468,17 @@ document.getElementById("editClassForm").addEventListener("submit",e=>{
    }
  });
 
- closeEditClassModal(); renderClassList(); renderClassPanelIfOpen(); rerenderOpenStudent();
+ if(CLASS_MODAL_CREATE){
+  DATA.classes.push(cls);
+  closeEditClassModal(); renderClassList(); renderClassSelects(); saveData();
+ }else{
+  closeEditClassModal(); renderClassList(); renderClassPanelIfOpen(); rerenderOpenStudent();
+ }
 });
 
 // ── MANAGE SUBJECTS ───────────────────────────────────────────────────────────
 const manageSubjectsModal=document.getElementById("manageSubjectsModal");
 document.getElementById("manageSubjectsClose").addEventListener("click",()=>{manageSubjectsModal.classList.remove("open");});
-document.getElementById("manageSubjectsCancel").addEventListener("click",()=>{manageSubjectsModal.classList.remove("open");});
 
 function openManageSubjectsModal(){
  ensureSubjectRegistry();
@@ -7645,7 +7714,7 @@ function renderAppreciationUI(){
  const periods=["T1","T2","T3","T4","YEAR"];
  const periodLabels={T1:"Trimestre 1",T2:"Trimestre 2",T3:"Trimestre 3",T4:"Trimestre 4",YEAR:"Année"};
  const cls=DATA.classes.find(c=>c.id===stu.classId);
- let html=`<div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">${periods.map(p=>{
+ let html=`<div class="period-tabs">${periods.map(p=>{
    const sNotes = (DATA.notes[stu.id]||[]).filter(n=>(n.period||"YEAR")===p);
    const sComps = (DATA.competencies||[]).filter(c=>c.studentId===stu.id && (c.period||"YEAR")===p);
    const hasMissing = p !== "YEAR" && (sNotes.some(n=>(n.note===undefined||n.note===null)&&(n.noteText===""||!n.noteText)) ||
@@ -7678,7 +7747,7 @@ function renderAppreciationUI(){
   const app=getAppreciation(stu.id,CURRENT_APP_PERIOD,subName);
   
   html+=`<tr style="border-bottom:1px solid #f1f5f9;">
-   <td style="padding:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight:700; color:#1e3a8a; font-size:1.1em;">${subName}</td>
+   <td style="padding:12px; font-family:Georgia,'Times New Roman',serif; font-weight:700; color:#1e3a8a; font-size:1.1em;">${subName}</td>
    <td style="padding:12px; text-align:center;">
     <div style="display:inline-block; padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; font-weight:700;">
      ${avg!==null?fmt(avg):'-'}
@@ -7694,7 +7763,7 @@ function renderAppreciationUI(){
  const averages = calculateStudentAverages(stu.id, CURRENT_APP_PERIOD);
  const genApp = (DATA.generalAppreciations || {})[stu.id]?.[CURRENT_APP_PERIOD] || "";
  html+=`<tr style="background:#f0f9ff; border-top:2px solid #bae6fd;">
-   <td style="padding:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight:800; color:#0c4a6e; font-size:1.2em;">Appréciation Générale</td>
+   <td style="padding:12px; font-weight:800; color:#0c4a6e; font-size:1.2em;">Appréciation Générale</td>
    <td style="padding:12px; text-align:center;">
     <div style="display:inline-block; padding:6px 12px; border:2px solid #0369a1; border-radius:8px; background:#fff; font-weight:800; color:#0369a1; font-size:1.1em;">
      ${averages.general!==null?fmt(averages.general):'-'}
