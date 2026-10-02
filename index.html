@@ -161,6 +161,137 @@ body.student-mode #noteDetailActions, #noteDetailActions:not(:has(button:not([st
 .modal-form label{ display:block; margin: 10px 0 4px }
 .modal-form input,.modal-form select{ width:100%; padding:8px; border:1px solid var(--border); border-radius:8px }
 .modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px }
+
+
+/* ── Tests en ligne ───────────────────────────────────────────────────────── */
+body.student-mode .tab-btn[data-target="onlineTestsView"],
+body.student-mode #onlineTestsView{ display:none !important }
+.online-tests-shell{ display:flex; flex-direction:column; gap:18px }
+.online-tests-toolbar{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:8px }
+.online-tests-toolbar p{ margin:6px 0 0; color:#64748b; max-width:760px }
+.online-tests-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px }
+.online-test-card{
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  border:1px solid #d8e4f6; border-radius:16px; padding:18px;
+  box-shadow:0 10px 30px rgba(37,99,235,.08);
+  display:flex; flex-direction:column; gap:14px;
+}
+.online-test-card h4{ margin:0; color:#1e3a8a; font-size:20px }
+.online-test-meta{ display:flex; flex-wrap:wrap; gap:8px; font-size:13px; color:#475569 }
+.online-test-meta span{
+  background:#eef4ff; border:1px solid #cfe0ff; border-radius:999px;
+  padding:6px 10px; font-weight:600;
+}
+.online-test-points{
+  display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#0f172a;
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px;
+}
+.online-test-badges{ display:flex; flex-wrap:wrap; gap:8px }
+.online-test-badges .badge{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
+  border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700;
+}
+.online-test-card-footer{ display:flex; justify-content:space-between; align-items:center; gap:12px; color:#64748b; font-size:12px; flex-wrap:wrap }
+.online-test-card-actions{ display:flex; gap:8px; flex-wrap:wrap }
+.online-empty{
+  padding:34px 18px; text-align:center; color:#64748b;
+  border:2px dashed #cbd5e1; border-radius:18px; background:#f8fafc;
+}
+.online-modal-wide{ width:1100px !important; max-width:97vw !important; }
+.online-modal-medium{ width:860px !important; max-width:96vw !important; }
+.online-modal-note{
+  margin-top:8px; padding:10px 12px; border-radius:12px;
+  background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:13px;
+}
+.online-setup-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px }
+.online-setup-grid .full{ grid-column:1 / -1 }
+.online-checklist{ display:flex; flex-direction:column; gap:10px }
+.online-check-item{
+  display:flex; gap:10px; align-items:flex-start; padding:10px 12px;
+  border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc;
+}
+.online-check-item input[type="checkbox"]{ margin-top:4px; width:18px; height:18px }
+.online-check-item strong{ display:block; color:#0f172a; margin-bottom:3px }
+.online-check-item small{ color:#64748b; line-height:1.4 }
+.online-check-item.is-disabled{ opacity:.55 }
+.online-inline-field{
+  margin-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.online-inline-field input{ width:120px !important }
+.online-builder-layout{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(290px,.7fr); gap:16px }
+.online-builder-card{
+  border:1px solid #dbe4f0; border-radius:16px; background:#fff; overflow:hidden;
+}
+.online-builder-card .head{
+  padding:14px 16px; border-bottom:1px solid #e2e8f0;
+  background:linear-gradient(180deg,#f8fbff 0%,#eef4ff 100%);
+}
+.online-builder-card .body{ padding:16px }
+.online-builder-card .head h4{ margin:0; color:#1e3a8a }
+.online-question-number{ color:#1d4ed8; font-weight:800; font-size:14px; margin-bottom:10px }
+.online-type-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px }
+.online-question-choices{ display:flex; flex-direction:column; gap:10px; margin-top:12px }
+.online-choice-row{
+  display:grid; grid-template-columns:28px minmax(0,1fr) auto auto; gap:10px; align-items:center;
+  padding:10px 12px; border:1px solid #dbe4f0; border-radius:12px; background:#fff;
+}
+.online-choice-marker{
+  width:18px; height:18px; border:2px solid #94a3b8; background:#fff; justify-self:center;
+}
+.online-choice-row[data-shape="round"] .online-choice-marker{ border-radius:999px }
+.online-choice-row[data-shape="square"] .online-choice-marker{ border-radius:4px }
+.online-choice-row.is-correct{ border-color:#60a5fa; background:#eff6ff }
+.online-choice-row.is-correct .online-choice-marker{ background:#2563eb; border-color:#2563eb }
+.online-choice-status{ font-size:12px; color:#1d4ed8; font-weight:700 }
+.online-answer-target{
+  min-height:58px; border:2px dashed #93c5fd; border-radius:14px; background:#f8fbff;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  color:#1d4ed8; font-weight:700; cursor:context-menu;
+}
+.online-answer-target small{ display:block; color:#64748b; font-weight:500; margin-top:4px }
+.online-blank-toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 }
+.online-blank-segments{ display:flex; flex-direction:column; gap:10px }
+.online-blank-row{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center;
+}
+.online-blank-token{
+  border:2px dashed #60a5fa; border-radius:12px; padding:11px 12px; background:#eff6ff;
+  color:#1d4ed8; font-weight:700; cursor:context-menu; text-align:left;
+}
+.online-blank-token small{ display:block; color:#64748b; font-weight:500; margin-top:4px }
+.online-blank-preview{
+  margin-top:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0;
+  border-radius:12px; color:#334155; line-height:1.6;
+}
+.online-blank-pill{
+  display:inline-flex; align-items:center; justify-content:center; min-width:110px;
+  padding:4px 10px; margin:0 6px; border-radius:999px; border:1px dashed #60a5fa;
+  background:#eff6ff; color:#1d4ed8; font-weight:700;
+}
+.online-questions-list{ display:flex; flex-direction:column; gap:10px }
+.online-question-item{
+  border:1px solid #dbe4f0; border-radius:14px; padding:12px; background:#fff;
+  display:flex; flex-direction:column; gap:8px;
+}
+.online-question-item-top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start }
+.online-question-item h5{ margin:0; color:#0f172a; font-size:15px }
+.online-question-item .meta{ display:flex; flex-wrap:wrap; gap:8px; color:#64748b; font-size:12px }
+.online-question-item .meta span{
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:999px; padding:4px 8px;
+}
+.online-question-item-actions{ display:flex; gap:8px; flex-wrap:wrap }
+.online-question-item p{ margin:0; color:#475569; font-size:13px; line-height:1.45 }
+.online-answer-list{ display:flex; flex-direction:column; gap:10px }
+.online-answer-row{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center }
+.online-builder-footer{
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px;
+}
+.online-builder-footer .resume{ color:#475569; font-size:13px }
+.online-subhint{ font-size:12px; color:#64748b; margin-top:6px }
+@media (max-width:960px){
+  .online-setup-grid,.online-type-grid,.online-builder-layout{ grid-template-columns:1fr }
+}
 .student-header-section{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; padding:10px; background:#f9fafb; border-radius:8px; }
 #studentElevePeriodViews .matiere-line{
  margin-bottom:16px;
@@ -548,6 +679,7 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
   <button class="tab-btn active" data-target="elevesView">Élèves</button>
   <button class="tab-btn" data-target="classesView">Classes</button>
   <button class="tab-btn" data-target="appreciationsView">Appréciations</button>
+  <button class="tab-btn" data-target="onlineTestsView">Tests en ligne</button>
  </div>
  <div class="locks" id="locksBar">
   <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1">🔓</button></div>
@@ -675,6 +807,27 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
    </div>
   </div>
  </section>
+ <section id="onlineTestsView" class="view">
+  <div class="card">
+   <div class="card-header">
+    <strong>Tests en ligne</strong>
+   </div>
+   <div class="card-body">
+    <div class="online-tests-shell">
+     <div class="online-tests-toolbar">
+      <div>
+       <strong style="display:block;font-size:18px;color:#1e3a8a;">Création et gestion des évaluations en ligne</strong>
+       <p>Cette vue est réservée au professeur. Tu peux y créer un test, définir ses options, préparer les questions puis retrouver toutes les évaluations déjà enregistrées.</p>
+      </div>
+      <button class="btn btn-primary" id="openCreateOnlineTestBtn" type="button" style="font-size:16px;padding:12px 18px;">+ Créer un test</button>
+     </div>
+     <div id="onlineTestsSummary" class="online-modal-note">Aucun test enregistré pour le moment.</div>
+     <div id="onlineTestsList" class="online-tests-grid"></div>
+    </div>
+   </div>
+  </div>
+ </section>
+
 </div>
 
 <div id="loginOverlay">
@@ -1452,6 +1605,163 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
    <div class="modal-actions">
     <button class="btn" id="classSingleCompGradingCancel">Annuler</button>
     <button class="btn btn-primary" id="classSingleCompGradingSave">Valider</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+
+<div id="onlineTestSetupModal" class="modal" aria-hidden="true" style="z-index:140;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3 id="onlineTestSetupTitle">Créer un test en ligne</h3>
+   <button class="modal-close" id="onlineTestSetupClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="onlineTestSetupForm" class="modal-form" autocomplete="off">
+    <div class="online-setup-grid">
+     <div>
+      <label>Nom de l’éval</label>
+      <input id="onlineTestTitleInput" placeholder="Ex : Chapitre 4 - fractions" required>
+     </div>
+     <div>
+      <label>Matière</label>
+      <input id="onlineTestSubjectInput" list="onlineTestSubjectSuggestions" placeholder="Ex : Mathématiques" required>
+      <datalist id="onlineTestSubjectSuggestions"></datalist>
+     </div>
+     <div class="full">
+      <div class="online-checklist">
+       <label class="online-check-item">
+        <input type="checkbox" id="onlineTestShowGradeDirect">
+        <span><strong>Afficher directement la note dans École Directe</strong><small>La note pourra être publiée automatiquement à l’issue du test.</small></span>
+       </label>
+       <label class="online-check-item">
+        <input type="checkbox" id="onlineTestShuffleQuestions">
+        <span><strong>Questions dans un ordre aléatoire</strong><small>L’ordre des questions change à chaque lancement du test.</small></span>
+       </label>
+       <div class="online-check-item">
+        <input type="checkbox" id="onlineTestTimed">
+        <span style="flex:1;">
+         <strong>Temps limité</strong>
+         <small>Si activé, le test est soumis automatiquement à la fin du temps imparti. Les messages d’introduction et de conclusion restent hors chronomètre.</small>
+         <div class="online-inline-field">
+          <label for="onlineTestTimeLimit" style="margin:0;">Temps imparti</label>
+          <input id="onlineTestTimeLimit" type="number" min="1" step="1" placeholder="Minutes">
+          <span>minutes</span>
+         </div>
+        </span>
+       </div>
+       <label class="online-check-item">
+        <input type="checkbox" id="onlineTestTrainingMode">
+        <span><strong>Mode entraînement</strong><small>Le résultat n’est pas transmis au professeur, le test est refaisable plusieurs fois et le corrigé est visible à la fin.</small></span>
+       </label>
+       <label class="online-check-item" id="onlineTestFocusWrap">
+        <input type="checkbox" id="onlineTestFocusMode">
+        <span><strong>Mode Focus</strong><small>Si l’élève quitte la page ou ouvre une autre application, le test est immédiatement arrêté et soumis. Disponible uniquement hors mode entraînement.</small></span>
+       </label>
+       <label class="online-check-item" id="onlineTestHideGradeWrap">
+        <input type="checkbox" id="onlineTestHideGrade">
+        <span><strong>Ne pas afficher la note</strong><small>Le résultat ne s’affiche pas à l’élève en fin de test. Cette option est désactivée en mode entraînement.</small></span>
+       </label>
+      </div>
+      <div id="onlineTestSetupHint" class="online-modal-note">Les options incompatibles se désactivent automatiquement si le mode entraînement est coché.</div>
+     </div>
+     <div class="full">
+      <label>Message d’introduction</label>
+      <textarea id="onlineTestIntroInput" rows="4" placeholder="Message affiché à l’élève avant le début du test."></textarea>
+     </div>
+     <div class="full">
+      <label>Message de conclusion</label>
+      <textarea id="onlineTestConclusionInput" rows="4" placeholder="Message affiché à l’élève à la fin du test."></textarea>
+     </div>
+     <div>
+      <label>Points par défaut pour chaque question</label>
+      <input id="onlineTestDefaultPoints" type="number" min="0.25" step="0.25" value="1">
+      <div class="online-subhint">Cette valeur pré-remplit les nouvelles questions, mais reste modifiable question par question.</div>
+     </div>
+    </div>
+    <div class="modal-actions">
+     <button type="button" class="btn" id="onlineTestSetupCancel">Annuler</button>
+     <button type="submit" class="btn btn-primary">Suivant : créer le quiz</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
+<div id="onlineTestBuilderModal" class="modal" aria-hidden="true" style="z-index:150;">
+ <div class="modal-card online-modal-wide" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3 id="onlineTestBuilderTitle">Configurer les questions</h3>
+   <button class="modal-close" id="onlineTestBuilderClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="online-builder-layout">
+    <div class="online-builder-card">
+     <div class="head">
+      <h4>Question en cours</h4>
+     </div>
+     <div class="body">
+      <div class="online-question-number" id="onlineQuestionNumberLabel">Question n°1</div>
+      <div class="online-type-grid">
+       <div>
+        <label>Type de question</label>
+        <select id="onlineQuestionType">
+         <option value="qcu">QCU</option>
+         <option value="qcm">QCM</option>
+         <option value="written">Réponse à écrire</option>
+         <option value="fillblank">Texte à trou</option>
+        </select>
+       </div>
+       <div>
+        <label>Points</label>
+        <input id="onlineQuestionPoints" type="number" min="0.25" step="0.25" value="1">
+       </div>
+      </div>
+      <label>Intitulé de la question</label>
+      <textarea id="onlineQuestionPrompt" rows="3" placeholder="Saisir la consigne de la question..."></textarea>
+      <div id="onlineQuestionTypeFields"></div>
+      <div class="modal-actions" style="justify-content:flex-start;margin-top:16px;">
+       <button type="button" class="btn btn-primary" id="onlineQuestionValidateBtn">Valider la question</button>
+       <button type="button" class="btn" id="onlineQuestionResetBtn">Nouvelle question</button>
+      </div>
+     </div>
+    </div>
+    <div class="online-builder-card">
+     <div class="head">
+      <h4>Questions enregistrées</h4>
+     </div>
+     <div class="body">
+      <div id="onlineQuestionsList" class="online-questions-list"></div>
+     </div>
+    </div>
+   </div>
+   <div class="online-builder-footer">
+    <div class="resume" id="onlineBuilderResume">0 question, 0 point</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+     <button type="button" class="btn" id="onlineBuilderBackBtn">Retour aux paramètres</button>
+     <button type="button" class="btn btn-primary" id="onlineBuilderSaveBtn">Enregistrer le test</button>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="onlineTestAnswersModal" class="modal" aria-hidden="true" style="z-index:160;">
+ <div class="modal-card" role="dialog" aria-modal="true" style="width:560px;max-width:95%;">
+  <div class="modal-header">
+   <h3 id="onlineAnswersModalTitle">Réponses attendues</h3>
+   <button class="modal-close" id="onlineAnswersClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <p style="margin-top:0;color:#64748b;">Tu peux enregistrer une ou plusieurs réponses acceptées.</p>
+   <div id="onlineAnswersList" class="online-answer-list"></div>
+   <div class="modal-actions" style="justify-content:space-between;">
+    <button type="button" class="btn" id="onlineAnswersAddBtn">+ Ajouter une réponse</button>
+    <div style="display:flex;gap:8px;">
+     <button type="button" class="btn" id="onlineAnswersCancel">Annuler</button>
+     <button type="button" class="btn btn-primary" id="onlineAnswersSave">Valider</button>
+    </div>
    </div>
   </div>
  </div>
@@ -2772,7 +3082,7 @@ const COMPETENCIES_HIERARCHY = {
 };
 
 const SPECIAL_VALUES = new Set(["Abs","Disp","NE","NR"]);
-let DATA = { students:[], classes:[], notes:{}, competencies:[], appreciations:[], generalAppreciations: {}, competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY)) };
+let DATA = { students:[], classes:[], notes:{}, competencies:[], appreciations:[], generalAppreciations: {}, onlineTests: [], competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY)) };
 let LOCKED_PERIODS = { T1:false, T2:false, T3:false, T4:false };
 let COMP_TARGET_STUDENT = null;
 let COMP_TARGET_NOTE_ID = null;
@@ -2982,6 +3292,10 @@ function buildCSVText(){
    });
   });
  }
+ ensureOnlineTestsStore();
+ (DATA.onlineTests||[]).forEach(test=>{
+  rows.push(["onlineTest",test.id||"",escapeCsv(test.title||""),escapeCsv(test.subject||""),escapeCsv(JSON.stringify(test.options||{})),escapeCsv(test.intro||""),escapeCsv(test.conclusion||""),test.defaultPoints||1,escapeCsv(JSON.stringify(test.questions||[])),test.createdAt||"",test.updatedAt||""].join(";"));
+ });
  const h = DATA.competenciesHierarchy || COMPETENCIES_HIERARCHY;
  for(const cycle in h){
   for(const domain in h[cycle]){
@@ -3008,7 +3322,7 @@ function exportCSV(){
 }
 
 function importCSV(text){
- DATA={students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
+ DATA={students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},onlineTests:[],competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
  SUBJECT_REGISTRY=[]; LOCKED_PERIODS={T1:false,T2:false,T3:false,T4:false};
  const lines=[]; let currentLine="",inQuotes=false;
  for(let i=0;i<text.length;i++){
@@ -3071,6 +3385,27 @@ function importCSV(text){
    if(!DATA.generalAppreciations[sid]) DATA.generalAppreciations[sid]={};
    DATA.generalAppreciations[sid][p]=text;
   }
+  else if(type==="onlineTest"){
+   try{
+    const optionsStr=unescapeCsv(cols[4]||"");
+    const questionsStr=unescapeCsv(cols[8]||"");
+    const options=optionsStr ? JSON.parse(optionsStr) : {};
+    const questions=questionsStr ? JSON.parse(questionsStr) : [];
+    if(!Array.isArray(DATA.onlineTests)) DATA.onlineTests=[];
+    DATA.onlineTests.push(sanitizeOnlineTest({
+     id: cols[1]||"",
+     title: unescapeCsv(cols[2]||""),
+     subject: unescapeCsv(cols[3]||""),
+     options,
+     intro: unescapeCsv(cols[5]||""),
+     conclusion: unescapeCsv(cols[6]||""),
+     defaultPoints: cols[7] ? parseFloat(cols[7]) : 1,
+     questions,
+     createdAt: cols[9]||"",
+     updatedAt: cols[10]||""
+    }));
+   }catch(e){ console.error("Import onlineTest error", e); }
+  }
   else if(type==="compHierarchy"){
    try {
     const cycle = unescapeCsv(cols[1]||"");
@@ -3087,7 +3422,7 @@ function importCSV(text){
    } catch(e) { console.error("Import compHierarchy error", e); }
   }
  });
- ensureSubjectRegistry(); backfillClassSubjectsFromRegistry(); refreshLocksUI(); ensureNoteIds();
+ ensureOnlineTestsStore(); ensureSubjectRegistry(); backfillClassSubjectsFromRegistry(); refreshLocksUI(); ensureNoteIds();
  IS_MODIFIED = false;
  updateSaveStatusUI(null);
 }
@@ -8992,11 +9327,636 @@ function updateTabWarningIndicators(){
     }
   }
 }
+
+
+// ── TESTS EN LIGNE ───────────────────────────────────────────────────────────
+function ensureOnlineTestsStore(){
+ if(!Array.isArray(DATA.onlineTests)) DATA.onlineTests = [];
+}
+function deepClone(obj){
+ return JSON.parse(JSON.stringify(obj));
+}
+function makeUid(prefix){
+ return prefix + "_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+}
+function defaultOnlineTestMeta(){
+ return {
+  title:"",
+  subject:"",
+  options:{
+   showGradeDirect:false,
+   shuffleQuestions:false,
+   timed:false,
+   timeLimitMinutes:"",
+   trainingMode:false,
+   focusMode:false,
+   hideGrade:false
+  },
+  intro:"",
+  conclusion:"",
+  defaultPoints:1
+ };
+}
+function normalizeOnlineAnswers(list){
+ return (list||[]).map(x=>String(x||"").trim()).filter(Boolean);
+}
+function sanitizeOnlineQuestion(question){
+ const base = {
+  id: question?.id || makeUid("otq"),
+  type: question?.type || "qcu",
+  prompt: String(question?.prompt||"").trim(),
+  points: Number(question?.points) > 0 ? Number(question.points) : 1
+ };
+ if(base.type==="written"){
+  base.expectedAnswers = normalizeOnlineAnswers(question?.expectedAnswers);
+ }else if(base.type==="fillblank"){
+  base.segments = (question?.segments||[]).map(seg=>{
+   if(seg?.type==="blank"){
+    return { type:"blank", id: seg.id || makeUid("blank"), answers: normalizeOnlineAnswers(seg.answers) };
+   }
+   return { type:"text", text: String(seg?.text||"") };
+  });
+ }else{
+  base.choices = (question?.choices||[]).map(choice=>({
+   id: choice?.id || makeUid("choice"),
+   text: String(choice?.text||"").trim(),
+   correct: !!choice?.correct
+  })).filter(choice=>choice.text);
+ }
+ return base;
+}
+function sanitizeOnlineTest(test){
+ const meta = test || {};
+ const opts = meta.options || {};
+ return {
+  id: meta.id || makeUid("ot"),
+  title: String(meta.title||"").trim(),
+  subject: String(meta.subject||"").trim(),
+  options:{
+   showGradeDirect: !!opts.showGradeDirect,
+   shuffleQuestions: !!opts.shuffleQuestions,
+   timed: !!opts.timed,
+   timeLimitMinutes: opts.timed ? (Number(opts.timeLimitMinutes)>0 ? Number(opts.timeLimitMinutes) : "") : "",
+   trainingMode: !!opts.trainingMode,
+   focusMode: !!opts.focusMode && !opts.trainingMode,
+   hideGrade: !!opts.hideGrade && !opts.trainingMode
+  },
+  intro: String(meta.intro||"").trim(),
+  conclusion: String(meta.conclusion||"").trim(),
+  defaultPoints: Number(meta.defaultPoints)>0 ? Number(meta.defaultPoints) : 1,
+  questions: (meta.questions||[]).map(sanitizeOnlineQuestion),
+  createdAt: meta.createdAt || new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+ };
+}
+function getOnlineTestTotalPoints(test){
+ return (test?.questions||[]).reduce((sum,question)=>sum + (Number(question.points)||0),0);
+}
+function getOnlineTestQuestionTypeLabel(type){
+ return {
+  qcu:"QCU",
+  qcm:"QCM",
+  written:"Réponse à écrire",
+  fillblank:"Texte à trou"
+ }[type] || "Question";
+}
+function getOnlineTestSubjectChoices(){
+ ensureSubjectRegistry();
+ return SUBJECT_REGISTRY.map(s=>typeof s==="object" ? s.name : s).filter(Boolean);
+}
+function populateOnlineTestSubjectSuggestions(){
+ const datalist=document.getElementById("onlineTestSubjectSuggestions");
+ if(!datalist) return;
+ datalist.innerHTML = getOnlineTestSubjectChoices().map(name=>`<option value="${escHtml(name)}"></option>`).join("");
+}
+function formatOnlineTestDate(value){
+ if(!value) return "";
+ try{
+  return new Date(value).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"});
+ }catch(e){
+  return "";
+ }
+}
+function renderOnlineTestsView(){
+ ensureOnlineTestsStore();
+ const summary=document.getElementById("onlineTestsSummary");
+ const list=document.getElementById("onlineTestsList");
+ if(!summary||!list) return;
+ populateOnlineTestSubjectSuggestions();
+ const tests = DATA.onlineTests.slice().sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+ if(!tests.length){
+  summary.textContent = "Aucun test enregistré pour le moment.";
+  list.innerHTML = '<div class="online-empty">Aucun test en ligne n’a encore été créé. Clique sur « Créer un test » pour préparer une première évaluation.</div>';
+  return;
+ }
+ const totalPoints = tests.reduce((sum,test)=>sum + getOnlineTestTotalPoints(test),0);
+ summary.textContent = `${tests.length} test${tests.length>1?"s":""} enregistré${tests.length>1?"s":""} · ${totalPoints} point${totalPoints>1?"s":""} configuré${totalPoints>1?"s":""}.`;
+ list.innerHTML = tests.map(test=>{
+  const badges = [];
+  if(test.options?.trainingMode) badges.push("Mode entraînement");
+  if(test.options?.focusMode) badges.push("Mode Focus");
+  if(test.options?.timed) badges.push(`${test.options.timeLimitMinutes||"?"} min`);
+  if(test.options?.shuffleQuestions) badges.push("Ordre aléatoire");
+  if(test.options?.hideGrade) badges.push("Note masquée");
+  if(test.options?.showGradeDirect) badges.push("Note vers École Directe");
+  const questionCount=(test.questions||[]).length;
+  const updated=formatOnlineTestDate(test.updatedAt);
+  return `
+   <article class="online-test-card">
+    <div>
+     <h4>${escHtml(test.title||"Sans titre")}</h4>
+     <div class="online-test-meta">
+      <span>${escHtml(test.subject||"Matière non précisée")}</span>
+      <span>${questionCount} question${questionCount>1?"s":""}</span>
+     </div>
+    </div>
+    <div class="online-test-points">Total : ${fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"")} point${getOnlineTestTotalPoints(test)>1?"s":""}</div>
+    <div class="online-test-badges">
+     ${(badges.length ? badges : ["Configuration standard"]).map(label=>`<span class="badge">${escHtml(label)}</span>`).join("")}
+    </div>
+    <div class="online-test-card-footer">
+     <span>${updated ? `Dernière mise à jour : ${updated}` : "Nouveau test"}</span>
+     <div class="online-test-card-actions">
+      <button type="button" class="btn btn-edit-online-test" data-testid="${escHtml(test.id)}">Modifier</button>
+      <button type="button" class="btn btn-danger btn-delete-online-test" data-testid="${escHtml(test.id)}">Supprimer</button>
+     </div>
+    </div>
+   </article>`;
+ }).join("");
+ list.querySelectorAll(".btn-edit-online-test").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+   const test=DATA.onlineTests.find(item=>item.id===btn.dataset.testid);
+   if(test) startOnlineTestFlow(test);
+  });
+ });
+ list.querySelectorAll(".btn-delete-online-test").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+   const test=DATA.onlineTests.find(item=>item.id===btn.dataset.testid);
+   if(!test) return;
+   openConfirmModal({
+    message:`Supprimer le test « ${test.title||"-"} » ?`,
+    onConfirm:()=>{
+     DATA.onlineTests = DATA.onlineTests.filter(item=>item.id!==test.id);
+     saveData();
+     renderOnlineTestsView();
+    }
+   });
+  });
+ });
+}
+
+const onlineTestSetupModal=document.getElementById("onlineTestSetupModal");
+const onlineTestBuilderModal=document.getElementById("onlineTestBuilderModal");
+const onlineTestAnswersModal=document.getElementById("onlineTestAnswersModal");
+const onlineTestSetupForm=document.getElementById("onlineTestSetupForm");
+const onlineQuestionTypeFields=document.getElementById("onlineQuestionTypeFields");
+const ONLINE_TEST_DRAFT = {
+ meta: defaultOnlineTestMeta(),
+ questions: [],
+ editingTestId: null,
+ currentQuestionEditIndex: null
+};
+let ONLINE_TEST_ANSWER_CONTEXT = null;
+
+function setModalOpen(modal, isOpen){
+ if(!modal) return;
+ modal.classList.toggle("open", !!isOpen);
+ modal.setAttribute("aria-hidden", isOpen ? "false" : "true");
+}
+function closeOnlineTestSetupModal(){ setModalOpen(onlineTestSetupModal,false); }
+function closeOnlineTestBuilderModal(){ setModalOpen(onlineTestBuilderModal,false); }
+function closeOnlineTestAnswersModal(){ setModalOpen(onlineTestAnswersModal,false); ONLINE_TEST_ANSWER_CONTEXT=null; }
+
+[["onlineTestSetupClose",closeOnlineTestSetupModal],["onlineTestSetupCancel",closeOnlineTestSetupModal],["onlineTestBuilderClose",closeOnlineTestBuilderModal],["onlineAnswersClose",closeOnlineTestAnswersModal],["onlineAnswersCancel",closeOnlineTestAnswersModal]].forEach(([id,handler])=>{
+ document.getElementById(id)?.addEventListener("click",handler);
+});
+[onlineTestSetupModal,onlineTestBuilderModal,onlineTestAnswersModal].forEach(modal=>{
+ modal?.addEventListener("click",e=>{ if(e.target===modal) setModalOpen(modal,false); });
+});
+
+function applyOnlineTestMetaToForm(meta){
+ const data = meta || defaultOnlineTestMeta();
+ document.getElementById("onlineTestTitleInput").value=data.title||"";
+ document.getElementById("onlineTestSubjectInput").value=data.subject||"";
+ document.getElementById("onlineTestShowGradeDirect").checked=!!data.options?.showGradeDirect;
+ document.getElementById("onlineTestShuffleQuestions").checked=!!data.options?.shuffleQuestions;
+ document.getElementById("onlineTestTimed").checked=!!data.options?.timed;
+ document.getElementById("onlineTestTimeLimit").value=data.options?.timeLimitMinutes||"";
+ document.getElementById("onlineTestTrainingMode").checked=!!data.options?.trainingMode;
+ document.getElementById("onlineTestFocusMode").checked=!!data.options?.focusMode;
+ document.getElementById("onlineTestHideGrade").checked=!!data.options?.hideGrade;
+ document.getElementById("onlineTestIntroInput").value=data.intro||"";
+ document.getElementById("onlineTestConclusionInput").value=data.conclusion||"";
+ document.getElementById("onlineTestDefaultPoints").value=data.defaultPoints||1;
+ syncOnlineTestSetupDependencies();
+}
+function readOnlineTestMetaFromForm(){
+ return sanitizeOnlineTest({
+  id: ONLINE_TEST_DRAFT.editingTestId || undefined,
+  title: document.getElementById("onlineTestTitleInput").value,
+  subject: document.getElementById("onlineTestSubjectInput").value,
+  options:{
+   showGradeDirect: document.getElementById("onlineTestShowGradeDirect").checked,
+   shuffleQuestions: document.getElementById("onlineTestShuffleQuestions").checked,
+   timed: document.getElementById("onlineTestTimed").checked,
+   timeLimitMinutes: document.getElementById("onlineTestTimeLimit").value,
+   trainingMode: document.getElementById("onlineTestTrainingMode").checked,
+   focusMode: document.getElementById("onlineTestFocusMode").checked,
+   hideGrade: document.getElementById("onlineTestHideGrade").checked
+  },
+  intro: document.getElementById("onlineTestIntroInput").value,
+  conclusion: document.getElementById("onlineTestConclusionInput").value,
+  defaultPoints: document.getElementById("onlineTestDefaultPoints").value,
+  questions: ONLINE_TEST_DRAFT.questions,
+  createdAt: ONLINE_TEST_DRAFT.meta?.createdAt
+ });
+}
+function syncOnlineTestSetupDependencies(){
+ const training=document.getElementById("onlineTestTrainingMode").checked;
+ const timed=document.getElementById("onlineTestTimed").checked;
+ const focus=document.getElementById("onlineTestFocusMode");
+ const hideGrade=document.getElementById("onlineTestHideGrade");
+ const timeLimit=document.getElementById("onlineTestTimeLimit");
+ const focusWrap=document.getElementById("onlineTestFocusWrap");
+ const hideGradeWrap=document.getElementById("onlineTestHideGradeWrap");
+ const hint=document.getElementById("onlineTestSetupHint");
+ timeLimit.disabled=!timed;
+ if(!timed) timeLimit.value="";
+ focus.disabled=training;
+ hideGrade.disabled=training;
+ if(training){ focus.checked=false; hideGrade.checked=false; }
+ focusWrap?.classList.toggle("is-disabled",focus.disabled);
+ hideGradeWrap?.classList.toggle("is-disabled",hideGrade.disabled);
+ if(training) hint.textContent="Le mode entraînement désactive automatiquement le mode Focus et l’option de note masquée.";
+ else if(timed) hint.textContent="Le chronomètre s’appliquera uniquement au test lui-même, pas aux messages d’introduction et de conclusion.";
+ else hint.textContent="Les options incompatibles se désactivent automatiquement si le mode entraînement est coché.";
+}
+["onlineTestTrainingMode","onlineTestTimed"].forEach(id=>{
+ document.getElementById(id)?.addEventListener("change",syncOnlineTestSetupDependencies);
+});
+
+function startOnlineTestFlow(existingTest=null){
+ ensureOnlineTestsStore();
+ const source = existingTest ? sanitizeOnlineTest(existingTest) : sanitizeOnlineTest(defaultOnlineTestMeta());
+ ONLINE_TEST_DRAFT.meta = source;
+ ONLINE_TEST_DRAFT.questions = deepClone(source.questions||[]);
+ ONLINE_TEST_DRAFT.editingTestId = existingTest?.id || null;
+ ONLINE_TEST_DRAFT.currentQuestionEditIndex = null;
+ document.getElementById("onlineTestSetupTitle").textContent = existingTest ? "Modifier un test en ligne" : "Créer un test en ligne";
+ applyOnlineTestMetaToForm(source);
+ populateOnlineTestSubjectSuggestions();
+ setModalOpen(onlineTestSetupModal,true);
+}
+
+document.getElementById("openCreateOnlineTestBtn")?.addEventListener("click",()=>{
+ if(AUTH.role!=="prof") return;
+ startOnlineTestFlow(null);
+});
+
+onlineTestSetupForm?.addEventListener("submit",e=>{
+ e.preventDefault();
+ const title=document.getElementById("onlineTestTitleInput").value.trim();
+ const subject=document.getElementById("onlineTestSubjectInput").value.trim();
+ const timed=document.getElementById("onlineTestTimed").checked;
+ const timeLimitValue=document.getElementById("onlineTestTimeLimit").value;
+ if(!title){ alert("Le nom de l’évaluation est requis."); return; }
+ if(!subject){ alert("La matière est requise."); return; }
+ if(timed && !(Number(timeLimitValue)>0)){ alert("Précise un temps imparti valide."); return; }
+ const nextMeta = readOnlineTestMetaFromForm();
+ nextMeta.id = ONLINE_TEST_DRAFT.editingTestId || nextMeta.id;
+ nextMeta.createdAt = ONLINE_TEST_DRAFT.meta?.createdAt || nextMeta.createdAt;
+ nextMeta.questions = ONLINE_TEST_DRAFT.questions;
+ ONLINE_TEST_DRAFT.meta = nextMeta;
+ closeOnlineTestSetupModal();
+ openOnlineTestBuilderModal();
+});
+
+function openOnlineTestBuilderModal(){
+ setModalOpen(onlineTestBuilderModal,true);
+ document.getElementById("onlineTestBuilderTitle").textContent = `Configurer les questions · ${ONLINE_TEST_DRAFT.meta.title || "Test sans titre"}`;
+ resetOnlineQuestionEditor();
+ renderOnlineQuestionsList();
+}
+
+document.getElementById("onlineBuilderBackBtn")?.addEventListener("click",()=>{
+ applyOnlineTestMetaToForm(ONLINE_TEST_DRAFT.meta);
+ closeOnlineTestBuilderModal();
+ setModalOpen(onlineTestSetupModal,true);
+});
+
+function getOnlineCurrentQuestionIndex(){
+ return ONLINE_TEST_DRAFT.currentQuestionEditIndex==null ? ONLINE_TEST_DRAFT.questions.length : ONLINE_TEST_DRAFT.currentQuestionEditIndex;
+}
+function resetOnlineQuestionEditor(question=null,index=null){
+ ONLINE_TEST_DRAFT.currentQuestionEditIndex = index;
+ document.getElementById("onlineQuestionType").value = question?.type || "qcu";
+ document.getElementById("onlineQuestionPrompt").value = question?.prompt || "";
+ document.getElementById("onlineQuestionPoints").value = question?.points || ONLINE_TEST_DRAFT.meta.defaultPoints || 1;
+ document.getElementById("onlineQuestionNumberLabel").textContent = `Question n°${(index==null ? ONLINE_TEST_DRAFT.questions.length : index)+1}`;
+ renderOnlineQuestionTypeFields(document.getElementById("onlineQuestionType").value,question||null);
+}
+function updateOnlineQuestionNumberLabel(){
+ const idx = ONLINE_TEST_DRAFT.currentQuestionEditIndex==null ? ONLINE_TEST_DRAFT.questions.length : ONLINE_TEST_DRAFT.currentQuestionEditIndex;
+ document.getElementById("onlineQuestionNumberLabel").textContent = `Question n°${idx+1}`;
+}
+document.getElementById("onlineQuestionResetBtn")?.addEventListener("click",()=>resetOnlineQuestionEditor());
+document.getElementById("onlineQuestionType")?.addEventListener("change",()=>{
+ renderOnlineQuestionTypeFields(document.getElementById("onlineQuestionType").value,null);
+});
+
+function createChoiceRow(choice={},type="qcu"){
+ const row=document.createElement("div");
+ row.className="online-choice-row"+(choice.correct?" is-correct":"");
+ row.dataset.shape = type==="qcu" ? "round" : "square";
+ row.dataset.correct = choice.correct ? "1" : "0";
+ row.innerHTML = `
+  <span class="online-choice-marker"></span>
+  <input class="online-choice-input" placeholder="Proposition" value="${escHtml(choice.text||"")}">
+  <span class="online-choice-status">${choice.correct ? "Acceptée" : "Clic droit = correcte"}</span>
+  <button type="button" class="btn btn-danger">×</button>
+ `;
+ row.addEventListener("contextmenu",e=>{
+  e.preventDefault();
+  const next=row.dataset.correct!=="1";
+  row.dataset.correct=next ? "1" : "0";
+  row.classList.toggle("is-correct",next);
+  const status=row.querySelector(".online-choice-status");
+  if(status) status.textContent = next ? "Acceptée" : "Clic droit = correcte";
+ });
+ row.querySelector("button")?.addEventListener("click",()=>row.remove());
+ return row;
+}
+function addOnlineBlankRow(container,segment){
+ const row=document.createElement("div");
+ row.className="online-blank-row";
+ if(segment?.type==="blank"){
+  const answers=normalizeOnlineAnswers(segment.answers);
+  row.dataset.segmentType="blank";
+  row.dataset.answers=JSON.stringify(answers);
+  row.dataset.blankId=segment.id || makeUid("blank");
+  row.innerHTML = `
+   <button type="button" class="online-blank-token">
+    <span>Trou</span>
+    <small>${answers.length ? answers.length + " réponse(s) attendue(s)" : "Clic droit pour définir la réponse"}</small>
+   </button>
+   <button type="button" class="btn btn-danger">×</button>
+  `;
+  const token=row.querySelector(".online-blank-token");
+  token?.addEventListener("contextmenu",e=>{
+   e.preventDefault();
+   openOnlineAnswerModal({
+    title:"Réponses attendues du trou",
+    answers: normalizeOnlineAnswers(JSON.parse(row.dataset.answers||"[]")),
+    onSave:(answersList)=>{
+     row.dataset.answers=JSON.stringify(answersList);
+     const small=row.querySelector("small");
+     if(small) small.textContent = answersList.length ? answersList.length + " réponse(s) attendue(s)" : "Clic droit pour définir la réponse";
+     refreshOnlineBlankPreview();
+    }
+   });
+  });
+ }else{
+  row.dataset.segmentType="text";
+  row.innerHTML = `
+   <textarea rows="2" class="online-blank-text" placeholder="Texte affiché avant ou après un trou...">${escHtml(segment?.text||"")}</textarea>
+   <button type="button" class="btn btn-danger">×</button>
+  `;
+  row.querySelector("textarea")?.addEventListener("input",refreshOnlineBlankPreview);
+ }
+ row.querySelector("button.btn-danger")?.addEventListener("click",()=>{
+  row.remove();
+  refreshOnlineBlankPreview();
+ });
+ container.appendChild(row);
+ refreshOnlineBlankPreview();
+}
+function refreshOnlineBlankPreview(){
+ const preview=document.getElementById("onlineBlankPreview");
+ const list=document.getElementById("onlineBlankSegmentsList");
+ if(!preview||!list) return;
+ let blankIndex=0;
+ const html=[...list.children].map(row=>{
+  if(row.dataset.segmentType==="blank"){
+   blankIndex += 1;
+   return `<span class="online-blank-pill">Trou ${blankIndex}</span>`;
+  }
+  const value=row.querySelector("textarea")?.value || "";
+  return escHtml(value).replace(/\n/g,"<br>");
+ }).join(" ");
+ preview.innerHTML = html || "Aperçu du texte à trous...";
+}
+function renderOnlineQuestionTypeFields(type,question){
+ if(type==="written"){
+  const answers=normalizeOnlineAnswers(question?.expectedAnswers);
+  onlineQuestionTypeFields.innerHTML = `
+   <div class="online-modal-note">Clic droit dans la zone ci-dessous pour saisir une ou plusieurs réponses attendues.</div>
+   <div id="onlineWrittenAnswerTarget" class="online-answer-target">
+    <div>${answers.length ? answers.map(escHtml).join(" · ") : "Clic droit ici pour définir la réponse attendue"}<small>${answers.length ? answers.length + " réponse(s) enregistrée(s)" : "Zone de correction"}</small></div>
+   </div>
+  `;
+  const target=document.getElementById("onlineWrittenAnswerTarget");
+  target.dataset.answers=JSON.stringify(answers);
+  target.addEventListener("contextmenu",e=>{
+   e.preventDefault();
+   openOnlineAnswerModal({
+    title:"Réponses attendues",
+    answers: normalizeOnlineAnswers(JSON.parse(target.dataset.answers||"[]")),
+    onSave:(answersList)=>{
+     target.dataset.answers=JSON.stringify(answersList);
+     target.innerHTML = `<div>${answersList.length ? answersList.map(escHtml).join(" · ") : "Clic droit ici pour définir la réponse attendue"}<small>${answersList.length ? answersList.length + " réponse(s) enregistrée(s)" : "Zone de correction"}</small></div>`;
+    }
+   });
+  });
+  return;
+ }
+ if(type==="fillblank"){
+  onlineQuestionTypeFields.innerHTML = `
+   <div class="online-modal-note">Ajoute des segments de texte et des trous. Clic droit sur un trou pour enregistrer une ou plusieurs réponses attendues.</div>
+   <div class="online-blank-toolbar">
+    <button type="button" class="btn" id="onlineAddTextSegmentBtn">+ Ajouter texte</button>
+    <button type="button" class="btn" id="onlineAddBlankSegmentBtn">+ Ajouter trou</button>
+   </div>
+   <div id="onlineBlankSegmentsList" class="online-blank-segments"></div>
+   <div id="onlineBlankPreview" class="online-blank-preview">Aperçu du texte à trous...</div>
+  `;
+  const list=document.getElementById("onlineBlankSegmentsList");
+  const segments=(question?.segments&&question.segments.length)?question.segments:[{type:"text",text:""},{type:"blank",answers:[]},{type:"text",text:""}];
+  segments.forEach(segment=>addOnlineBlankRow(list,segment));
+  document.getElementById("onlineAddTextSegmentBtn")?.addEventListener("click",()=>addOnlineBlankRow(list,{type:"text",text:""}));
+  document.getElementById("onlineAddBlankSegmentBtn")?.addEventListener("click",()=>addOnlineBlankRow(list,{type:"blank",answers:[]}));
+  refreshOnlineBlankPreview();
+  return;
+ }
+ onlineQuestionTypeFields.innerHTML = `
+  <div class="online-modal-note">Ajoute les propositions puis fais un clic droit sur chaque bonne réponse pour l’enregistrer comme acceptable.</div>
+  <div class="online-question-choices" id="onlineQuestionChoices"></div>
+  <div class="modal-actions" style="justify-content:flex-start;">
+   <button type="button" class="btn" id="onlineAddChoiceBtn">+ Ajouter une proposition</button>
+  </div>
+ `;
+ const list=document.getElementById("onlineQuestionChoices");
+ const choices=(question?.choices&&question.choices.length)?question.choices:[{text:"",correct:false},{text:"",correct:false}];
+ choices.forEach(choice=>list.appendChild(createChoiceRow(choice,type)));
+ document.getElementById("onlineAddChoiceBtn")?.addEventListener("click",()=>list.appendChild(createChoiceRow({text:"",correct:false},type)));
+}
+
+function collectOnlineQuestionFromForm(){
+ const type=document.getElementById("onlineQuestionType").value;
+ const prompt=document.getElementById("onlineQuestionPrompt").value.trim();
+ const points=parseFloat(document.getElementById("onlineQuestionPoints").value);
+ if(!prompt){ alert("L’intitulé de la question est requis."); return null; }
+ if(!(points>0)){ alert("Le nombre de points doit être positif."); return null; }
+ const existingId = ONLINE_TEST_DRAFT.currentQuestionEditIndex!=null ? ONLINE_TEST_DRAFT.questions[ONLINE_TEST_DRAFT.currentQuestionEditIndex]?.id : null;
+ const question={ id: existingId || makeUid("otq"), type, prompt, points };
+ if(type==="written"){
+  const answers=normalizeOnlineAnswers(JSON.parse(document.getElementById("onlineWrittenAnswerTarget")?.dataset.answers||"[]"));
+  if(!answers.length){ alert("Saisis au moins une réponse attendue."); return null; }
+  question.expectedAnswers=answers;
+ }else if(type==="fillblank"){
+  const rows=[...document.querySelectorAll("#onlineBlankSegmentsList .online-blank-row")];
+  const segments=rows.map(row=>{
+   if(row.dataset.segmentType==="blank"){
+    return { type:"blank", id: row.dataset.blankId || makeUid("blank"), answers: normalizeOnlineAnswers(JSON.parse(row.dataset.answers||"[]")) };
+   }
+   return { type:"text", text: row.querySelector("textarea")?.value || "" };
+  });
+  const blankCount=segments.filter(seg=>seg.type==="blank").length;
+  if(!blankCount){ alert("Ajoute au moins un trou."); return null; }
+  if(segments.some(seg=>seg.type==="blank" && !seg.answers.length)){ alert("Chaque trou doit avoir au moins une réponse attendue."); return null; }
+  question.segments=segments;
+ }else{
+  const rows=[...document.querySelectorAll("#onlineQuestionChoices .online-choice-row")];
+  const choices=rows.map(row=>({
+   id: row.dataset.choiceId || makeUid("choice"),
+   text: row.querySelector(".online-choice-input")?.value || "",
+   correct: row.dataset.correct==="1"
+  })).filter(choice=>choice.text.trim());
+  if(choices.length<2){ alert("Ajoute au moins deux propositions."); return null; }
+  if(!choices.some(choice=>choice.correct)){ alert("Définis au moins une proposition correcte avec un clic droit."); return null; }
+  question.choices=choices;
+ }
+ return sanitizeOnlineQuestion(question);
+}
+
+document.getElementById("onlineQuestionValidateBtn")?.addEventListener("click",()=>{
+ const question=collectOnlineQuestionFromForm();
+ if(!question) return;
+ if(ONLINE_TEST_DRAFT.currentQuestionEditIndex==null) ONLINE_TEST_DRAFT.questions.push(question);
+ else ONLINE_TEST_DRAFT.questions.splice(ONLINE_TEST_DRAFT.currentQuestionEditIndex,1,question);
+ renderOnlineQuestionsList();
+ resetOnlineQuestionEditor();
+});
+
+function buildOnlineQuestionSummary(question){
+ if(question.type==="written") return `${question.expectedAnswers?.length||0} réponse(s) attendue(s)`;
+ if(question.type==="fillblank") return `${(question.segments||[]).filter(seg=>seg.type==="blank").length} trou(s)`;
+ return `${question.choices?.length||0} proposition(s), ${(question.choices||[]).filter(choice=>choice.correct).length} correcte(s)`;
+}
+function renderOnlineQuestionsList(){
+ const container=document.getElementById("onlineQuestionsList");
+ const resume=document.getElementById("onlineBuilderResume");
+ if(!container||!resume) return;
+ if(!ONLINE_TEST_DRAFT.questions.length){
+  container.innerHTML = '<div class="online-empty" style="padding:22px 14px;">Aucune question validée pour le moment.</div>';
+ }else{
+  container.innerHTML = ONLINE_TEST_DRAFT.questions.map((question,index)=>`
+   <div class="online-question-item">
+    <div class="online-question-item-top">
+     <div>
+      <h5>Q${index+1} · ${escHtml(getOnlineTestQuestionTypeLabel(question.type))}</h5>
+      <div class="meta">
+       <span>${fmt(question.points,2).replace(/\.00$/,"")} pt${question.points>1?"s":""}</span>
+       <span>${escHtml(buildOnlineQuestionSummary(question))}</span>
+      </div>
+     </div>
+     <div class="online-question-item-actions">
+      <button type="button" class="btn btn-edit-online-question" data-qindex="${index}">Modifier</button>
+      <button type="button" class="btn btn-danger btn-delete-online-question" data-qindex="${index}">Supprimer</button>
+     </div>
+    </div>
+    <p>${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</p>
+   </div>
+  `).join("");
+ }
+ const totalPoints=getOnlineTestTotalPoints({questions:ONLINE_TEST_DRAFT.questions});
+ resume.textContent = `${ONLINE_TEST_DRAFT.questions.length} question${ONLINE_TEST_DRAFT.questions.length>1?"s":""} · ${fmt(totalPoints,2).replace(/\.00$/,"")} point${totalPoints>1?"s":""}`;
+ container.querySelectorAll(".btn-edit-online-question").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+   const idx=parseInt(btn.dataset.qindex,10);
+   const question=ONLINE_TEST_DRAFT.questions[idx];
+   if(question) resetOnlineQuestionEditor(question,idx);
+  });
+ });
+ container.querySelectorAll(".btn-delete-online-question").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+   const idx=parseInt(btn.dataset.qindex,10);
+   ONLINE_TEST_DRAFT.questions.splice(idx,1);
+   renderOnlineQuestionsList();
+   resetOnlineQuestionEditor();
+  });
+ });
+ updateOnlineQuestionNumberLabel();
+}
+
+document.getElementById("onlineBuilderSaveBtn")?.addEventListener("click",()=>{
+ if(!ONLINE_TEST_DRAFT.questions.length){ alert("Ajoute au moins une question avant d’enregistrer le test."); return; }
+ const finalTest = sanitizeOnlineTest({
+  ...ONLINE_TEST_DRAFT.meta,
+  id: ONLINE_TEST_DRAFT.editingTestId || ONLINE_TEST_DRAFT.meta.id,
+  questions: ONLINE_TEST_DRAFT.questions,
+  createdAt: ONLINE_TEST_DRAFT.meta.createdAt
+ });
+ const existingIndex=DATA.onlineTests.findIndex(test=>test.id===finalTest.id);
+ if(existingIndex>=0) DATA.onlineTests.splice(existingIndex,1,finalTest);
+ else DATA.onlineTests.unshift(finalTest);
+ saveData();
+ closeOnlineTestBuilderModal();
+ renderOnlineTestsView();
+ activateMainView("onlineTestsView");
+});
+
+function activateMainView(targetId){
+ document.querySelectorAll("#mainTabs .tab-btn").forEach(btn=>btn.classList.toggle("active",btn.dataset.target===targetId));
+ document.querySelectorAll(".view").forEach(view=>view.classList.toggle("active",view.id===targetId));
+ applyLocksEffects();
+ if(targetId==="appreciationsView") renderAppreciationStudentList();
+ if(targetId==="onlineTestsView") renderOnlineTestsView();
+}
+
+function addOnlineAnswerRow(value=""){
+ const list=document.getElementById("onlineAnswersList");
+ if(!list) return;
+ const row=document.createElement("div");
+ row.className="online-answer-row";
+ row.innerHTML = `
+  <input class="online-answer-input" placeholder="Réponse acceptée" value="${escHtml(value)}">
+  <button type="button" class="btn btn-danger">×</button>
+ `;
+ row.querySelector("button")?.addEventListener("click",()=>row.remove());
+ list.appendChild(row);
+}
+function openOnlineAnswerModal({title,answers,onSave}){
+ ONLINE_TEST_ANSWER_CONTEXT = { onSave };
+ const list=document.getElementById("onlineAnswersList");
+ if(!list) return;
+ document.getElementById("onlineAnswersModalTitle").textContent=title||"Réponses attendues";
+ list.innerHTML="";
+ (answers&&answers.length ? answers : [""]).forEach(answer=>addOnlineAnswerRow(answer));
+ setModalOpen(onlineTestAnswersModal,true);
+}
+document.getElementById("onlineAnswersAddBtn")?.addEventListener("click",()=>addOnlineAnswerRow(""));
+document.getElementById("onlineAnswersSave")?.addEventListener("click",()=>{
+ const values=[...document.querySelectorAll(".online-answer-input")].map(input=>input.value);
+ const answers=normalizeOnlineAnswers(values);
+ ONLINE_TEST_ANSWER_CONTEXT?.onSave?.(answers);
+ closeOnlineTestAnswersModal();
+});
+
 function rebuildUI(){
- ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
+ ensureOnlineTestsStore(); ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
  renderClassList(); renderClassSelects(); renderStudentList();
  refreshLocksUI(); applyLocksEffects(); updateTabWarningIndicators();
- renderClassPanelIfOpen(); rerenderOpenStudent(); renderAppreciationStudentList();
+ renderClassPanelIfOpen(); rerenderOpenStudent(); renderAppreciationStudentList(); renderOnlineTestsView();
 }
 function renderClassPanelIfOpen(){const sel=document.getElementById("classList").value;if(sel) openClass(sel);}
 function rerenderOpenStudent(){const sel=document.getElementById("studentList").value;if(sel) openStudent(sel);}
@@ -9422,6 +10382,7 @@ function initApp(){
     document.getElementById(targetId)?.classList.add("active");
     applyLocksEffects();
     if(targetId==="appreciationsView") renderAppreciationStudentList();
+    if(targetId==="onlineTestsView") renderOnlineTestsView();
    });
   });
   document.getElementById("manageSubjectsBtnTop")?.addEventListener("click",openManageSubjectsModal);
