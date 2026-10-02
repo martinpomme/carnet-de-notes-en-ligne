@@ -284,6 +284,65 @@ body.student-mode #onlineTestsView{ display:none !important }
 .online-question-item p{ margin:0; color:#475569; font-size:13px; line-height:1.45 }
 .online-answer-list{ display:flex; flex-direction:column; gap:10px }
 .online-answer-row{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center }
+.online-time-fields input{ width:86px !important }
+.online-preview-note{
+  margin:0 0 12px; padding:10px 12px; border-radius:12px;
+  background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8;
+}
+.online-preview-stack{ display:flex; flex-direction:column; gap:16px }
+.online-preview-card{
+  border:1px solid #dbe4f0; border-radius:16px; background:#fff; padding:18px;
+  box-shadow:0 10px 24px rgba(15,23,42,.05);
+}
+.online-preview-header{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap }
+.online-preview-header h4{ margin:0; color:#0f172a; font-size:22px }
+.online-preview-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
+.online-preview-meta span{
+  display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px;
+  background:#eef4ff; border:1px solid #cfe0ff; color:#1e3a8a; font-weight:700; font-size:12px;
+}
+.online-preview-timer{
+  display:none; min-width:94px; text-align:center; padding:10px 12px; border-radius:12px;
+  background:#0f172a; color:#fff; font-weight:800; letter-spacing:.04em;
+}
+.online-preview-timer.is-warning{ background:#b91c1c }
+.online-preview-message{ margin:14px 0 0; color:#475569; line-height:1.55 }
+.online-preview-form{ display:flex; flex-direction:column; gap:14px }
+.online-preview-question{
+  border:1px solid #dbe4f0; border-radius:14px; background:#f8fafc; padding:16px;
+}
+.online-preview-question-head{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px }
+.online-preview-question-head strong{ color:#0f172a }
+.online-preview-question-head span{ color:#1d4ed8; font-weight:700 }
+.online-preview-prompt{ color:#334155; margin-bottom:12px; line-height:1.55 }
+.online-preview-options{ display:flex; flex-direction:column; gap:8px }
+.online-preview-option{
+  display:flex; gap:10px; align-items:flex-start; border:1px solid #dbe4f0;
+  border-radius:12px; background:#fff; padding:10px 12px;
+}
+.online-preview-option input{ margin-top:3px }
+.online-preview-text, .online-preview-blank-input{
+  width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:12px; font:inherit;
+}
+.online-preview-fillblank{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; line-height:1.8;
+}
+.online-preview-fillblank span{ color:#334155 }
+.online-preview-actions{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:6px }
+.online-preview-result{
+  border:1px solid #dbe4f0; border-radius:16px; background:#fff; padding:18px; display:flex; flex-direction:column; gap:14px;
+}
+.online-preview-score{
+  display:inline-flex; align-items:center; width:max-content; padding:10px 12px; border-radius:12px;
+  background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-weight:800;
+}
+.online-preview-corrections{ display:flex; flex-direction:column; gap:10px }
+.online-preview-correction-item{
+  border:1px solid #dbe4f0; border-radius:14px; padding:12px; background:#f8fafc;
+}
+.online-preview-correction-item.is-correct{ border-color:#86efac; background:#f0fdf4 }
+.online-preview-correction-item.is-wrong{ border-color:#fecaca; background:#fef2f2 }
+.online-preview-correction-item small{ display:block; color:#475569; line-height:1.45; margin-top:6px }
 .online-builder-footer{
   display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px;
 }
@@ -815,13 +874,9 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
    <div class="card-body">
     <div class="online-tests-shell">
      <div class="online-tests-toolbar">
-      <div>
-       <strong style="display:block;font-size:18px;color:#1e3a8a;">Création et gestion des évaluations en ligne</strong>
-       <p>Cette vue est réservée au professeur. Tu peux y créer un test, définir ses options, préparer les questions puis retrouver toutes les évaluations déjà enregistrées.</p>
-      </div>
+      <div id="onlineTestsSummary" class="online-modal-note" style="margin-top:0;">0 test réalisé</div>
       <button class="btn btn-primary" id="openCreateOnlineTestBtn" type="button" style="font-size:16px;padding:12px 18px;">+ Créer un test</button>
      </div>
-     <div id="onlineTestsSummary" class="online-modal-note">Aucun test enregistré pour le moment.</div>
      <div id="onlineTestsList" class="online-tests-grid"></div>
     </div>
    </div>
@@ -1626,12 +1681,12 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
      </div>
      <div>
       <label>Matière</label>
-      <input id="onlineTestSubjectInput" list="onlineTestSubjectSuggestions" placeholder="Ex : Mathématiques" required>
-      <datalist id="onlineTestSubjectSuggestions"></datalist>
+      <select id="onlineTestSubjectInput" required></select>
+      <div class="online-subhint">Choisis une matière déjà enregistrée sur le site.</div>
      </div>
      <div class="full">
       <div class="online-checklist">
-       <label class="online-check-item">
+       <label class="online-check-item" id="onlineTestShowGradeDirectWrap">
         <input type="checkbox" id="onlineTestShowGradeDirect">
         <span><strong>Afficher directement la note dans École Directe</strong><small>La note pourra être publiée automatiquement à l’issue du test.</small></span>
        </label>
@@ -1644,10 +1699,12 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
         <span style="flex:1;">
          <strong>Temps limité</strong>
          <small>Si activé, le test est soumis automatiquement à la fin du temps imparti. Les messages d’introduction et de conclusion restent hors chronomètre.</small>
-         <div class="online-inline-field">
-          <label for="onlineTestTimeLimit" style="margin:0;">Temps imparti</label>
-          <input id="onlineTestTimeLimit" type="number" min="1" step="1" placeholder="Minutes">
-          <span>minutes</span>
+         <div class="online-inline-field online-time-fields">
+          <label for="onlineTestTimeLimitMinutes" style="margin:0;">Temps imparti</label>
+          <input id="onlineTestTimeLimitMinutes" type="number" min="0" step="1" placeholder="Min">
+          <span>min</span>
+          <input id="onlineTestTimeLimitSeconds" type="number" min="0" max="59" step="1" placeholder="Sec">
+          <span>s</span>
          </div>
         </span>
        </div>
@@ -1655,16 +1712,20 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
         <input type="checkbox" id="onlineTestTrainingMode">
         <span><strong>Mode entraînement</strong><small>Le résultat n’est pas transmis au professeur, le test est refaisable plusieurs fois et le corrigé est visible à la fin.</small></span>
        </label>
+       <label class="online-check-item" id="onlineTestManualReviewWrap">
+        <input type="checkbox" id="onlineTestManualReview">
+        <span><strong>Exiger la correction et l’attribution des points par le professeur</strong><small>Force « ne pas afficher la note » et désactive l’envoi automatique vers École Directe.</small></span>
+       </label>
        <label class="online-check-item" id="onlineTestFocusWrap">
         <input type="checkbox" id="onlineTestFocusMode">
         <span><strong>Mode Focus</strong><small>Si l’élève quitte la page ou ouvre une autre application, le test est immédiatement arrêté et soumis. Disponible uniquement hors mode entraînement.</small></span>
        </label>
        <label class="online-check-item" id="onlineTestHideGradeWrap">
         <input type="checkbox" id="onlineTestHideGrade">
-        <span><strong>Ne pas afficher la note</strong><small>Le résultat ne s’affiche pas à l’élève en fin de test. Cette option est désactivée en mode entraînement.</small></span>
+        <span><strong>Ne pas afficher la note</strong><small>Le résultat ne s’affiche pas à l’élève en fin de test. Cette option est désactivée en mode entraînement, sauf correction obligatoire par le professeur.</small></span>
        </label>
       </div>
-      <div id="onlineTestSetupHint" class="online-modal-note">Les options incompatibles se désactivent automatiquement si le mode entraînement est coché.</div>
+      <div id="onlineTestSetupHint" class="online-modal-note">Certaines options se désactivent automatiquement selon le mode choisi.</div>
      </div>
      <div class="full">
       <label>Message d’introduction</label>
@@ -1763,6 +1824,18 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
      <button type="button" class="btn btn-primary" id="onlineAnswersSave">Valider</button>
     </div>
    </div>
+  </div>
+ </div>
+</div>
+
+<div id="onlineTestPreviewModal" class="modal" aria-hidden="true" style="z-index:170;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3 id="onlinePreviewTitle">Vision élève</h3>
+   <button class="modal-close" id="onlinePreviewClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div id="onlinePreviewBody" class="online-preview-stack"></div>
   </div>
  </div>
 </div>
@@ -9347,8 +9420,9 @@ function defaultOnlineTestMeta(){
    showGradeDirect:false,
    shuffleQuestions:false,
    timed:false,
-   timeLimitMinutes:"",
+   timeLimitSeconds:"",
    trainingMode:false,
+   manualReviewRequired:false,
    focusMode:false,
    hideGrade:false
   },
@@ -9388,18 +9462,26 @@ function sanitizeOnlineQuestion(question){
 function sanitizeOnlineTest(test){
  const meta = test || {};
  const opts = meta.options || {};
+ const legacyMinutes = Number(opts.timeLimitMinutes);
+ const rawSeconds = Number(opts.timeLimitSeconds);
+ const manualReviewRequired = !!opts.manualReviewRequired;
+ const timed = !!opts.timed;
+ const timeLimitSeconds = timed
+  ? (rawSeconds>0 ? Math.floor(rawSeconds) : (legacyMinutes>0 ? Math.floor(legacyMinutes * 60) : ""))
+  : "";
  return {
   id: meta.id || makeUid("ot"),
   title: String(meta.title||"").trim(),
   subject: String(meta.subject||"").trim(),
   options:{
-   showGradeDirect: !!opts.showGradeDirect,
+   showGradeDirect: !!opts.showGradeDirect && !manualReviewRequired,
    shuffleQuestions: !!opts.shuffleQuestions,
-   timed: !!opts.timed,
-   timeLimitMinutes: opts.timed ? (Number(opts.timeLimitMinutes)>0 ? Number(opts.timeLimitMinutes) : "") : "",
+   timed,
+   timeLimitSeconds,
    trainingMode: !!opts.trainingMode,
+   manualReviewRequired,
    focusMode: !!opts.focusMode && !opts.trainingMode,
-   hideGrade: !!opts.hideGrade && !opts.trainingMode
+   hideGrade: manualReviewRequired || (!!opts.hideGrade && !opts.trainingMode)
   },
   intro: String(meta.intro||"").trim(),
   conclusion: String(meta.conclusion||"").trim(),
@@ -9425,9 +9507,36 @@ function getOnlineTestSubjectChoices(){
  return SUBJECT_REGISTRY.map(s=>typeof s==="object" ? s.name : s).filter(Boolean);
 }
 function populateOnlineTestSubjectSuggestions(){
- const datalist=document.getElementById("onlineTestSubjectSuggestions");
- if(!datalist) return;
- datalist.innerHTML = getOnlineTestSubjectChoices().map(name=>`<option value="${escHtml(name)}"></option>`).join("");
+ const select=document.getElementById("onlineTestSubjectInput");
+ if(!select) return;
+ const previousValue=select.value;
+ const choices=getOnlineTestSubjectChoices();
+ select.innerHTML = choices.length
+  ? `<option value="">Sélectionner une matière</option>${choices.map(name=>`<option value="${escHtml(name)}">${escHtml(name)}</option>`).join("")}`
+  : `<option value="">Aucune matière disponible</option>`;
+ select.disabled=!choices.length;
+ if(previousValue && choices.includes(previousValue)) select.value=previousValue;
+}
+function parseOnlineTestDurationToSeconds(minutesValue, secondsValue){
+ const minutes=Math.max(0, Math.floor(Number(minutesValue)||0));
+ const seconds=Math.max(0, Math.min(59, Math.floor(Number(secondsValue)||0)));
+ return minutes * 60 + seconds;
+}
+function splitOnlineTestDuration(totalSeconds){
+ const safe=Math.max(0, Math.floor(Number(totalSeconds)||0));
+ return { minutes: Math.floor(safe/60), seconds: safe % 60 };
+}
+function formatOnlineTestDuration(totalSeconds){
+ const parts=splitOnlineTestDuration(totalSeconds);
+ return `${parts.minutes} min ${String(parts.seconds).padStart(2,"0")} s`;
+}
+function normalizeOnlinePreviewText(value){
+ return String(value||"")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"")
+  .toLowerCase()
+  .replace(/\s+/g," ")
+  .trim();
 }
 function formatOnlineTestDate(value){
  if(!value) return "";
@@ -9444,18 +9553,17 @@ function renderOnlineTestsView(){
  if(!summary||!list) return;
  populateOnlineTestSubjectSuggestions();
  const tests = DATA.onlineTests.slice().sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+ summary.textContent = `${tests.length} test${tests.length>1?"s":""} réalisé${tests.length>1?"s":""}`; 
  if(!tests.length){
-  summary.textContent = "Aucun test enregistré pour le moment.";
-  list.innerHTML = '<div class="online-empty">Aucun test en ligne n’a encore été créé. Clique sur « Créer un test » pour préparer une première évaluation.</div>';
+  list.innerHTML = "";
   return;
  }
- const totalPoints = tests.reduce((sum,test)=>sum + getOnlineTestTotalPoints(test),0);
- summary.textContent = `${tests.length} test${tests.length>1?"s":""} enregistré${tests.length>1?"s":""} · ${totalPoints} point${totalPoints>1?"s":""} configuré${totalPoints>1?"s":""}.`;
  list.innerHTML = tests.map(test=>{
   const badges = [];
   if(test.options?.trainingMode) badges.push("Mode entraînement");
+  if(test.options?.manualReviewRequired) badges.push("Correction professeur");
   if(test.options?.focusMode) badges.push("Mode Focus");
-  if(test.options?.timed) badges.push(`${test.options.timeLimitMinutes||"?"} min`);
+  if(test.options?.timed) badges.push(formatOnlineTestDuration(test.options.timeLimitSeconds||0));
   if(test.options?.shuffleQuestions) badges.push("Ordre aléatoire");
   if(test.options?.hideGrade) badges.push("Note masquée");
   if(test.options?.showGradeDirect) badges.push("Note vers École Directe");
@@ -9477,12 +9585,19 @@ function renderOnlineTestsView(){
     <div class="online-test-card-footer">
      <span>${updated ? `Dernière mise à jour : ${updated}` : "Nouveau test"}</span>
      <div class="online-test-card-actions">
+      <button type="button" class="btn btn-preview-online-test" data-testid="${escHtml(test.id)}">Visionner</button>
       <button type="button" class="btn btn-edit-online-test" data-testid="${escHtml(test.id)}">Modifier</button>
       <button type="button" class="btn btn-danger btn-delete-online-test" data-testid="${escHtml(test.id)}">Supprimer</button>
      </div>
     </div>
    </article>`;
  }).join("");
+ list.querySelectorAll(".btn-preview-online-test").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+   const test=DATA.onlineTests.find(item=>item.id===btn.dataset.testid);
+   if(test) openOnlineTestPreview(test);
+  });
+ });
  list.querySelectorAll(".btn-edit-online-test").forEach(btn=>{
   btn.addEventListener("click",()=>{
    const test=DATA.onlineTests.find(item=>item.id===btn.dataset.testid);
@@ -9508,6 +9623,7 @@ function renderOnlineTestsView(){
 const onlineTestSetupModal=document.getElementById("onlineTestSetupModal");
 const onlineTestBuilderModal=document.getElementById("onlineTestBuilderModal");
 const onlineTestAnswersModal=document.getElementById("onlineTestAnswersModal");
+const onlineTestPreviewModal=document.getElementById("onlineTestPreviewModal");
 const onlineTestSetupForm=document.getElementById("onlineTestSetupForm");
 const onlineQuestionTypeFields=document.getElementById("onlineQuestionTypeFields");
 const ONLINE_TEST_DRAFT = {
@@ -9515,6 +9631,15 @@ const ONLINE_TEST_DRAFT = {
  questions: [],
  editingTestId: null,
  currentQuestionEditIndex: null
+};
+const ONLINE_TEST_PREVIEW_STATE = {
+ test: null,
+ questions: [],
+ remainingSeconds: null,
+ timerId: null,
+ visibilityHandler: null,
+ blurHandler: null,
+ submitted: false
 };
 let ONLINE_TEST_ANSWER_CONTEXT = null;
 
@@ -9526,23 +9651,56 @@ function setModalOpen(modal, isOpen){
 function closeOnlineTestSetupModal(){ setModalOpen(onlineTestSetupModal,false); }
 function closeOnlineTestBuilderModal(){ setModalOpen(onlineTestBuilderModal,false); }
 function closeOnlineTestAnswersModal(){ setModalOpen(onlineTestAnswersModal,false); ONLINE_TEST_ANSWER_CONTEXT=null; }
+function stopOnlineTestPreviewTimer(){
+ if(ONLINE_TEST_PREVIEW_STATE.timerId){
+  clearInterval(ONLINE_TEST_PREVIEW_STATE.timerId);
+  ONLINE_TEST_PREVIEW_STATE.timerId=null;
+ }
+}
+function detachOnlineTestPreviewFocusWatchers(){
+ if(ONLINE_TEST_PREVIEW_STATE.visibilityHandler){
+  document.removeEventListener("visibilitychange", ONLINE_TEST_PREVIEW_STATE.visibilityHandler);
+  ONLINE_TEST_PREVIEW_STATE.visibilityHandler=null;
+ }
+ if(ONLINE_TEST_PREVIEW_STATE.blurHandler){
+  window.removeEventListener("blur", ONLINE_TEST_PREVIEW_STATE.blurHandler);
+  ONLINE_TEST_PREVIEW_STATE.blurHandler=null;
+ }
+}
+function resetOnlineTestPreviewState(){
+ stopOnlineTestPreviewTimer();
+ detachOnlineTestPreviewFocusWatchers();
+ ONLINE_TEST_PREVIEW_STATE.test=null;
+ ONLINE_TEST_PREVIEW_STATE.questions=[];
+ ONLINE_TEST_PREVIEW_STATE.remainingSeconds=null;
+ ONLINE_TEST_PREVIEW_STATE.submitted=false;
+}
+function closeOnlineTestPreviewModal(){
+ resetOnlineTestPreviewState();
+ setModalOpen(onlineTestPreviewModal,false);
+}
 
-[["onlineTestSetupClose",closeOnlineTestSetupModal],["onlineTestSetupCancel",closeOnlineTestSetupModal],["onlineTestBuilderClose",closeOnlineTestBuilderModal],["onlineAnswersClose",closeOnlineTestAnswersModal],["onlineAnswersCancel",closeOnlineTestAnswersModal]].forEach(([id,handler])=>{
+[["onlineTestSetupClose",closeOnlineTestSetupModal],["onlineTestSetupCancel",closeOnlineTestSetupModal],["onlineTestBuilderClose",closeOnlineTestBuilderModal],["onlineAnswersClose",closeOnlineTestAnswersModal],["onlineAnswersCancel",closeOnlineTestAnswersModal],["onlinePreviewClose",closeOnlineTestPreviewModal]].forEach(([id,handler])=>{
  document.getElementById(id)?.addEventListener("click",handler);
 });
-[onlineTestSetupModal,onlineTestBuilderModal,onlineTestAnswersModal].forEach(modal=>{
+[onlineTestSetupModal,onlineTestBuilderModal,onlineTestAnswersModal,onlineTestPreviewModal].forEach(modal=>{
  modal?.addEventListener("click",e=>{ if(e.target===modal) setModalOpen(modal,false); });
 });
+onlineTestPreviewModal?.addEventListener("click",e=>{ if(e.target===onlineTestPreviewModal) closeOnlineTestPreviewModal(); });
 
 function applyOnlineTestMetaToForm(meta){
  const data = meta || defaultOnlineTestMeta();
+ const duration=splitOnlineTestDuration(data.options?.timeLimitSeconds||0);
+ populateOnlineTestSubjectSuggestions();
  document.getElementById("onlineTestTitleInput").value=data.title||"";
  document.getElementById("onlineTestSubjectInput").value=data.subject||"";
  document.getElementById("onlineTestShowGradeDirect").checked=!!data.options?.showGradeDirect;
  document.getElementById("onlineTestShuffleQuestions").checked=!!data.options?.shuffleQuestions;
  document.getElementById("onlineTestTimed").checked=!!data.options?.timed;
- document.getElementById("onlineTestTimeLimit").value=data.options?.timeLimitMinutes||"";
+ document.getElementById("onlineTestTimeLimitMinutes").value=data.options?.timed ? duration.minutes : "";
+ document.getElementById("onlineTestTimeLimitSeconds").value=data.options?.timed ? duration.seconds : "";
  document.getElementById("onlineTestTrainingMode").checked=!!data.options?.trainingMode;
+ document.getElementById("onlineTestManualReview").checked=!!data.options?.manualReviewRequired;
  document.getElementById("onlineTestFocusMode").checked=!!data.options?.focusMode;
  document.getElementById("onlineTestHideGrade").checked=!!data.options?.hideGrade;
  document.getElementById("onlineTestIntroInput").value=data.intro||"";
@@ -9559,8 +9717,9 @@ function readOnlineTestMetaFromForm(){
    showGradeDirect: document.getElementById("onlineTestShowGradeDirect").checked,
    shuffleQuestions: document.getElementById("onlineTestShuffleQuestions").checked,
    timed: document.getElementById("onlineTestTimed").checked,
-   timeLimitMinutes: document.getElementById("onlineTestTimeLimit").value,
+   timeLimitSeconds: parseOnlineTestDurationToSeconds(document.getElementById("onlineTestTimeLimitMinutes").value, document.getElementById("onlineTestTimeLimitSeconds").value),
    trainingMode: document.getElementById("onlineTestTrainingMode").checked,
+   manualReviewRequired: document.getElementById("onlineTestManualReview").checked,
    focusMode: document.getElementById("onlineTestFocusMode").checked,
    hideGrade: document.getElementById("onlineTestHideGrade").checked
   },
@@ -9574,24 +9733,38 @@ function readOnlineTestMetaFromForm(){
 function syncOnlineTestSetupDependencies(){
  const training=document.getElementById("onlineTestTrainingMode").checked;
  const timed=document.getElementById("onlineTestTimed").checked;
+ const manualReview=document.getElementById("onlineTestManualReview").checked;
  const focus=document.getElementById("onlineTestFocusMode");
+ const showGradeDirect=document.getElementById("onlineTestShowGradeDirect");
  const hideGrade=document.getElementById("onlineTestHideGrade");
- const timeLimit=document.getElementById("onlineTestTimeLimit");
+ const timeLimitMinutes=document.getElementById("onlineTestTimeLimitMinutes");
+ const timeLimitSeconds=document.getElementById("onlineTestTimeLimitSeconds");
+ const showGradeDirectWrap=document.getElementById("onlineTestShowGradeDirectWrap");
  const focusWrap=document.getElementById("onlineTestFocusWrap");
  const hideGradeWrap=document.getElementById("onlineTestHideGradeWrap");
  const hint=document.getElementById("onlineTestSetupHint");
- timeLimit.disabled=!timed;
- if(!timed) timeLimit.value="";
+ timeLimitMinutes.disabled=!timed;
+ timeLimitSeconds.disabled=!timed;
+ if(!timed){
+  timeLimitMinutes.value="";
+  timeLimitSeconds.value="";
+ }
  focus.disabled=training;
- hideGrade.disabled=training;
- if(training){ focus.checked=false; hideGrade.checked=false; }
+ if(training) focus.checked=false;
+ showGradeDirect.disabled=manualReview;
+ if(manualReview) showGradeDirect.checked=false;
+ hideGrade.disabled=training || manualReview;
+ if(manualReview) hideGrade.checked=true;
+ else if(training) hideGrade.checked=false;
+ showGradeDirectWrap?.classList.toggle("is-disabled",showGradeDirect.disabled);
  focusWrap?.classList.toggle("is-disabled",focus.disabled);
  hideGradeWrap?.classList.toggle("is-disabled",hideGrade.disabled);
- if(training) hint.textContent="Le mode entraînement désactive automatiquement le mode Focus et l’option de note masquée.";
+ if(manualReview) hint.textContent="La correction devra être faite par le professeur : la note est masquée et l’envoi automatique vers École Directe est désactivé.";
+ else if(training) hint.textContent="Le mode entraînement désactive automatiquement le mode Focus et l’option de note masquée.";
  else if(timed) hint.textContent="Le chronomètre s’appliquera uniquement au test lui-même, pas aux messages d’introduction et de conclusion.";
- else hint.textContent="Les options incompatibles se désactivent automatiquement si le mode entraînement est coché.";
+ else hint.textContent="Certaines options se désactivent automatiquement selon le mode choisi.";
 }
-["onlineTestTrainingMode","onlineTestTimed"].forEach(id=>{
+["onlineTestTrainingMode","onlineTestTimed","onlineTestManualReview"].forEach(id=>{
  document.getElementById(id)?.addEventListener("change",syncOnlineTestSetupDependencies);
 });
 
@@ -9604,12 +9777,12 @@ function startOnlineTestFlow(existingTest=null){
  ONLINE_TEST_DRAFT.currentQuestionEditIndex = null;
  document.getElementById("onlineTestSetupTitle").textContent = existingTest ? "Modifier un test en ligne" : "Créer un test en ligne";
  applyOnlineTestMetaToForm(source);
- populateOnlineTestSubjectSuggestions();
  setModalOpen(onlineTestSetupModal,true);
 }
 
 document.getElementById("openCreateOnlineTestBtn")?.addEventListener("click",()=>{
  if(AUTH.role!=="prof") return;
+ if(!getOnlineTestSubjectChoices().length){ alert("Ajoute d’abord au moins une matière dans le registre du site."); return; }
  startOnlineTestFlow(null);
 });
 
@@ -9618,10 +9791,12 @@ onlineTestSetupForm?.addEventListener("submit",e=>{
  const title=document.getElementById("onlineTestTitleInput").value.trim();
  const subject=document.getElementById("onlineTestSubjectInput").value.trim();
  const timed=document.getElementById("onlineTestTimed").checked;
- const timeLimitValue=document.getElementById("onlineTestTimeLimit").value;
+ const durationSeconds=parseOnlineTestDurationToSeconds(document.getElementById("onlineTestTimeLimitMinutes").value, document.getElementById("onlineTestTimeLimitSeconds").value);
+ const subjectChoices=getOnlineTestSubjectChoices();
  if(!title){ alert("Le nom de l’évaluation est requis."); return; }
  if(!subject){ alert("La matière est requise."); return; }
- if(timed && !(Number(timeLimitValue)>0)){ alert("Précise un temps imparti valide."); return; }
+ if(!subjectChoices.includes(subject)){ alert("Choisis une matière dans la liste du site."); return; }
+ if(timed && !(durationSeconds>0)){ alert("Précise un temps imparti valide en minutes et/ou secondes."); return; }
  const nextMeta = readOnlineTestMetaFromForm();
  nextMeta.id = ONLINE_TEST_DRAFT.editingTestId || nextMeta.id;
  nextMeta.createdAt = ONLINE_TEST_DRAFT.meta?.createdAt || nextMeta.createdAt;
@@ -9630,6 +9805,286 @@ onlineTestSetupForm?.addEventListener("submit",e=>{
  closeOnlineTestSetupModal();
  openOnlineTestBuilderModal();
 });
+
+function buildOnlinePreviewQuestions(test){
+ const questions=deepClone(test?.questions||[]);
+ if(test?.options?.shuffleQuestions){
+  for(let i=questions.length-1;i>0;i--){
+   const j=Math.floor(Math.random()*(i+1));
+   [questions[i],questions[j]]=[questions[j],questions[i]];
+  }
+ }
+ return questions;
+}
+function renderOnlinePreviewIntro(){
+ const body=document.getElementById("onlinePreviewBody");
+ const test=ONLINE_TEST_PREVIEW_STATE.test;
+ if(!body||!test) return;
+ const totalPoints=fmt(getOnlineTestTotalPoints({questions:ONLINE_TEST_PREVIEW_STATE.questions}),2).replace(/\.00$/,"");
+ const badges=[
+  `${ONLINE_TEST_PREVIEW_STATE.questions.length} question${ONLINE_TEST_PREVIEW_STATE.questions.length>1?"s":""}`,
+  `${totalPoints} point${Number(totalPoints)>1?"s":""}`
+ ];
+ if(test.options?.timed) badges.push(formatOnlineTestDuration(test.options.timeLimitSeconds||0));
+ if(test.options?.trainingMode) badges.push("Mode entraînement");
+ if(test.options?.manualReviewRequired) badges.push("Correction professeur");
+ body.innerHTML = `
+  <div class="online-preview-card">
+   <div class="online-preview-header">
+    <div>
+     <h4>${escHtml(test.title||"Test sans titre")}</h4>
+     <div class="online-preview-meta">
+      <span>${escHtml(test.subject||"Matière non précisée")}</span>
+      ${badges.map(label=>`<span>${escHtml(label)}</span>`).join("")}
+     </div>
+    </div>
+   </div>
+   <p class="online-preview-note">Mode aperçu professeur : aucun résultat n’est enregistré, même hors mode entraînement.</p>
+   ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
+   <div class="online-preview-actions" style="justify-content:flex-end;">
+    <button type="button" class="btn btn-primary" id="onlinePreviewStartBtn">Commencer le test</button>
+   </div>
+  </div>
+ `;
+ document.getElementById("onlinePreviewStartBtn")?.addEventListener("click",renderOnlinePreviewForm);
+}
+function renderOnlinePreviewQuestionInput(question){
+ if(question.type==="written"){
+  return `<input type="text" class="online-preview-text" data-question-id="${escHtml(question.id)}" placeholder="Ta réponse">`;
+ }
+ if(question.type==="fillblank"){
+  let blankIndex=0;
+  return `<div class="online-preview-fillblank">${(question.segments||[]).map(segment=>{
+   if(segment.type==="blank"){
+    const html=`<input type="text" class="online-preview-blank-input" data-question-id="${escHtml(question.id)}" data-blank-index="${blankIndex}" placeholder="Réponse ${blankIndex+1}">`;
+    blankIndex += 1;
+    return html;
+   }
+   return `<span>${escHtml(segment.text||"").replace(/\n/g,"<br>")}</span>`;
+  }).join(" ")}</div>`;
+ }
+ const inputType=question.type==="qcm" ? "checkbox" : "radio";
+ return `<div class="online-preview-options">${(question.choices||[]).map(choice=>`
+  <label class="online-preview-option">
+   <input type="${inputType}" name="preview_${escHtml(question.id)}" value="${escHtml(choice.id)}">
+   <span>${escHtml(choice.text||"")}</span>
+  </label>
+ `).join("")}</div>`;
+}
+function updateOnlinePreviewTimerDisplay(){
+ const timer=document.getElementById("onlinePreviewTimer");
+ if(!timer) return;
+ const seconds=Number(ONLINE_TEST_PREVIEW_STATE.remainingSeconds);
+ if(!(seconds>=0)){ timer.style.display="none"; return; }
+ const minutes=Math.floor(seconds/60);
+ const remainder=seconds%60;
+ timer.style.display="";
+ timer.classList.toggle("is-warning", seconds<=30);
+ timer.textContent=`${String(minutes).padStart(2,"0")}:${String(remainder).padStart(2,"0")}`;
+}
+function startOnlinePreviewTimer(){
+ stopOnlineTestPreviewTimer();
+ if(!(ONLINE_TEST_PREVIEW_STATE.remainingSeconds>0)) return;
+ updateOnlinePreviewTimerDisplay();
+ ONLINE_TEST_PREVIEW_STATE.timerId=setInterval(()=>{
+  ONLINE_TEST_PREVIEW_STATE.remainingSeconds -= 1;
+  updateOnlinePreviewTimerDisplay();
+  if(ONLINE_TEST_PREVIEW_STATE.remainingSeconds<=0){
+   finishOnlineTestPreview("timeout");
+  }
+ },1000);
+}
+function attachOnlineTestPreviewFocusWatchers(){
+ detachOnlineTestPreviewFocusWatchers();
+ if(!ONLINE_TEST_PREVIEW_STATE.test?.options?.focusMode) return;
+ ONLINE_TEST_PREVIEW_STATE.visibilityHandler=()=>{
+  if(document.hidden && onlineTestPreviewModal?.classList.contains("open")){
+   finishOnlineTestPreview("focus");
+  }
+ };
+ ONLINE_TEST_PREVIEW_STATE.blurHandler=()=>{
+  if(onlineTestPreviewModal?.classList.contains("open")){
+   setTimeout(()=>{
+    if(onlineTestPreviewModal?.classList.contains("open")) finishOnlineTestPreview("focus");
+   },0);
+  }
+ };
+ document.addEventListener("visibilitychange", ONLINE_TEST_PREVIEW_STATE.visibilityHandler);
+ window.addEventListener("blur", ONLINE_TEST_PREVIEW_STATE.blurHandler);
+}
+function renderOnlinePreviewForm(){
+ const body=document.getElementById("onlinePreviewBody");
+ const test=ONLINE_TEST_PREVIEW_STATE.test;
+ if(!body||!test) return;
+ ONLINE_TEST_PREVIEW_STATE.remainingSeconds=test.options?.timed ? Number(test.options.timeLimitSeconds)||0 : null;
+ ONLINE_TEST_PREVIEW_STATE.submitted=false;
+ body.innerHTML = `
+  <div class="online-preview-card">
+   <div class="online-preview-header">
+    <div>
+     <h4>${escHtml(test.title||"Test sans titre")}</h4>
+     <div class="online-preview-meta">
+      <span>${escHtml(test.subject||"Matière non précisée")}</span>
+      <span>${ONLINE_TEST_PREVIEW_STATE.questions.length} question${ONLINE_TEST_PREVIEW_STATE.questions.length>1?"s":""}</span>
+     </div>
+    </div>
+    <div id="onlinePreviewTimer" class="online-preview-timer"></div>
+   </div>
+   <p class="online-preview-note">Mode aperçu professeur : aucun résultat n’est enregistré, même hors mode entraînement.</p>
+   <form id="onlineTestPreviewForm" class="online-preview-form">
+    ${ONLINE_TEST_PREVIEW_STATE.questions.map((question,index)=>`
+     <section class="online-preview-question">
+      <div class="online-preview-question-head">
+       <strong>Question ${index+1}</strong>
+       <span>${fmt(question.points,2).replace(/\.00$/,"")} pt${Number(question.points)>1?"s":""}</span>
+      </div>
+      <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
+      ${renderOnlinePreviewQuestionInput(question)}
+     </section>
+    `).join("")}
+    <div class="online-preview-actions">
+     <button type="button" class="btn" id="onlinePreviewBackBtn">Retour</button>
+     <button type="submit" class="btn btn-primary">Rendre le test</button>
+    </div>
+   </form>
+  </div>
+ `;
+ document.getElementById("onlinePreviewBackBtn")?.addEventListener("click",renderOnlinePreviewIntro);
+ document.getElementById("onlineTestPreviewForm")?.addEventListener("submit",e=>{
+  e.preventDefault();
+  finishOnlineTestPreview("submitted");
+ });
+ updateOnlinePreviewTimerDisplay();
+ startOnlinePreviewTimer();
+ attachOnlineTestPreviewFocusWatchers();
+}
+function collectOnlineTestPreviewAnswers(){
+ const answers={};
+ ONLINE_TEST_PREVIEW_STATE.questions.forEach(question=>{
+  if(question.type==="written"){
+   answers[question.id]=document.querySelector(`.online-preview-text[data-question-id="${CSS.escape(question.id)}"]`)?.value||"";
+   return;
+  }
+  if(question.type==="fillblank"){
+   answers[question.id]=[...document.querySelectorAll(`.online-preview-blank-input[data-question-id="${CSS.escape(question.id)}"]`)].sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex)).map(input=>input.value||"");
+   return;
+  }
+  if(question.type==="qcm"){
+   answers[question.id]=[...document.querySelectorAll(`input[name="preview_${CSS.escape(question.id)}"]:checked`)].map(input=>input.value);
+   return;
+  }
+  answers[question.id]=document.querySelector(`input[name="preview_${CSS.escape(question.id)}"]:checked`)?.value||"";
+ });
+ return answers;
+}
+function evaluateOnlineTestPreview(answers){
+ const test=ONLINE_TEST_PREVIEW_STATE.test;
+ const manualReview=!!test?.options?.manualReviewRequired;
+ const result={ manualReview, earned:0, total:getOnlineTestTotalPoints({questions:ONLINE_TEST_PREVIEW_STATE.questions}), details:[] };
+ ONLINE_TEST_PREVIEW_STATE.questions.forEach(question=>{
+  if(manualReview){
+   result.details.push({question, correct:null});
+   return;
+  }
+  if(question.type==="written"){
+   const answer=String(answers[question.id]||"");
+   const expected=normalizeOnlineAnswers(question.expectedAnswers);
+   const correct=expected.some(item=>normalizeOnlinePreviewText(item)===normalizeOnlinePreviewText(answer));
+   if(correct) result.earned += Number(question.points)||0;
+   result.details.push({question, correct, answer, expected});
+   return;
+  }
+  if(question.type==="fillblank"){
+   const userAnswers=Array.isArray(answers[question.id]) ? answers[question.id] : [];
+   const blanks=(question.segments||[]).filter(segment=>segment.type==="blank");
+   const expected=blanks.map(blank=>normalizeOnlineAnswers(blank.answers));
+   const correct=expected.length===userAnswers.length && expected.every((accepted,index)=>accepted.some(item=>normalizeOnlinePreviewText(item)===normalizeOnlinePreviewText(userAnswers[index]||"")));
+   if(correct) result.earned += Number(question.points)||0;
+   result.details.push({question, correct, answer:userAnswers, expected});
+   return;
+  }
+  const correctChoices=(question.choices||[]).filter(choice=>choice.correct).map(choice=>choice.id);
+  const selected=question.type==="qcm"
+   ? (Array.isArray(answers[question.id]) ? answers[question.id] : [])
+   : (answers[question.id] ? [answers[question.id]] : []);
+  const correct=selected.length===correctChoices.length && selected.every(value=>correctChoices.includes(value));
+  if(correct) result.earned += Number(question.points)||0;
+  result.details.push({question, correct, answer:selected, expected:correctChoices});
+ });
+ return result;
+}
+function buildOnlinePreviewCorrectionHtml(result){
+ return `<div class="online-preview-corrections">${result.details.map((detail,index)=>{
+  const question=detail.question;
+  let answerText="Aucune réponse";
+  let expectedText="";
+  if(question.type==="written"){
+   answerText=detail.answer ? escHtml(detail.answer) : "Aucune réponse";
+   expectedText=(detail.expected||[]).length ? `Réponse attendue : ${(detail.expected||[]).map(escHtml).join(" · ")}` : "Aucune réponse attendue définie";
+  }else if(question.type==="fillblank"){
+   answerText=(detail.answer||[]).length ? (detail.answer||[]).map(value=>escHtml(value||"—")).join(" · ") : "Aucune réponse";
+   expectedText=(detail.expected||[]).map((answers,blankIdx)=>`Trou ${blankIdx+1} : ${answers.length ? answers.map(escHtml).join(" / ") : "—"}`).join(" · ");
+  }else{
+   const byId=new Map((question.choices||[]).map(choice=>[choice.id, choice.text]));
+   answerText=(detail.answer||[]).length ? detail.answer.map(value=>escHtml(byId.get(value)||value)).join(" · ") : "Aucune réponse";
+   expectedText=(detail.expected||[]).length ? `Réponse attendue : ${detail.expected.map(value=>escHtml(byId.get(value)||value)).join(" · ")}` : "Aucune réponse attendue définie";
+  }
+  return `
+   <div class="online-preview-correction-item ${detail.correct ? "is-correct" : "is-wrong"}">
+    <strong>Question ${index+1} · ${detail.correct ? "Correcte" : "À corriger"}</strong>
+    <small>Ta réponse : ${answerText}</small>
+    <small>${expectedText}</small>
+   </div>
+  `;
+ }).join("")}</div>`;
+}
+function renderOnlinePreviewResult(result, reason){
+ const body=document.getElementById("onlinePreviewBody");
+ const test=ONLINE_TEST_PREVIEW_STATE.test;
+ if(!body||!test) return;
+ const reasonText = reason==="timeout"
+  ? "Le temps imparti est écoulé."
+  : (reason==="focus" ? "Le test a été rendu automatiquement car l’élève a quitté la page." : "Le test a été rendu.");
+ let mainMessage = "Aucun résultat n’est enregistré dans cet aperçu.";
+ if(result.manualReview){
+  mainMessage = "La correction et l’attribution des points doivent être faites par le professeur.";
+ }else if(test.options?.hideGrade){
+  mainMessage = "La note n’est pas affichée à l’élève pour ce test.";
+ }
+ body.innerHTML = `
+  <div class="online-preview-result">
+   <p class="online-preview-note">${escHtml(reasonText)} ${escHtml(mainMessage)}</p>
+   ${(!result.manualReview && !test.options?.hideGrade) ? `<div class="online-preview-score">Note simulée : ${fmt(result.earned,2).replace(/\.00$/,"")} / ${fmt(result.total,2).replace(/\.00$/,"")}</div>` : ""}
+   ${test.conclusion ? `<p class="online-preview-message">${escHtml(test.conclusion).replace(/\n/g,"<br>")}</p>` : ""}
+   ${(test.options?.trainingMode && !result.manualReview) ? buildOnlinePreviewCorrectionHtml(result) : ""}
+   <div class="online-preview-actions">
+    <button type="button" class="btn" id="onlinePreviewRestartBtn">Recommencer</button>
+    <button type="button" class="btn btn-primary" id="onlinePreviewDoneBtn">Fermer</button>
+   </div>
+  </div>
+ `;
+ document.getElementById("onlinePreviewRestartBtn")?.addEventListener("click",()=>{
+  ONLINE_TEST_PREVIEW_STATE.questions=buildOnlinePreviewQuestions(test);
+  renderOnlinePreviewIntro();
+ });
+ document.getElementById("onlinePreviewDoneBtn")?.addEventListener("click",closeOnlineTestPreviewModal);
+}
+function finishOnlineTestPreview(reason="submitted"){
+ if(!ONLINE_TEST_PREVIEW_STATE.test || ONLINE_TEST_PREVIEW_STATE.submitted) return;
+ ONLINE_TEST_PREVIEW_STATE.submitted=true;
+ stopOnlineTestPreviewTimer();
+ detachOnlineTestPreviewFocusWatchers();
+ const result=evaluateOnlineTestPreview(collectOnlineTestPreviewAnswers());
+ renderOnlinePreviewResult(result,reason);
+}
+function openOnlineTestPreview(test){
+ resetOnlineTestPreviewState();
+ ONLINE_TEST_PREVIEW_STATE.test=sanitizeOnlineTest(test);
+ ONLINE_TEST_PREVIEW_STATE.questions=buildOnlinePreviewQuestions(ONLINE_TEST_PREVIEW_STATE.test);
+ document.getElementById("onlinePreviewTitle").textContent=`Vision élève · ${ONLINE_TEST_PREVIEW_STATE.test.title||"Test sans titre"}`;
+ setModalOpen(onlineTestPreviewModal,true);
+ renderOnlinePreviewIntro();
+}
 
 function openOnlineTestBuilderModal(){
  setModalOpen(onlineTestBuilderModal,true);
