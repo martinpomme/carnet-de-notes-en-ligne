@@ -9197,7 +9197,7 @@ window.onbeforeunload = function(e) {
 
 // ── CONNEXION + SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbziu6cd7ODL18lWRDKQjV5xJ4ch7qGgh9A-dRTERzwUPI63eI5Z-EpKdzMMeyE1YS6N/exec";
-const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, lastSnap:null, retryAt:0 };
+const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, lastSnap:null, retryAt:0, polling:false };
 function cloudSnapshot(){
  try{ return buildCSVText()+"\n#ACCOUNTS#"+JSON.stringify(DATA.students.map(s=>[s.id,ACCOUNTS[s.id]?.login||"",ACCOUNTS[s.id]?.pwd||""])); }
  catch(e){ return null; }
@@ -9405,14 +9405,31 @@ async function cloudPush(force){
  }
  CLOUD.saving=false;
 }
-// Au retour sur l'onglet : récupère les modifications faites ailleurs (si rien n'est en attente)
-document.addEventListener("visibilitychange",async()=>{
- if(document.visibilityState!=="visible"||!AUTH.role||IS_MODIFIED||CLOUD.saving) return;
+async function cloudCheckRemoteUpdates(showStatus=false){
+ if(!AUTH.role || IS_MODIFIED || CLOUD.saving || CLOUD.polling) return;
+ CLOUD.polling=true;
  try{
   const j=await api("rev");
-  if(j.ok && j.rev!==CLOUD.rev){ await cloudPull(); if(AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour()); }
- }catch(e){console.warn("cloud rev:",e);}
+  if(j.ok && j.rev!==CLOUD.rev){
+   await cloudPull();
+   if(showStatus && AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour());
+  }
+ }catch(e){
+  console.warn("cloud rev:",e);
+ }finally{
+  CLOUD.polling=false;
+ }
+}
+// Au retour sur l'onglet : récupère les modifications faites ailleurs (si rien n'est en attente)
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState!=="visible") return;
+ cloudCheckRemoteUpdates(true);
 });
+// Les comptes élèves se mettent aussi à jour automatiquement en arrière-plan
+// pour voir les nouveaux devoirs sans rechargement manuel.
+setInterval(()=>{
+ if(AUTH.role==="eleve" && document.visibilityState==="visible") cloudCheckRemoteUpdates(false);
+},5000);
 
 // Sauvegarde automatique universelle : toute différence entre l'état affiché et le dernier état
 // enregistré (note, appréciation, classe, évaluation de classe, matière, verrou, compte…) déclenche l'envoi.
@@ -11256,7 +11273,8 @@ function initApp(){
   reviewFilterTestId: "",
   reviewSelectedKey: "",
   correction: null,
-  quiz: null
+ quiz: null,
+ studentDatePinned: false
  };
 
  function ensureHomeworkStore(){
@@ -11374,6 +11392,26 @@ function initApp(){
   const classId=homeworkStudentClassId();
   return getHomeworkOnDate(dateISO).filter(item=>item.classId===classId);
  }
+function getHomeworkStudentDates(){
+ const classId=homeworkStudentClassId();
+ if(!classId) return [];
+ return [...new Set((DATA.homework||[])
+  .filter(item=>item.classId===classId && item.dateISO)
+  .map(item=>item.dateISO))]
+  .sort((a,b)=>a.localeCompare(b));
+}
+function syncStudentHomeworkDate(force=false){
+ if(AUTH.role!=="eleve") return;
+ const dates=getHomeworkStudentDates();
+ if(!dates.length) return;
+ if(!force && HOMEWORK_STATE.studentDatePinned) return;
+ if(dates.includes(HOMEWORK_STATE.selectedDate)) return;
+ const today=todayISO();
+ const target=dates.find(date=>date>=today) || dates[dates.length-1];
+ HOMEWORK_STATE.selectedDate=target;
+ const d=new Date(`${target}T12:00:00`);
+ HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
+}
  function saveHomeworkDraftFromDom(){
   if(!HOMEWORK_STATE.draft) return;
   const editor=document.getElementById("homeworkEditorInput");
@@ -11621,8 +11659,9 @@ function initApp(){
   ensureHomeworkStore();
   const main=document.getElementById("homeworkMainContent");
   if(!main) return;
-  renderHomeworkCalendar();
   const isStudent=AUTH.role==="eleve";
+ if(isStudent) syncStudentHomeworkDate();
+ renderHomeworkCalendar();
   const dayItems=isStudent ? getHomeworkForStudentDate(HOMEWORK_STATE.selectedDate) : getHomeworkOnDate(HOMEWORK_STATE.selectedDate);
   const cards=isStudent
    ? dayItems.map(renderStudentHomeworkCard).join("")
@@ -12349,6 +12388,7 @@ function initApp(){
   const action=btn.dataset.hwAction;
   if(action==="select-date"){
    HOMEWORK_STATE.selectedDate=btn.dataset.date;
+  if(AUTH.role==="eleve") HOMEWORK_STATE.studentDatePinned=true;
    const d=new Date(`${btn.dataset.date}T12:00:00`);
    HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
    HOMEWORK_STATE.draft=null;
@@ -12501,6 +12541,8 @@ function initApp(){
   originalApplyStudentMode();
   const t=document.querySelector('.tab-btn[data-target="homeworkView"]');
   if(t) t.textContent="Mes devoirs";
+ HOMEWORK_STATE.studentDatePinned=false;
+ syncStudentHomeworkDate(true);
   renderHomeworkView();
  };
 })();
