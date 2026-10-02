@@ -11326,6 +11326,14 @@ function initApp(){
  function homeworkStudentById(studentId){
   return DATA.students.find(s=>s.id===studentId) || null;
  }
+ function normalizeHomeworkClassKey(value){
+  return String(value||"")
+   .normalize("NFD")
+   .replace(/[\u0300-\u036f]/g,"")
+   .replace(/\s+/g," ")
+   .trim()
+   .toLowerCase();
+ }
  function homeworkStudentName(studentId){
   const stu=homeworkStudentById(studentId);
   return stu ? `${stu.first} ${stu.last}` : "Élève inconnu";
@@ -11367,6 +11375,16 @@ function initApp(){
  function homeworkStudentClassId(){
   return homeworkStudentById(homeworkStudentId())?.classId || "";
  }
+ function homeworkMatchesStudentClass(item){
+  const student=homeworkStudentById(homeworkStudentId());
+  if(!student || !item) return false;
+  if(item.classId && item.classId===student.classId) return true;
+  const studentClass=homeworkClassById(student.classId);
+  const homeworkClass=homeworkClassById(item.classId);
+  const studentName=normalizeHomeworkClassKey(studentClass?.name || student.classId);
+  const homeworkName=normalizeHomeworkClassKey(homeworkClass?.name || item.classId);
+  return !!studentName && studentName===homeworkName;
+ }
  function getHomeworkSubmission(homeworkId,testId,studentId){
   ensureHomeworkStore();
   return DATA.homeworkSubmissions.find(item=>item.homeworkId===homeworkId && item.testId===testId && item.studentId===studentId) || null;
@@ -11389,14 +11407,12 @@ function initApp(){
   });
  }
  function getHomeworkForStudentDate(dateISO){
-  const classId=homeworkStudentClassId();
-  return getHomeworkOnDate(dateISO).filter(item=>item.classId===classId);
+  return getHomeworkOnDate(dateISO).filter(item=>homeworkMatchesStudentClass(item));
  }
 function getHomeworkStudentDates(){
- const classId=homeworkStudentClassId();
- if(!classId) return [];
+ if(!homeworkStudentClassId()) return [];
  return [...new Set((DATA.homework||[])
-  .filter(item=>item.classId===classId && item.dateISO)
+  .filter(item=>homeworkMatchesStudentClass(item) && item.dateISO)
   .map(item=>item.dateISO))]
   .sort((a,b)=>a.localeCompare(b));
 }
@@ -11454,6 +11470,36 @@ function syncStudentHomeworkDate(force=false){
   HOMEWORK_STATE.draft=null;
   renderHomeworkView();
  }
+ function deleteHomeworkDraft(){
+  if(AUTH.role!=="prof" || !HOMEWORK_STATE.draft) return;
+  const homeworkId=HOMEWORK_STATE.draft.id;
+  const existing=getHomeworkById(homeworkId);
+  if(!existing) return;
+  const relatedSubmissions=(DATA.homeworkSubmissions||[]).filter(item=>item.homeworkId===homeworkId);
+  const relatedNoteIds=new Set();
+  const relatedSubmissionIds=new Set();
+  relatedSubmissions.forEach(item=>{
+   if(item.noteId) relatedNoteIds.add(item.noteId);
+   if(item.id) relatedSubmissionIds.add(item.id);
+  });
+  Object.entries(DATA.notes||{}).forEach(([studentId,notes])=>{
+   DATA.notes[studentId]=(notes||[]).filter(note=>{
+    const remove=relatedNoteIds.has(note.id) || (note.homeworkSubmissionId && relatedSubmissionIds.has(note.homeworkSubmissionId));
+    if(remove && note.id) relatedNoteIds.add(note.id);
+    return !remove;
+   });
+  });
+  if(Array.isArray(DATA.competencies)){
+   DATA.competencies=DATA.competencies.filter(item=>!relatedNoteIds.has(item.noteId));
+  }
+  DATA.homework=DATA.homework.filter(item=>item.id!==homeworkId);
+  DATA.homeworkSubmissions=(DATA.homeworkSubmissions||[]).filter(item=>item.homeworkId!==homeworkId);
+  HOMEWORK_STATE.draft=null;
+  saveData();
+  renderHomeworkView();
+  renderOnlineTestsView();
+  updateTabWarningIndicators();
+ }
  function saveHomeworkDraft(){
   if(AUTH.role!=="prof" || !HOMEWORK_STATE.draft) return;
   saveHomeworkDraftFromDom();
@@ -11486,7 +11532,7 @@ function syncStudentHomeworkDate(force=false){
   const offset=(firstDay.getDay()+6)%7;
   const days=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
   const teacherDates=new Set((DATA.homework||[]).map(item=>item.dateISO));
-  const studentDates=new Set((DATA.homework||[]).filter(item=>item.classId===homeworkStudentClassId()).map(item=>item.dateISO));
+  const studentDates=new Set((DATA.homework||[]).filter(item=>homeworkMatchesStudentClass(item)).map(item=>item.dateISO));
   const cells=[];
   days.forEach(day=>cells.push(`<div class="homework-calendar-weekday">${day}</div>`));
   for(let i=0;i<offset;i++) cells.push('<div class="homework-calendar-day is-empty"></div>');
@@ -11593,6 +11639,7 @@ function syncStudentHomeworkDate(force=false){
      <button type="button" class="btn" data-hw-action="open-assign-tests">Ajouter un test</button>
      <div style="display:flex;gap:8px;">
       <button type="button" class="btn" data-hw-action="cancel-homework">Annuler</button>
+      ${getHomeworkById(draft.id) ? '<button type="button" class="btn btn-danger" data-hw-action="delete-homework">Supprimer</button>' : ""}
       <button type="button" class="btn btn-primary" data-hw-action="save-homework">Enregistrer</button>
      </div>
     </div>
@@ -12397,6 +12444,13 @@ function syncStudentHomeworkDate(force=false){
   }
   if(action==="add-homework"){ startHomeworkDraft(); return; }
   if(action==="cancel-homework"){ cancelHomeworkDraft(); return; }
+  if(action==="delete-homework"){
+   openConfirmModal({
+    message:"Supprimer définitivement ce devoir ?",
+    onConfirm:()=>deleteHomeworkDraft()
+   });
+   return;
+  }
   if(action==="save-homework"){ saveHomeworkDraft(); return; }
   if(action==="edit-homework"){ startHomeworkDraft(btn.dataset.homeworkId); return; }
   if(action==="open-assign-tests"){ openHomeworkAssignTestsModal(); return; }
