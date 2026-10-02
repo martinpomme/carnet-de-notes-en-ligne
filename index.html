@@ -169,15 +169,16 @@ body.student-mode #onlineTestsView{ display:none !important }
 .online-tests-shell{ display:flex; flex-direction:column; gap:18px }
 .online-tests-toolbar{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:8px }
 .online-tests-toolbar p{ margin:6px 0 0; color:#64748b; max-width:760px }
-.online-tests-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px }
+.online-tests-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px }
 .online-test-card{
   background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
-  border:1px solid #d8e4f6; border-radius:16px; padding:18px;
-  box-shadow:0 10px 30px rgba(37,99,235,.08);
+  border:2px solid #b8c4d8; border-radius:16px; padding:18px;
+  box-shadow:0 10px 24px rgba(15,23,42,.06);
   display:flex; flex-direction:column; gap:14px;
 }
-.online-test-card h4{ margin:0; color:#1e3a8a; font-size:20px }
-.online-test-meta{ display:flex; flex-wrap:wrap; gap:8px; font-size:13px; color:#475569 }
+.online-test-title-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+.online-test-card h4{ margin:0; color:#1e3a8a; font-size:20px; line-height:1.2 }
+.online-test-meta{ display:inline-flex; flex-wrap:wrap; gap:8px; font-size:13px; color:#475569 }
 .online-test-meta span{
   background:#eef4ff; border:1px solid #cfe0ff; border-radius:999px;
   padding:6px 10px; font-weight:600;
@@ -186,12 +187,6 @@ body.student-mode #onlineTestsView{ display:none !important }
   display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#0f172a;
   background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px;
 }
-.online-test-badges{ display:flex; flex-wrap:wrap; gap:8px }
-.online-test-badges .badge{
-  display:inline-flex; align-items:center; gap:6px;
-  background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
-  border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700;
-}
 .online-test-card-footer{ display:flex; justify-content:space-between; align-items:center; gap:12px; color:#64748b; font-size:12px; flex-wrap:wrap }
 .online-test-card-actions{ display:flex; gap:8px; flex-wrap:wrap }
 .online-empty{
@@ -199,7 +194,7 @@ body.student-mode #onlineTestsView{ display:none !important }
   border:2px dashed #cbd5e1; border-radius:18px; background:#f8fafc;
 }
 .online-modal-wide{ width:1100px !important; max-width:97vw !important; }
-.online-modal-medium{ width:860px !important; max-width:96vw !important; }
+.online-modal-medium{ width:920px !important; max-width:96vw !important; }
 .online-modal-note{
   margin-top:8px; padding:10px 12px; border-radius:12px;
   background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:13px;
@@ -301,8 +296,22 @@ body.student-mode #onlineTestsView{ display:none !important }
   display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px;
   background:#eef4ff; border:1px solid #cfe0ff; color:#1e3a8a; font-weight:700; font-size:12px;
 }
+.online-preview-progress{
+  display:none; align-items:center; gap:12px; margin-bottom:16px;
+}
+.online-preview-progress-track{
+  flex:1; height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden;
+}
+.online-preview-progress-bar{
+  width:100%; height:100%;
+  background:linear-gradient(90deg,#2563eb 0%,#60a5fa 100%);
+  transition:width 1s linear, background .2s ease;
+}
+.online-preview-progress.is-warning .online-preview-progress-bar{
+  background:linear-gradient(90deg,#dc2626 0%,#f87171 100%);
+}
 .online-preview-timer{
-  display:none; min-width:94px; text-align:center; padding:10px 12px; border-radius:12px;
+  display:none; min-width:110px; justify-content:center; text-align:center; padding:10px 12px; border-radius:12px;
   background:#0f172a; color:#fff; font-weight:800; letter-spacing:.04em;
 }
 .online-preview-timer.is-warning{ background:#b91c1c }
@@ -310,6 +319,10 @@ body.student-mode #onlineTestsView{ display:none !important }
 .online-preview-form{ display:flex; flex-direction:column; gap:14px }
 .online-preview-question{
   border:1px solid #dbe4f0; border-radius:14px; background:#f8fafc; padding:16px;
+}
+.online-preview-question-counter{
+  display:inline-flex; align-items:center; width:max-content; padding:6px 10px; border-radius:999px;
+  background:#eef4ff; border:1px solid #cfe0ff; color:#1e3a8a; font-weight:700; font-size:12px;
 }
 .online-preview-question-head{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px }
 .online-preview-question-head strong{ color:#0f172a }
@@ -329,6 +342,7 @@ body.student-mode #onlineTestsView{ display:none !important }
 }
 .online-preview-fillblank span{ color:#334155 }
 .online-preview-actions{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:6px }
+.online-preview-actions .btn[disabled]{ opacity:.45; cursor:not-allowed }
 .online-preview-result{
   border:1px solid #dbe4f0; border-radius:16px; background:#fff; padding:18px; display:flex; flex-direction:column; gap:14px;
 }
@@ -349,7 +363,9 @@ body.student-mode #onlineTestsView{ display:none !important }
 .online-builder-footer .resume{ color:#475569; font-size:13px }
 .online-subhint{ font-size:12px; color:#64748b; margin-top:6px }
 @media (max-width:960px){
-  .online-setup-grid,.online-type-grid,.online-builder-layout{ grid-template-columns:1fr }
+  .online-setup-grid,.online-type-grid,.online-builder-layout,.online-tests-grid{ grid-template-columns:1fr }
+  .online-test-title-row,.online-preview-progress{ align-items:flex-start; flex-direction:column }
+  .online-preview-progress-track{ width:100% }
 }
 .student-header-section{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; padding:10px; background:#f9fafb; border-radius:8px; }
 #studentElevePeriodViews .matiere-line{
@@ -579,6 +595,7 @@ body.student-mode #importSheetBtn{ display:none !important }
 .modern-input:focus,.modern-select:focus{ outline:2px solid #bfdbfe; border-color:#93c5fd }
 .pl{ border:1px solid var(--border); border-radius:12px; background:#fff; height:340px; overflow-y:auto; padding:6px }
 .pl-item{ padding:9px 12px; border:1px solid #000; border-radius:8px; cursor:pointer; font-size:14.5px; line-height:1.25; user-select:none }
+#studentListUI .pl-item{ font-size:13.5px }
 .pl-item + .pl-item{ margin-top:5px }
 .pl-item:hover{ background:#f1f5f9 }
 .pl-item.sel{ background:#e0e7ff; color:#1e3a8a; font-weight:600 }
@@ -662,6 +679,8 @@ body.student-mode .container .card{ border-top-left-radius:0 }
 
 /* ── Bandeau d'enregistrement : même hauteur que les boutons Matières / Compétences ── */
 .top-actions .btn{ height:36px; padding:0 14px; font-size:14px; line-height:1; display:inline-flex; align-items:center; justify-content:center }
+.status-wrap{ flex:0 0 auto !important; width:auto; min-width:0; margin-left:0 }
+.status-wrap > *{ flex:0 0 auto }
 .save-status-banner{ height:36px; padding:0 14px; font-size:15px; font-weight:700; line-height:34px; border-radius:8px }
 .save-status-banner small{ font-size:11px; font-weight:400; opacity:.8; margin-left:8px }
 
@@ -718,6 +737,171 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
  #userLabel{ display:none }
  .btn{ padding:8px 10px }
 }
+/* ── Devoirs ───────────────────────────────────────────────────────────────── */
+.homework-shell{ display:grid; grid-template-columns:320px minmax(0,1fr); gap:18px; align-items:start }
+.homework-calendar-panel,.homework-main-panel{
+ background:#fff; border:1px solid var(--border); border-radius:16px; box-shadow:0 8px 24px rgba(15,23,42,.06);
+}
+.homework-calendar-panel{ padding:14px }
+.homework-main-panel{ padding:16px }
+.homework-calendar-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px }
+.homework-calendar-title{ font-size:18px; font-weight:700; color:#1e3a8a }
+.homework-calendar-grid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px }
+.homework-calendar-weekday{
+ text-align:center; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; padding-bottom:4px;
+}
+.homework-calendar-day{
+ min-height:44px; border-radius:12px; border:1px solid #dbeafe; background:#fff; color:#0f172a; font-weight:700;
+ cursor:pointer; transition:all .15s ease; position:relative;
+}
+.homework-calendar-day:hover{ border-color:#60a5fa; background:#eff6ff }
+.homework-calendar-day.is-empty{ visibility:hidden }
+.homework-calendar-day.has-homework{ box-shadow:inset 0 0 0 2px #2563eb }
+.homework-calendar-day.student-homework{ background:#dbeafe; border-color:#93c5fd; color:#1e3a8a }
+.homework-calendar-day.is-selected{ background:#2563eb; border-color:#1d4ed8; color:#fff; box-shadow:none }
+.homework-calendar-day.is-today::after{
+ content:""; position:absolute; inset:auto 10px 6px 10px; height:3px; border-radius:999px; background:currentColor; opacity:.28;
+}
+.homework-toolbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px }
+.homework-toolbar-left{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end }
+.homework-toolbar .modal-form label{ margin:0 0 4px }
+.homework-toolbar .modal-form select{ min-width:180px }
+.homework-toolbar.is-hidden{ display:none }
+.homework-day-head{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap }
+.homework-day-head h3{ margin:0; color:#0f172a; font-size:22px }
+.homework-day-head p{ margin:6px 0 0; color:#64748b }
+.homework-list{ display:flex; flex-direction:column; gap:14px }
+.homework-empty{
+ padding:18px; border:1px dashed #bfdbfe; border-radius:14px; background:#f8fbff; color:#64748b; text-align:center;
+}
+.homework-entry-card{
+ position:relative; border:1px solid #dbeafe; border-radius:16px; background:#fff; padding:18px; box-shadow:0 10px 24px rgba(37,99,235,.06);
+}
+.homework-entry-card.is-exam{ border-width:2px; border-color:#dc2626; box-shadow:0 12px 24px rgba(220,38,38,.08) }
+.homework-entry-title{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px }
+.homework-entry-title h4{ margin:0; font-size:22px; line-height:1.15 }
+.homework-entry-title h4 .class-name{ color:#0f172a }
+.homework-entry-title h4 .subject-name{ color:#2563eb }
+.homework-entry-title h5{ margin:0; color:#0f172a; font-size:21px }
+.homework-entry-date{ color:#64748b; font-size:13px; margin-top:6px }
+.homework-entry-edit{
+ position:absolute; left:14px; top:14px; width:38px; height:38px; border-radius:12px; border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8; cursor:pointer;
+}
+.homework-entry-body{ color:#334155; line-height:1.6 }
+.homework-entry-body[contenteditable="true"]{
+ min-height:140px; padding:14px; border:1px solid #cbd5e1; border-radius:12px; outline:none; background:#fff;
+}
+.homework-entry-body[contenteditable="false"]{ padding:4px 0 0 }
+.homework-entry-body:empty:before{ content:attr(data-placeholder); color:#94a3b8 }
+.homework-entry-badge{
+ display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; font-size:12px; font-weight:700; background:#fee2e2; color:#b91c1c; margin-bottom:12px;
+}
+.homework-editor-toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px }
+.homework-editor-toolbar select,
+.homework-editor-toolbar input[type="color"]{
+ border:1px solid var(--border); border-radius:10px; background:#fff; padding:8px 10px; min-height:38px;
+}
+.homework-editor-toolbar button{
+ min-width:38px; min-height:38px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; font-weight:700; color:#334155;
+}
+.homework-editor-toolbar button:hover{ background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe }
+.homework-editor-meta{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px }
+.homework-editor-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px }
+.homework-tests-list{ display:flex; flex-direction:column; gap:8px; margin-top:12px }
+.homework-test-line{
+ display:flex; align-items:center; justify-content:space-between; gap:10px; border:1px solid #dbeafe; border-radius:12px; padding:10px 12px; background:#f8fbff;
+}
+.homework-test-line.is-clickable{ cursor:pointer }
+.homework-test-line.is-clickable:hover{ background:#eef6ff }
+.homework-test-line strong{ color:#0f172a }
+.homework-test-line span{ color:#2563eb; font-weight:700 }
+.homework-test-line small{ color:#64748b; display:block; margin-top:4px }
+.homework-test-remove{
+ width:30px; height:30px; border-radius:999px; border:1px solid #fecaca; background:#fff1f2; color:#dc2626; cursor:pointer; font-size:18px; line-height:1;
+}
+.homework-assign-list{ display:flex; flex-direction:column; gap:10px }
+.homework-assign-item{
+ border:1px solid #dbeafe; border-radius:12px; padding:12px; display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+}
+.homework-assign-item label{ margin:0; display:flex; gap:10px; align-items:flex-start; cursor:pointer }
+.homework-assign-item input{ margin-top:3px }
+.homework-assign-item strong{ color:#0f172a }
+.homework-assign-item p{ margin:4px 0 0; color:#64748b; font-size:13px }
+.homework-review-layout{ display:grid; grid-template-columns:330px minmax(0,1fr); gap:14px }
+.homework-review-assignments,.homework-review-students{
+ border:1px solid #dbeafe; border-radius:14px; background:#f8fbff; padding:12px; min-height:280px;
+}
+.homework-review-sort{ margin-bottom:10px }
+.homework-review-sort select{ width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:10px }
+.homework-review-assignment{
+ padding:12px; border:1px solid #dbeafe; border-radius:12px; background:#fff; cursor:pointer; margin-bottom:10px;
+}
+.homework-review-assignment.active{ border-color:#2563eb; background:#eff6ff }
+.homework-review-assignment strong{ color:#0f172a; display:block }
+.homework-review-assignment span,.homework-review-assignment small{ color:#64748b; display:block; margin-top:4px }
+.homework-review-student{
+ display:grid; grid-template-columns:auto 1fr 110px auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid #e2e8f0;
+}
+.homework-review-student:last-child{ border-bottom:none }
+.homework-status-dot{
+ width:14px; height:14px; border-radius:999px; display:inline-block; background:#ef4444; box-shadow:0 0 0 3px rgba(239,68,68,.14);
+}
+.homework-status-dot.is-done{ background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.14) }
+.homework-review-warning{ color:#b45309; font-size:18px }
+.homework-grade-input{
+ width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; text-align:center; font-weight:700;
+}
+.homework-correction-list{ display:flex; flex-direction:column; gap:14px }
+.homework-correction-question{
+ border:1px solid #dbeafe; border-radius:14px; background:#f8fbff; padding:14px;
+}
+.homework-correction-question h4{ margin:0 0 8px; color:#0f172a }
+.homework-correction-answer,.homework-correction-expected{ color:#334155; margin-top:8px }
+.homework-correction-score{ display:flex; align-items:center; gap:10px; margin-top:12px }
+.homework-correction-score input{
+ width:110px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; font-weight:700;
+}
+.homework-quiz-stack{ display:flex; flex-direction:column; gap:16px }
+.homework-quiz-card{ border:1px solid #dbeafe; border-radius:16px; background:#fff; padding:18px }
+.homework-quiz-header{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap }
+.homework-quiz-header h4{ margin:0; color:#0f172a; font-size:24px }
+.homework-quiz-badges{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px }
+.homework-quiz-badges span{
+ display:inline-flex; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-weight:700; font-size:12px;
+}
+.homework-quiz-progress{ display:flex; align-items:center; gap:10px; margin-bottom:12px }
+.homework-quiz-track{ flex:1; height:10px; border-radius:999px; background:#dbeafe; overflow:hidden }
+.homework-quiz-bar{ height:100%; width:100%; background:linear-gradient(90deg,#2563eb,#38bdf8); transition:width .2s linear }
+.homework-quiz-timer{
+ padding:6px 10px; border-radius:999px; background:#1d4ed8; color:#fff; font-weight:700; min-width:72px; text-align:center;
+}
+.homework-quiz-question-counter{ color:#1d4ed8; font-weight:700; margin-bottom:12px }
+.homework-quiz-options{ display:flex; flex-direction:column; gap:10px; margin-top:14px }
+.homework-quiz-option{
+ display:flex; align-items:flex-start; gap:10px; border:1px solid #dbeafe; border-radius:12px; background:#f8fbff; padding:12px;
+}
+.homework-quiz-text,.homework-quiz-blank{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:12px; font-size:15px }
+.homework-quiz-blank-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+.homework-quiz-actions{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:16px }
+.homework-correction-summary{
+ display:flex; flex-direction:column; gap:10px; margin-top:16px;
+}
+.homework-correction-summary .online-preview-correction-item{ margin:0 }
+.btn-homework-review{
+ width:42px; height:42px; border-radius:12px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer; font-size:18px;
+}
+.btn-homework-review.is-warning{ border:2px solid #f59e0b; color:#b45309; background:#fff7ed }
+.btn-homework-review.is-danger{ border:3px solid #dc2626; color:#b91c1c; background:#fff1f2 }
+body.student-mode #homeworkView .card-header strong::after{ content:""; }
+@media (max-width:980px){
+ .homework-shell,.homework-review-layout{ grid-template-columns:1fr }
+}
+@media (max-width:620px){
+ .homework-toolbar-left{ width:100% }
+ .homework-toolbar .modal-form select{ min-width:0; width:100% }
+ .homework-review-student{ grid-template-columns:auto 1fr; }
+ .homework-grade-input{ grid-column:1/-1 }
+}
 </style>
 </head>
 <body class="auth-pending">
@@ -738,7 +922,8 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
   <button class="tab-btn active" data-target="elevesView">Élèves</button>
   <button class="tab-btn" data-target="classesView">Classes</button>
   <button class="tab-btn" data-target="appreciationsView">Appréciations</button>
-  <button class="tab-btn" data-target="onlineTestsView">Tests en ligne</button>
+  <button class="tab-btn" data-target="onlineTestsView">Test en ligne</button>
+  <button class="tab-btn" data-target="homeworkView">Devoirs</button>
  </div>
  <div class="locks" id="locksBar">
   <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1">🔓</button></div>
@@ -869,7 +1054,7 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
  <section id="onlineTestsView" class="view">
   <div class="card">
    <div class="card-header">
-    <strong>Tests en ligne</strong>
+    <strong>Test en ligne</strong>
    </div>
    <div class="card-body">
     <div class="online-tests-shell">
@@ -878,6 +1063,28 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
       <button class="btn btn-primary" id="openCreateOnlineTestBtn" type="button" style="font-size:16px;padding:12px 18px;">+ Créer un test</button>
      </div>
      <div id="onlineTestsList" class="online-tests-grid"></div>
+    </div>
+   </div>
+  </div>
+ </section>
+ <section id="homeworkView" class="view">
+  <div class="card">
+   <div class="card-header">
+    <strong>Devoirs</strong>
+   </div>
+   <div class="card-body">
+    <div class="homework-shell">
+     <aside class="homework-calendar-panel">
+      <div class="homework-calendar-header">
+       <button class="btn" id="homeworkPrevMonth" type="button">←</button>
+       <div class="homework-calendar-title" id="homeworkMonthLabel">Mois</div>
+       <button class="btn" id="homeworkNextMonth" type="button">→</button>
+      </div>
+      <div id="homeworkCalendarGrid" class="homework-calendar-grid"></div>
+     </aside>
+     <section class="homework-main-panel">
+      <div id="homeworkMainContent"></div>
+     </section>
     </div>
    </div>
   </div>
@@ -1836,6 +2043,79 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
   </div>
   <div class="modal-body">
    <div id="onlinePreviewBody" class="online-preview-stack"></div>
+  </div>
+ </div>
+</div>
+
+<div id="homeworkAssignTestsModal" class="modal" aria-hidden="true" style="z-index:175;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3>Ajouter un test</h3>
+   <button class="modal-close" id="homeworkAssignTestsClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div id="homeworkAssignTestsList" class="homework-assign-list"></div>
+   <div class="modal-actions">
+    <button type="button" class="btn" id="homeworkAssignTestsCancel">Annuler</button>
+    <button type="button" class="btn btn-primary" id="homeworkAssignTestsValidate">Valider</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="homeworkQuizModal" class="modal" aria-hidden="true" style="z-index:176;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3 id="homeworkQuizTitle">Test assigné</h3>
+   <button class="modal-close" id="homeworkQuizClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div id="homeworkQuizBody" class="homework-quiz-stack"></div>
+  </div>
+ </div>
+</div>
+
+<div id="homeworkReviewModal" class="modal" aria-hidden="true" style="z-index:177;">
+ <div class="modal-card online-modal-wide" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3>Soumissions des devoirs</h3>
+   <button class="modal-close" id="homeworkReviewClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="homework-review-layout">
+    <div class="homework-review-assignments">
+     <div class="homework-review-sort">
+      <select id="homeworkReviewSort">
+       <option value="class">Tri par classe puis matière</option>
+       <option value="uncorrected">Tri par test non corrigé</option>
+      </select>
+     </div>
+     <div id="homeworkReviewAssignments"></div>
+    </div>
+    <div class="homework-review-students">
+     <div id="homeworkReviewStudents"></div>
+    </div>
+   </div>
+   <div class="modal-actions">
+    <button type="button" class="btn" id="homeworkReviewCancel">Fermer</button>
+    <button type="button" class="btn btn-primary" id="homeworkPublishGrades">Saisir les notes</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="homeworkCorrectionModal" class="modal" aria-hidden="true" style="z-index:178;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3 id="homeworkCorrectionTitle">Corriger la copie</h3>
+   <button class="modal-close" id="homeworkCorrectionClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <div id="homeworkCorrectionBody" class="homework-correction-list"></div>
+   <div class="modal-actions">
+    <button type="button" class="btn" id="homeworkCorrectionCancel">Annuler</button>
+    <button type="button" class="btn btn-primary" id="homeworkCorrectionValidate">Valider la correction</button>
+   </div>
   </div>
  </div>
 </div>
@@ -9559,29 +9839,19 @@ function renderOnlineTestsView(){
   return;
  }
  list.innerHTML = tests.map(test=>{
-  const badges = [];
-  if(test.options?.trainingMode) badges.push("Mode entraînement");
-  if(test.options?.manualReviewRequired) badges.push("Correction professeur");
-  if(test.options?.focusMode) badges.push("Mode Focus");
-  if(test.options?.timed) badges.push(formatOnlineTestDuration(test.options.timeLimitSeconds||0));
-  if(test.options?.shuffleQuestions) badges.push("Ordre aléatoire");
-  if(test.options?.hideGrade) badges.push("Note masquée");
-  if(test.options?.showGradeDirect) badges.push("Note vers École Directe");
   const questionCount=(test.questions||[]).length;
+  const totalPoints=getOnlineTestTotalPoints(test);
   const updated=formatOnlineTestDate(test.updatedAt);
   return `
    <article class="online-test-card">
-    <div>
+    <div class="online-test-title-row">
      <h4>${escHtml(test.title||"Sans titre")}</h4>
      <div class="online-test-meta">
       <span>${escHtml(test.subject||"Matière non précisée")}</span>
       <span>${questionCount} question${questionCount>1?"s":""}</span>
      </div>
     </div>
-    <div class="online-test-points">Total : ${fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"")} point${getOnlineTestTotalPoints(test)>1?"s":""}</div>
-    <div class="online-test-badges">
-     ${(badges.length ? badges : ["Configuration standard"]).map(label=>`<span class="badge">${escHtml(label)}</span>`).join("")}
-    </div>
+    <div class="online-test-points">Total : ${fmt(totalPoints,2).replace(/\.00$/,"")} point${totalPoints>1?"s":""}</div>
     <div class="online-test-card-footer">
      <span>${updated ? `Dernière mise à jour : ${updated}` : "Nouveau test"}</span>
      <div class="online-test-card-actions">
@@ -9635,7 +9905,10 @@ const ONLINE_TEST_DRAFT = {
 const ONLINE_TEST_PREVIEW_STATE = {
  test: null,
  questions: [],
+ answers: {},
+ currentQuestionIndex: 0,
  remainingSeconds: null,
+ totalDurationSeconds: null,
  timerId: null,
  visibilityHandler: null,
  blurHandler: null,
@@ -9672,7 +9945,10 @@ function resetOnlineTestPreviewState(){
  detachOnlineTestPreviewFocusWatchers();
  ONLINE_TEST_PREVIEW_STATE.test=null;
  ONLINE_TEST_PREVIEW_STATE.questions=[];
+ ONLINE_TEST_PREVIEW_STATE.answers={};
+ ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex=0;
  ONLINE_TEST_PREVIEW_STATE.remainingSeconds=null;
+ ONLINE_TEST_PREVIEW_STATE.totalDurationSeconds=null;
  ONLINE_TEST_PREVIEW_STATE.submitted=false;
 }
 function closeOnlineTestPreviewModal(){
@@ -9839,14 +10115,58 @@ function renderOnlinePreviewIntro(){
      </div>
     </div>
    </div>
-   <p class="online-preview-note">Mode aperçu professeur : aucun résultat n’est enregistré, même hors mode entraînement.</p>
    ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
    <div class="online-preview-actions" style="justify-content:flex-end;">
     <button type="button" class="btn btn-primary" id="onlinePreviewStartBtn">Commencer le test</button>
    </div>
   </div>
  `;
- document.getElementById("onlinePreviewStartBtn")?.addEventListener("click",renderOnlinePreviewForm);
+ document.getElementById("onlinePreviewStartBtn")?.addEventListener("click",startOnlinePreviewSession);
+}
+function getOnlinePreviewCurrentQuestion(){
+ return ONLINE_TEST_PREVIEW_STATE.questions[ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex] || null;
+}
+function getOnlinePreviewAnswerFromDom(question){
+ if(!question) return "";
+ if(question.type==="written"){
+  return document.querySelector(`.online-preview-text[data-question-id="${CSS.escape(question.id)}"]`)?.value || "";
+ }
+ if(question.type==="fillblank"){
+  return [...document.querySelectorAll(`.online-preview-blank-input[data-question-id="${CSS.escape(question.id)}"]`)]
+   .sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex))
+   .map(input=>input.value || "");
+ }
+ if(question.type==="qcm"){
+  return [...document.querySelectorAll(`input[name="preview_${CSS.escape(question.id)}"]:checked`)].map(input=>input.value);
+ }
+ return document.querySelector(`input[name="preview_${CSS.escape(question.id)}"]:checked`)?.value || "";
+}
+function saveCurrentOnlinePreviewAnswer(){
+ const question=getOnlinePreviewCurrentQuestion();
+ if(!question) return;
+ ONLINE_TEST_PREVIEW_STATE.answers[question.id]=getOnlinePreviewAnswerFromDom(question);
+}
+function hydrateOnlinePreviewQuestionInputs(question){
+ if(!question) return;
+ const saved=ONLINE_TEST_PREVIEW_STATE.answers[question.id];
+ if(question.type==="written"){
+  const input=document.querySelector(`.online-preview-text[data-question-id="${CSS.escape(question.id)}"]`);
+  if(input) input.value=typeof saved==="string" ? saved : "";
+  return;
+ }
+ if(question.type==="fillblank"){
+  const values=Array.isArray(saved) ? saved : [];
+  [...document.querySelectorAll(`.online-preview-blank-input[data-question-id="${CSS.escape(question.id)}"]`)]
+   .sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex))
+   .forEach((input,index)=>{ input.value=values[index] || ""; });
+  return;
+ }
+ const selected=question.type==="qcm"
+  ? (Array.isArray(saved) ? saved : [])
+  : (saved ? [saved] : []);
+ document.querySelectorAll(`input[name="preview_${CSS.escape(question.id)}"]`).forEach(input=>{
+  input.checked=selected.includes(input.value);
+ });
 }
 function renderOnlinePreviewQuestionInput(question){
  if(question.type==="written"){
@@ -9872,13 +10192,26 @@ function renderOnlinePreviewQuestionInput(question){
  `).join("")}</div>`;
 }
 function updateOnlinePreviewTimerDisplay(){
+ const progress=document.getElementById("onlinePreviewProgress");
+ const bar=document.getElementById("onlinePreviewProgressBar");
  const timer=document.getElementById("onlinePreviewTimer");
  if(!timer) return;
  const seconds=Number(ONLINE_TEST_PREVIEW_STATE.remainingSeconds);
- if(!(seconds>=0)){ timer.style.display="none"; return; }
+ const total=Number(ONLINE_TEST_PREVIEW_STATE.totalDurationSeconds);
+ if(!(seconds>=0) || !(total>0)){
+  if(progress) progress.style.display="none";
+  timer.style.display="none";
+  return;
+ }
  const minutes=Math.floor(seconds/60);
  const remainder=seconds%60;
- timer.style.display="";
+ const ratio=Math.max(0, Math.min(1, seconds/total));
+ if(progress){
+  progress.style.display="flex";
+  progress.classList.toggle("is-warning", seconds<=30);
+ }
+ if(bar) bar.style.width=`${ratio*100}%`;
+ timer.style.display="inline-flex";
  timer.classList.toggle("is-warning", seconds<=30);
  timer.textContent=`${String(minutes).padStart(2,"0")}:${String(remainder).padStart(2,"0")}`;
 }
@@ -9916,10 +10249,31 @@ function renderOnlinePreviewForm(){
  const body=document.getElementById("onlinePreviewBody");
  const test=ONLINE_TEST_PREVIEW_STATE.test;
  if(!body||!test) return;
- ONLINE_TEST_PREVIEW_STATE.remainingSeconds=test.options?.timed ? Number(test.options.timeLimitSeconds)||0 : null;
- ONLINE_TEST_PREVIEW_STATE.submitted=false;
+ const totalQuestions=ONLINE_TEST_PREVIEW_STATE.questions.length;
+ if(!totalQuestions){
+  body.innerHTML = `
+   <div class="online-preview-result">
+    <p class="online-preview-note">Aucune question n’est encore configurée pour ce test.</p>
+    <div class="online-preview-actions">
+     <button type="button" class="btn btn-primary" id="onlinePreviewDoneBtn">Fermer</button>
+    </div>
+   </div>
+  `;
+  document.getElementById("onlinePreviewDoneBtn")?.addEventListener("click",closeOnlineTestPreviewModal);
+  return;
+ }
+ const index=Math.max(0, Math.min(ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex, totalQuestions-1));
+ ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex=index;
+ const question=ONLINE_TEST_PREVIEW_STATE.questions[index];
+ const isLast=index===totalQuestions-1;
  body.innerHTML = `
   <div class="online-preview-card">
+   <div id="onlinePreviewProgress" class="online-preview-progress">
+    <div class="online-preview-progress-track">
+     <div id="onlinePreviewProgressBar" class="online-preview-progress-bar"></div>
+    </div>
+    <div id="onlinePreviewTimer" class="online-preview-timer"></div>
+   </div>
    <div class="online-preview-header">
     <div>
      <h4>${escHtml(test.title||"Test sans titre")}</h4>
@@ -9928,52 +10282,77 @@ function renderOnlinePreviewForm(){
       <span>${ONLINE_TEST_PREVIEW_STATE.questions.length} question${ONLINE_TEST_PREVIEW_STATE.questions.length>1?"s":""}</span>
      </div>
     </div>
-    <div id="onlinePreviewTimer" class="online-preview-timer"></div>
    </div>
-   <p class="online-preview-note">Mode aperçu professeur : aucun résultat n’est enregistré, même hors mode entraînement.</p>
    <form id="onlineTestPreviewForm" class="online-preview-form">
-    ${ONLINE_TEST_PREVIEW_STATE.questions.map((question,index)=>`
-     <section class="online-preview-question">
-      <div class="online-preview-question-head">
-       <strong>Question ${index+1}</strong>
-       <span>${fmt(question.points,2).replace(/\.00$/,"")} pt${Number(question.points)>1?"s":""}</span>
-      </div>
-      <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
-      ${renderOnlinePreviewQuestionInput(question)}
-     </section>
-    `).join("")}
+    <div class="online-preview-question-counter">Question ${index+1} / ${totalQuestions}</div>
+    <section class="online-preview-question">
+     <div class="online-preview-question-head">
+      <strong>Question ${index+1}</strong>
+      <span>${fmt(question.points,2).replace(/\.00$/,"")} pt${Number(question.points)>1?"s":""}</span>
+     </div>
+     <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
+     ${renderOnlinePreviewQuestionInput(question)}
+    </section>
     <div class="online-preview-actions">
-     <button type="button" class="btn" id="onlinePreviewBackBtn">Retour</button>
-     <button type="submit" class="btn btn-primary">Rendre le test</button>
+     <button type="button" class="btn" id="onlinePreviewPrevBtn" ${index===0 ? "disabled" : ""}>←</button>
+     ${isLast
+      ? `<button type="submit" class="btn btn-primary" id="onlinePreviewSubmitBtn">Rendre le test</button>`
+      : `<button type="button" class="btn btn-primary" id="onlinePreviewNextBtn">→</button>`}
     </div>
    </form>
   </div>
  `;
- document.getElementById("onlinePreviewBackBtn")?.addEventListener("click",renderOnlinePreviewIntro);
+ hydrateOnlinePreviewQuestionInputs(question);
+ document.getElementById("onlinePreviewPrevBtn")?.addEventListener("click",()=>{
+  saveCurrentOnlinePreviewAnswer();
+  if(ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex>0){
+   ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex -= 1;
+   renderOnlinePreviewForm();
+  }
+ });
+ document.getElementById("onlinePreviewNextBtn")?.addEventListener("click",()=>{
+  saveCurrentOnlinePreviewAnswer();
+  if(ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex<ONLINE_TEST_PREVIEW_STATE.questions.length-1){
+   ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex += 1;
+   renderOnlinePreviewForm();
+  }
+ });
  document.getElementById("onlineTestPreviewForm")?.addEventListener("submit",e=>{
   e.preventDefault();
+  saveCurrentOnlinePreviewAnswer();
   finishOnlineTestPreview("submitted");
  });
  updateOnlinePreviewTimerDisplay();
+}
+function startOnlinePreviewSession(){
+ const test=ONLINE_TEST_PREVIEW_STATE.test;
+ ONLINE_TEST_PREVIEW_STATE.answers={};
+ ONLINE_TEST_PREVIEW_STATE.currentQuestionIndex=0;
+ ONLINE_TEST_PREVIEW_STATE.remainingSeconds=test?.options?.timed ? Number(test.options.timeLimitSeconds)||0 : null;
+ ONLINE_TEST_PREVIEW_STATE.totalDurationSeconds=test?.options?.timed ? Number(test.options.timeLimitSeconds)||0 : null;
+ ONLINE_TEST_PREVIEW_STATE.submitted=false;
+ renderOnlinePreviewForm();
  startOnlinePreviewTimer();
  attachOnlineTestPreviewFocusWatchers();
 }
 function collectOnlineTestPreviewAnswers(){
+ saveCurrentOnlinePreviewAnswer();
  const answers={};
  ONLINE_TEST_PREVIEW_STATE.questions.forEach(question=>{
+  const stored=ONLINE_TEST_PREVIEW_STATE.answers[question.id];
   if(question.type==="written"){
-   answers[question.id]=document.querySelector(`.online-preview-text[data-question-id="${CSS.escape(question.id)}"]`)?.value||"";
+   answers[question.id]=typeof stored==="string" ? stored : "";
    return;
   }
   if(question.type==="fillblank"){
-   answers[question.id]=[...document.querySelectorAll(`.online-preview-blank-input[data-question-id="${CSS.escape(question.id)}"]`)].sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex)).map(input=>input.value||"");
+   answers[question.id]=Array.isArray(stored) ? stored : [];
    return;
   }
   if(question.type==="qcm"){
-   answers[question.id]=[...document.querySelectorAll(`input[name="preview_${CSS.escape(question.id)}"]:checked`)].map(input=>input.value);
+   answers[question.id]=Array.isArray(stored) ? stored : [];
    return;
   }
-  answers[question.id]=document.querySelector(`input[name="preview_${CSS.escape(question.id)}"]:checked`)?.value||"";
+  answers[question.id]=typeof stored==="string" ? stored : "";
  });
  return answers;
 }
@@ -10862,6 +11241,1269 @@ function initApp(){
   console.log("Application initialisée avec succès.");
  }catch(e){console.error("initApp error:",e);alert("Erreur init : "+e.message);}
 }
+
+/* ── Devoirs ───────────────────────────────────────────────────────────────── */
+(function(){
+ const homeworkAssignTestsModal=document.getElementById("homeworkAssignTestsModal");
+ const homeworkQuizModal=document.getElementById("homeworkQuizModal");
+ const homeworkReviewModal=document.getElementById("homeworkReviewModal");
+ const homeworkCorrectionModal=document.getElementById("homeworkCorrectionModal");
+ const HOMEWORK_STATE = {
+  selectedDate: todayISO(),
+  currentMonth: (()=>{ const d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })(),
+  draft: null,
+  assignSelection: [],
+  reviewFilterTestId: "",
+  reviewSelectedKey: "",
+  correction: null,
+  quiz: null
+ };
+
+ function ensureHomeworkStore(){
+  if(!Array.isArray(DATA.homework)) DATA.homework=[];
+  if(!Array.isArray(DATA.homeworkSubmissions)) DATA.homeworkSubmissions=[];
+ }
+ function sanitizeHomeworkHtml(html){
+  return String(html||"")
+   .replace(/<script[\s\S]*?<\/script>/gi,"")
+   .replace(/\son\w+="[^"]*"/gi,"")
+   .replace(/\son\w+='[^']*'/gi,"");
+ }
+ function normalizeHomeworkEntry(raw){
+  return {
+   id: raw?.id || makeUid("hw"),
+   dateISO: raw?.dateISO || todayISO(),
+   classId: raw?.classId || "",
+   subject: String(raw?.subject || "").trim(),
+   contentHtml: sanitizeHomeworkHtml(raw?.contentHtml || ""),
+   isExam: !!raw?.isExam,
+   testIds: Array.isArray(raw?.testIds) ? raw.testIds.filter(Boolean) : [],
+   locked: raw?.locked !== false,
+   createdAt: raw?.createdAt || new Date().toISOString(),
+   updatedAt: raw?.updatedAt || new Date().toISOString()
+  };
+ }
+ function normalizeHomeworkSubmission(raw){
+  return {
+   id: raw?.id || makeUid("hws"),
+   homeworkId: raw?.homeworkId || "",
+   testId: raw?.testId || "",
+   studentId: raw?.studentId || "",
+   answers: raw?.answers && typeof raw.answers==="object" ? raw.answers : {},
+   autoResult: raw?.autoResult && typeof raw.autoResult==="object" ? raw.autoResult : null,
+   review: raw?.review && typeof raw.review==="object" ? raw.review : {},
+   submittedAt: raw?.submittedAt || "",
+   validatedAt: raw?.validatedAt || "",
+   publishedAt: raw?.publishedAt || "",
+   manualOverride: raw?.manualOverride==null ? "" : String(raw.manualOverride),
+   noteId: raw?.noteId || ""
+  };
+ }
+ function homeworkClassName(classId){
+  return DATA.classes.find(c=>c.id===classId)?.name || "Classe inconnue";
+ }
+ function homeworkClassById(classId){
+  return DATA.classes.find(c=>c.id===classId) || null;
+ }
+ function homeworkStudentById(studentId){
+  return DATA.students.find(s=>s.id===studentId) || null;
+ }
+ function homeworkStudentName(studentId){
+  const stu=homeworkStudentById(studentId);
+  return stu ? `${stu.first} ${stu.last}` : "Élève inconnu";
+ }
+ function homeworkClassSubjects(classId){
+  const cls=homeworkClassById(classId);
+  return (cls?.subjects||[]).map(s=>typeof s==="object" ? s.name : s).filter(Boolean);
+ }
+ function homeworkSortedClasses(){
+  return DATA.classes.slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"fr",{sensitivity:"base"}));
+ }
+ function homeworkFormatLong(dateISO){
+  const d=new Date(`${dateISO}T12:00:00`);
+  return d.toLocaleDateString("fr-FR",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
+ }
+ function homeworkDateToFr(dateISO){
+  const [y,m,d]=String(dateISO||"").split("-");
+  if(!y||!m||!d) return "";
+  return `${d}/${m}/${y}`;
+ }
+ function homeworkPeriodFromDate(dateISO){
+  const d=new Date(`${dateISO}T12:00:00`);
+  const month=d.getMonth()+1;
+  if(month>=9 && month<=11) return "T1";
+  if(month===12 || month<=2) return "T2";
+  if(month>=3 && month<=5) return "T3";
+  return "T4";
+ }
+ function getHomeworkById(homeworkId){
+  ensureHomeworkStore();
+  return DATA.homework.find(item=>item.id===homeworkId) || null;
+ }
+ function getHomeworkTest(testId){
+  return (DATA.onlineTests||[]).find(test=>test.id===testId) || null;
+ }
+ function homeworkStudentId(){
+  return AUTH.role==="eleve" ? AUTH.studentId : "";
+ }
+ function homeworkStudentClassId(){
+  return homeworkStudentById(homeworkStudentId())?.classId || "";
+ }
+ function getHomeworkSubmission(homeworkId,testId,studentId){
+  ensureHomeworkStore();
+  return DATA.homeworkSubmissions.find(item=>item.homeworkId===homeworkId && item.testId===testId && item.studentId===studentId) || null;
+ }
+ function upsertHomeworkSubmission(payload){
+  ensureHomeworkStore();
+  const normalized=normalizeHomeworkSubmission(payload);
+  const idx=DATA.homeworkSubmissions.findIndex(item=>item.id===normalized.id || (item.homeworkId===normalized.homeworkId && item.testId===normalized.testId && item.studentId===normalized.studentId));
+  if(idx>=0) DATA.homeworkSubmissions[idx]=normalized;
+  else DATA.homeworkSubmissions.push(normalized);
+  return normalized;
+ }
+ function getHomeworkOnDate(dateISO){
+  ensureHomeworkStore();
+  const list=DATA.homework.filter(item=>item.dateISO===dateISO);
+  return list.sort((a,b)=>{
+   const classCompare=homeworkClassName(a.classId).localeCompare(homeworkClassName(b.classId),"fr",{sensitivity:"base"});
+   if(classCompare) return classCompare;
+   return String(a.subject||"").localeCompare(String(b.subject||""),"fr",{sensitivity:"base"});
+  });
+ }
+ function getHomeworkForStudentDate(dateISO){
+  const classId=homeworkStudentClassId();
+  return getHomeworkOnDate(dateISO).filter(item=>item.classId===classId);
+ }
+ function saveHomeworkDraftFromDom(){
+  if(!HOMEWORK_STATE.draft) return;
+  const editor=document.getElementById("homeworkEditorInput");
+  const exam=document.getElementById("homeworkIsExam");
+  if(editor) HOMEWORK_STATE.draft.contentHtml=sanitizeHomeworkHtml(editor.innerHTML);
+  if(exam) HOMEWORK_STATE.draft.isExam=!!exam.checked;
+ }
+ function hasHomeworkCollision(draft){
+  return (DATA.homework||[]).some(item=>item.dateISO===draft.dateISO && item.classId===draft.classId && item.subject===draft.subject && item.id!==draft.id);
+ }
+ function startHomeworkDraft(homeworkId=null){
+  ensureHomeworkStore();
+  if(homeworkId){
+   const existing=getHomeworkById(homeworkId);
+   if(!existing) return;
+   HOMEWORK_STATE.draft=normalizeHomeworkEntry({...existing, locked:false});
+  }else{
+   const classId=document.getElementById("homeworkClassSelect")?.value || homeworkSortedClasses()[0]?.id || "";
+   const subject=document.getElementById("homeworkSubjectSelect")?.value || homeworkClassSubjects(classId)[0] || "";
+   if(!classId){ alert("Ajoute d’abord au moins une classe."); return; }
+   if(!subject){ alert("Ajoute d’abord au moins une matière pour cette classe."); return; }
+   const draft=normalizeHomeworkEntry({
+    dateISO: HOMEWORK_STATE.selectedDate,
+    classId,
+    subject,
+    contentHtml:"",
+    isExam:false,
+    testIds:[],
+    locked:false
+   });
+   if(hasHomeworkCollision(draft)){
+    alert("Un devoir existe déjà pour cette classe, cette matière et cette date.");
+    return;
+   }
+   HOMEWORK_STATE.draft=draft;
+  }
+  renderHomeworkView();
+ }
+ function cancelHomeworkDraft(){
+  HOMEWORK_STATE.draft=null;
+  renderHomeworkView();
+ }
+ function saveHomeworkDraft(){
+  if(AUTH.role!=="prof" || !HOMEWORK_STATE.draft) return;
+  saveHomeworkDraftFromDom();
+  const draft=normalizeHomeworkEntry({...HOMEWORK_STATE.draft, locked:true, updatedAt:new Date().toISOString()});
+  if(!draft.subject){ alert("La matière est requise."); return; }
+  const editorText=String(draft.contentHtml||"").replace(/<[^>]+>/g,"").trim();
+  if(!editorText){ alert("Saisis le contenu du devoir."); return; }
+  if(hasHomeworkCollision(draft)){
+    alert("Un devoir existe déjà pour cette classe, cette matière et cette date.");
+    return;
+  }
+  ensureHomeworkStore();
+  const idx=DATA.homework.findIndex(item=>item.id===draft.id);
+  if(idx>=0) DATA.homework[idx]=draft;
+  else DATA.homework.push(draft);
+  HOMEWORK_STATE.draft=null;
+  saveData();
+  renderHomeworkView();
+  renderOnlineTestsView();
+ }
+ function renderHomeworkCalendar(){
+  const grid=document.getElementById("homeworkCalendarGrid");
+  const label=document.getElementById("homeworkMonthLabel");
+  if(!grid||!label) return;
+  ensureHomeworkStore();
+  const d=HOMEWORK_STATE.currentMonth;
+  label.textContent=d.toLocaleDateString("fr-FR",{month:"long", year:"numeric"});
+  const firstDay=new Date(d.getFullYear(), d.getMonth(), 1);
+  const lastDay=new Date(d.getFullYear(), d.getMonth()+1, 0);
+  const offset=(firstDay.getDay()+6)%7;
+  const days=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  const teacherDates=new Set((DATA.homework||[]).map(item=>item.dateISO));
+  const studentDates=new Set((DATA.homework||[]).filter(item=>item.classId===homeworkStudentClassId()).map(item=>item.dateISO));
+  const cells=[];
+  days.forEach(day=>cells.push(`<div class="homework-calendar-weekday">${day}</div>`));
+  for(let i=0;i<offset;i++) cells.push('<div class="homework-calendar-day is-empty"></div>');
+  for(let day=1; day<=lastDay.getDate(); day++){
+   const dateISO=todayISOFromDate(new Date(d.getFullYear(), d.getMonth(), day));
+   const teacherHas=teacherDates.has(dateISO);
+   const studentHas=studentDates.has(dateISO);
+   const isSelected=HOMEWORK_STATE.selectedDate===dateISO;
+   const isToday=todayISO()===dateISO;
+   cells.push(`
+    <button type="button"
+      class="homework-calendar-day ${teacherHas ? "has-homework" : ""} ${studentHas ? "student-homework" : ""} ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""}"
+      data-hw-action="select-date"
+      data-date="${dateISO}">
+      ${day}
+    </button>
+   `);
+  }
+  grid.innerHTML=cells.join("");
+ }
+ function renderHomeworkTeacherToolbar(){
+  const classes=homeworkSortedClasses();
+  const selectedClass=HOMEWORK_STATE.draft?.classId || document.getElementById("homeworkClassSelect")?.value || classes[0]?.id || "";
+  const subjects=homeworkClassSubjects(selectedClass);
+  const selectedSubject=HOMEWORK_STATE.draft?.subject || document.getElementById("homeworkSubjectSelect")?.value || subjects[0] || "";
+  return `
+   <div class="homework-toolbar ${HOMEWORK_STATE.draft ? "is-hidden" : ""}">
+    <div class="homework-toolbar-left">
+     <div class="modal-form">
+      <label>Classe</label>
+      <select id="homeworkClassSelect">${classes.map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===selectedClass?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+     </div>
+     <div class="modal-form">
+      <label>Matière</label>
+      <select id="homeworkSubjectSelect">${subjects.map(subject=>`<option value="${escHtml(subject)}" ${subject===selectedSubject?"selected":""}>${escHtml(subject)}</option>`).join("")}</select>
+     </div>
+    </div>
+    <button type="button" class="btn btn-primary" data-hw-action="add-homework">Ajouter un devoir</button>
+   </div>
+  `;
+ }
+ function renderHomeworkAssignedTests(testIds, editable){
+  if(!testIds.length) return "";
+  return `<div class="homework-tests-list">${testIds.map(testId=>{
+   const test=getHomeworkTest(testId);
+   const total=test ? fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"") : "0";
+   const title=test?.title || "Test supprimé";
+   return `
+    <div class="homework-test-line ${editable ? "" : ""}" data-test-id="${escHtml(testId)}">
+     <div>
+      <strong>${escHtml(title)}</strong>
+      <small>${test ? escHtml(test.subject||"") : "Test indisponible"}</small>
+     </div>
+     <div style="display:flex;align-items:center;gap:10px;">
+      <span>${total} pts</span>
+      ${editable ? `<button type="button" class="homework-test-remove" data-hw-action="remove-assigned-test" data-test-id="${escHtml(testId)}">×</button>` : ""}
+     </div>
+    </div>
+   `;
+  }).join("")}</div>`;
+ }
+ function renderHomeworkEditorCard(){
+  const draft=HOMEWORK_STATE.draft;
+  if(!draft) return "";
+  const className=homeworkClassName(draft.classId);
+  return `
+   <article class="homework-entry-card">
+    <div class="homework-entry-title">
+     <div>
+      <h4><span class="class-name">${escHtml(className)}</span> - <span class="subject-name">${escHtml(draft.subject)}</span></h4>
+      <div class="homework-entry-date">${escHtml(homeworkFormatLong(draft.dateISO))}</div>
+     </div>
+    </div>
+    <div class="homework-editor-meta">
+     <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
+      <input type="checkbox" id="homeworkIsExam" ${draft.isExam ? "checked" : ""}>
+      <span>Évaluation ou contrôle</span>
+     </label>
+    </div>
+    <div class="homework-editor-toolbar">
+     <select data-hw-action="editor-font-family">
+      <option value="Arial">Arial</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Tahoma">Tahoma</option>
+      <option value="Verdana">Verdana</option>
+     </select>
+     <select data-hw-action="editor-font-size">
+      <option value="2">Petit</option>
+      <option value="3" selected>Normal</option>
+      <option value="4">Grand</option>
+      <option value="5">Très grand</option>
+     </select>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="bold"><strong>B</strong></button>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="italic"><em>I</em></button>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="underline"><u>U</u></button>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="justifyLeft">G</button>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="justifyCenter">C</button>
+     <button type="button" data-hw-action="editor-cmd" data-cmd="justifyRight">D</button>
+     <input type="color" value="#0f172a" data-hw-action="editor-fore-color">
+     <input type="color" value="#fef08a" data-hw-action="editor-back-color">
+    </div>
+    <div id="homeworkEditorInput" class="homework-entry-body" contenteditable="true" data-placeholder="Saisis le devoir ici...">${draft.contentHtml || ""}</div>
+    <div class="homework-editor-actions">
+     <button type="button" class="btn" data-hw-action="open-assign-tests">Ajouter un test</button>
+     <div style="display:flex;gap:8px;">
+      <button type="button" class="btn" data-hw-action="cancel-homework">Annuler</button>
+      <button type="button" class="btn btn-primary" data-hw-action="save-homework">Enregistrer</button>
+     </div>
+    </div>
+    ${renderHomeworkAssignedTests(draft.testIds,true)}
+   </article>
+  `;
+ }
+ function renderTeacherHomeworkCard(homework){
+  const className=homeworkClassName(homework.classId);
+  return `
+   <article class="homework-entry-card ${homework.isExam ? "is-exam" : ""}">
+    <button type="button" class="homework-entry-edit" data-hw-action="edit-homework" data-homework-id="${escHtml(homework.id)}" title="Modifier">✎</button>
+    <div class="homework-entry-title" style="padding-left:42px;">
+     <div>
+      <h4><span class="class-name">${escHtml(className)}</span> - <span class="subject-name">${escHtml(homework.subject)}</span></h4>
+      <div class="homework-entry-date">${escHtml(homeworkFormatLong(homework.dateISO))}</div>
+     </div>
+    </div>
+    ${homework.isExam ? '<div class="homework-entry-badge">Contrôle</div>' : ""}
+    <div class="homework-entry-body" contenteditable="false">${homework.contentHtml || '<span style="color:#94a3b8;">Aucun contenu.</span>'}</div>
+    ${renderHomeworkAssignedTests(homework.testIds,false)}
+   </article>
+  `;
+ }
+ function getHomeworkStudentSubmissionState(homework,test){
+  const submission=getHomeworkSubmission(homework.id,test.id,homeworkStudentId());
+  if(!submission) return { submission:null, label:"À faire", status:"todo" };
+  if(submission.publishedAt) return { submission, label:"Correction disponible", status:"published" };
+  if(submission.submittedAt) return { submission, label:"Rendu - correction en attente", status:"submitted" };
+  return { submission, label:"À faire", status:"todo" };
+ }
+ function renderStudentHomeworkCard(homework){
+  return `
+   <article class="homework-entry-card ${homework.isExam ? "is-exam" : ""}">
+    <div class="homework-entry-title">
+     <div>
+      <h5>${escHtml(homework.subject)}</h5>
+      <div class="homework-entry-date">${escHtml(homeworkFormatLong(homework.dateISO))}</div>
+     </div>
+    </div>
+    ${homework.isExam ? '<div class="homework-entry-badge">Contrôle</div>' : ""}
+    <div class="homework-entry-body" contenteditable="false">${homework.contentHtml || '<span style="color:#94a3b8;">Aucun contenu.</span>'}</div>
+    <div class="homework-tests-list">
+     ${(homework.testIds||[]).map(testId=>{
+      const test=getHomeworkTest(testId);
+      if(!test) return "";
+      const total=fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"");
+      const state=getHomeworkStudentSubmissionState(homework,test);
+      return `
+       <button type="button" class="homework-test-line is-clickable" data-hw-action="open-student-test" data-homework-id="${escHtml(homework.id)}" data-test-id="${escHtml(test.id)}">
+        <div style="text-align:left;">
+         <strong>${escHtml(test.title||"Test sans titre")}</strong>
+         <small>${escHtml(state.label)}</small>
+        </div>
+        <span>${total} pts</span>
+       </button>
+      `;
+     }).join("")}
+    </div>
+   </article>
+  `;
+ }
+ function renderHomeworkView(){
+  ensureHomeworkStore();
+  const main=document.getElementById("homeworkMainContent");
+  if(!main) return;
+  renderHomeworkCalendar();
+  const isStudent=AUTH.role==="eleve";
+  const dayItems=isStudent ? getHomeworkForStudentDate(HOMEWORK_STATE.selectedDate) : getHomeworkOnDate(HOMEWORK_STATE.selectedDate);
+  const cards=isStudent
+   ? dayItems.map(renderStudentHomeworkCard).join("")
+   : [HOMEWORK_STATE.draft ? renderHomeworkEditorCard() : "", ...dayItems.filter(item=>item.id!==HOMEWORK_STATE.draft?.id).map(renderTeacherHomeworkCard)].join("");
+  main.innerHTML = `
+   ${isStudent ? "" : renderHomeworkTeacherToolbar()}
+   <div class="homework-day-head">
+    <div>
+     <h3>${escHtml(homeworkFormatLong(HOMEWORK_STATE.selectedDate))}</h3>
+     <p>${dayItems.length ? `${dayItems.length} devoir${dayItems.length>1?"s":""} affiché${dayItems.length>1?"s":""}` : "Aucun devoir pour cette date."}</p>
+    </div>
+   </div>
+   <div class="homework-list">
+    ${cards || '<div class="homework-empty">Aucun devoir enregistré pour cette date.</div>'}
+   </div>
+  `;
+ }
+ function openHomeworkAssignTestsModal(){
+  if(!HOMEWORK_STATE.draft) return;
+  saveHomeworkDraftFromDom();
+  const list=document.getElementById("homeworkAssignTestsList");
+  if(!list) return;
+  const currentSubject=HOMEWORK_STATE.draft.subject;
+  const tests=(DATA.onlineTests||[]).slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"fr",{sensitivity:"base"}));
+  HOMEWORK_STATE.assignSelection=(HOMEWORK_STATE.draft.testIds||[]).slice();
+  if(!tests.length){
+   list.innerHTML='<div class="homework-empty">Aucun test en ligne disponible.</div>';
+  }else{
+   list.innerHTML=tests.map(test=>{
+    const total=fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"");
+    const checked=HOMEWORK_STATE.assignSelection.includes(test.id);
+    const sameSubject=test.subject===currentSubject;
+    return `
+     <div class="homework-assign-item">
+      <label>
+       <input type="checkbox" value="${escHtml(test.id)}" ${checked ? "checked" : ""}>
+       <div>
+        <strong>${escHtml(test.title||"Test sans titre")}</strong>
+        <p>${escHtml(test.subject||"Sans matière")} · ${total} pts ${sameSubject ? "· même matière" : ""}</p>
+       </div>
+      </label>
+     </div>
+    `;
+   }).join("");
+  }
+  setModalOpen(homeworkAssignTestsModal,true);
+ }
+ function closeHomeworkAssignTestsModal(){
+  setModalOpen(homeworkAssignTestsModal,false);
+ }
+ function evaluateHomeworkAttempt(test, questions, answers){
+  const manualReview=!!test?.options?.manualReviewRequired;
+  const result={ manualReview, earned:0, total:getOnlineTestTotalPoints({questions}), details:[] };
+  questions.forEach(question=>{
+   if(manualReview){
+    result.details.push({question, correct:null, answer:answers[question.id]});
+    return;
+   }
+   if(question.type==="written"){
+    const answer=String(answers[question.id]||"");
+    const expected=normalizeOnlineAnswers(question.expectedAnswers);
+    const correct=expected.some(item=>normalizeOnlinePreviewText(item)===normalizeOnlinePreviewText(answer));
+    if(correct) result.earned += Number(question.points)||0;
+    result.details.push({question, correct, answer, expected});
+    return;
+   }
+   if(question.type==="fillblank"){
+    const values=Array.isArray(answers[question.id]) ? answers[question.id] : [];
+    const blanks=(question.segments||[]).filter(seg=>seg.type==="blank");
+    const expected=blanks.map(blank=>normalizeOnlineAnswers(blank.answers));
+    const correct=expected.length===values.length && expected.every((accepted,index)=>accepted.some(item=>normalizeOnlinePreviewText(item)===normalizeOnlinePreviewText(values[index]||"")));
+    if(correct) result.earned += Number(question.points)||0;
+    result.details.push({question, correct, answer:values, expected});
+    return;
+   }
+   const correctChoices=(question.choices||[]).filter(choice=>choice.correct).map(choice=>choice.id);
+   const selected=question.type==="qcm"
+    ? (Array.isArray(answers[question.id]) ? answers[question.id] : [])
+    : (answers[question.id] ? [answers[question.id]] : []);
+   const correct=selected.length===correctChoices.length && selected.every(value=>correctChoices.includes(value));
+   if(correct) result.earned += Number(question.points)||0;
+   result.details.push({question, correct, answer:selected, expected:correctChoices});
+  });
+  return result;
+ }
+ function formatHomeworkUserAnswer(question, answer){
+  if(question.type==="written") return escHtml(String(answer||"") || "Aucune réponse");
+  if(question.type==="fillblank"){
+   const values=Array.isArray(answer) ? answer : [];
+   return values.length ? values.map(v=>escHtml(v||"—")).join(" · ") : "Aucune réponse";
+  }
+  const map=new Map((question.choices||[]).map(choice=>[choice.id, choice.text]));
+  const values=Array.isArray(answer) ? answer : (answer ? [answer] : []);
+  return values.length ? values.map(value=>escHtml(map.get(value)||value)).join(" · ") : "Aucune réponse";
+ }
+ function formatHomeworkExpectedAnswer(question, detail){
+  if(question.type==="written"){
+   return (detail.expected||[]).length ? (detail.expected||[]).map(escHtml).join(" · ") : "Aucune réponse attendue définie";
+  }
+  if(question.type==="fillblank"){
+   return (detail.expected||[]).map((answers,idx)=>`Trou ${idx+1} : ${answers.length ? answers.map(escHtml).join(" / ") : "—"}`).join(" · ");
+  }
+  const map=new Map((question.choices||[]).map(choice=>[choice.id, choice.text]));
+  return (detail.expected||[]).length ? detail.expected.map(value=>escHtml(map.get(value)||value)).join(" · ") : "Aucune réponse attendue définie";
+ }
+ function closeHomeworkQuizModal(){
+  if(HOMEWORK_STATE.quiz?.timerId) clearInterval(HOMEWORK_STATE.quiz.timerId);
+  HOMEWORK_STATE.quiz=null;
+  setModalOpen(homeworkQuizModal,false);
+ }
+ function renderHomeworkQuizIntro(homework,test,submission){
+  const body=document.getElementById("homeworkQuizBody");
+  if(!body) return;
+  const total=fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"");
+  const badges=[
+   `${(test.questions||[]).length} question${(test.questions||[]).length>1?"s":""}`,
+   `${total} point${Number(total)>1?"s":""}`
+  ];
+  if(test.options?.timed) badges.push(formatOnlineTestDuration(test.options.timeLimitSeconds||0));
+  if(test.options?.trainingMode) badges.push("Mode entraînement");
+  if(test.options?.manualReviewRequired) badges.push("Correction professeur");
+  body.innerHTML=`
+   <div class="homework-quiz-card">
+    <div class="homework-quiz-header">
+     <div>
+      <h4>${escHtml(test.title||"Test sans titre")}</h4>
+      <div class="homework-quiz-badges">${badges.map(label=>`<span>${escHtml(label)}</span>`).join("")}</div>
+     </div>
+    </div>
+    ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
+    ${submission && !test.options?.trainingMode ? `<p class="online-preview-note">Ce test a déjà été rendu. La correction sera disponible ici dès validation par l’enseignant.</p>` : ""}
+    <div class="homework-quiz-actions" style="justify-content:flex-end;">
+     <button type="button" class="btn btn-primary" data-hw-action="start-quiz">${submission && !test.options?.trainingMode ? "Revoir" : "Démarrer"}</button>
+    </div>
+   </div>
+  `;
+ }
+ function getCurrentHomeworkQuizQuestion(){
+  return HOMEWORK_STATE.quiz?.questions?.[HOMEWORK_STATE.quiz.currentIndex] || null;
+ }
+ function collectHomeworkAnswerFromDom(question){
+  if(!question) return "";
+  if(question.type==="written") return document.querySelector(`.homework-quiz-text[data-question-id="${CSS.escape(question.id)}"]`)?.value || "";
+  if(question.type==="fillblank"){
+   return [...document.querySelectorAll(`.homework-quiz-blank[data-question-id="${CSS.escape(question.id)}"]`)]
+    .sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex))
+    .map(input=>input.value || "");
+  }
+  if(question.type==="qcm"){
+   return [...document.querySelectorAll(`input[name="homework_${CSS.escape(question.id)}"]:checked`)].map(input=>input.value);
+  }
+  return document.querySelector(`input[name="homework_${CSS.escape(question.id)}"]:checked`)?.value || "";
+ }
+ function saveHomeworkCurrentAnswer(){
+  const question=getCurrentHomeworkQuizQuestion();
+  if(!question || !HOMEWORK_STATE.quiz) return;
+  HOMEWORK_STATE.quiz.answers[question.id]=collectHomeworkAnswerFromDom(question);
+ }
+ function hydrateHomeworkQuizInputs(question){
+  if(!question || !HOMEWORK_STATE.quiz) return;
+  const saved=HOMEWORK_STATE.quiz.answers[question.id];
+  if(question.type==="written"){
+   const input=document.querySelector(`.homework-quiz-text[data-question-id="${CSS.escape(question.id)}"]`);
+   if(input) input.value=typeof saved==="string" ? saved : "";
+   return;
+  }
+  if(question.type==="fillblank"){
+   const values=Array.isArray(saved) ? saved : [];
+   [...document.querySelectorAll(`.homework-quiz-blank[data-question-id="${CSS.escape(question.id)}"]`)]
+    .sort((a,b)=>Number(a.dataset.blankIndex)-Number(b.dataset.blankIndex))
+    .forEach((input,index)=>{ input.value=values[index] || ""; });
+   return;
+  }
+  const selected=question.type==="qcm" ? (Array.isArray(saved) ? saved : []) : (saved ? [saved] : []);
+  document.querySelectorAll(`input[name="homework_${CSS.escape(question.id)}"]`).forEach(input=>{ input.checked=selected.includes(input.value); });
+ }
+ function renderHomeworkQuizInput(question){
+  if(question.type==="written"){
+   return `<input type="text" class="homework-quiz-text" data-question-id="${escHtml(question.id)}" placeholder="Ta réponse">`;
+  }
+  if(question.type==="fillblank"){
+   let blankIndex=0;
+   return `<div class="homework-quiz-options">${(question.segments||[]).map(segment=>{
+    if(segment.type==="blank"){
+     const html=`<input type="text" class="homework-quiz-blank" data-question-id="${escHtml(question.id)}" data-blank-index="${blankIndex}" placeholder="Réponse ${blankIndex+1}">`;
+     blankIndex += 1;
+     return html;
+    }
+    return `<div class="homework-quiz-blank-row">${escHtml(segment.text||"").replace(/\n/g,"<br>")}</div>`;
+   }).join("")}</div>`;
+  }
+  const inputType=question.type==="qcm" ? "checkbox" : "radio";
+  return `<div class="homework-quiz-options">${(question.choices||[]).map(choice=>`
+   <label class="homework-quiz-option">
+    <input type="${inputType}" name="homework_${escHtml(question.id)}" value="${escHtml(choice.id)}">
+    <span>${escHtml(choice.text||"")}</span>
+   </label>
+  `).join("")}</div>`;
+ }
+ function updateHomeworkQuizTimer(){
+  const bar=document.getElementById("homeworkQuizBar");
+  const timer=document.getElementById("homeworkQuizTimer");
+  if(!HOMEWORK_STATE.quiz || !timer) return;
+  const remaining=Number(HOMEWORK_STATE.quiz.remainingSeconds);
+  const total=Number(HOMEWORK_STATE.quiz.totalSeconds);
+  if(!(remaining>=0) || !(total>0)){
+   timer.style.display="none";
+   if(bar) bar.style.width="100%";
+   return;
+  }
+  const ratio=Math.max(0, Math.min(1, remaining/total));
+  const min=Math.floor(remaining/60);
+  const sec=remaining%60;
+  timer.style.display="inline-flex";
+  timer.textContent=`${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+  if(bar) bar.style.width=`${ratio*100}%`;
+ }
+ function finishHomeworkQuiz(reason){
+  const quiz=HOMEWORK_STATE.quiz;
+  if(!quiz || quiz.submitted) return;
+  quiz.submitted=true;
+  if(quiz.timerId) clearInterval(quiz.timerId);
+  saveHomeworkCurrentAnswer();
+  const answers={};
+  quiz.questions.forEach(question=>{
+   const stored=quiz.answers[question.id];
+   if(question.type==="fillblank") answers[question.id]=Array.isArray(stored) ? stored : [];
+   else if(question.type==="qcm") answers[question.id]=Array.isArray(stored) ? stored : [];
+   else answers[question.id]=stored || "";
+  });
+  const result=evaluateHomeworkAttempt(quiz.test, quiz.questions, answers);
+  const existing=getHomeworkSubmission(quiz.homework.id, quiz.test.id, homeworkStudentId());
+  const persisted=upsertHomeworkSubmission({
+   ...existing,
+   id: existing?.id || makeUid("hws"),
+   homeworkId: quiz.homework.id,
+   testId: quiz.test.id,
+   studentId: homeworkStudentId(),
+   answers,
+   autoResult: result,
+   review: existing?.review || {},
+   submittedAt: new Date().toISOString(),
+   validatedAt: existing?.validatedAt || "",
+   publishedAt: existing?.publishedAt || "",
+   manualOverride: existing?.manualOverride || "",
+   noteId: existing?.noteId || ""
+  });
+  saveData();
+  renderHomeworkQuizResult(quiz.homework, quiz.test, persisted, result, reason);
+  renderHomeworkView();
+  renderOnlineTestsView();
+ }
+ function startHomeworkQuiz(){
+  if(!HOMEWORK_STATE.quiz) return;
+  HOMEWORK_STATE.quiz.answers={};
+  HOMEWORK_STATE.quiz.currentIndex=0;
+  HOMEWORK_STATE.quiz.remainingSeconds=HOMEWORK_STATE.quiz.test.options?.timed ? Number(HOMEWORK_STATE.quiz.test.options.timeLimitSeconds)||0 : null;
+  HOMEWORK_STATE.quiz.totalSeconds=HOMEWORK_STATE.quiz.remainingSeconds;
+  HOMEWORK_STATE.quiz.submitted=false;
+  if(HOMEWORK_STATE.quiz.timerId) clearInterval(HOMEWORK_STATE.quiz.timerId);
+  if(HOMEWORK_STATE.quiz.remainingSeconds>0){
+   HOMEWORK_STATE.quiz.timerId=setInterval(()=>{
+    HOMEWORK_STATE.quiz.remainingSeconds -= 1;
+    updateHomeworkQuizTimer();
+    if(HOMEWORK_STATE.quiz.remainingSeconds<=0) finishHomeworkQuiz("timeout");
+   },1000);
+  }
+  renderHomeworkQuizQuestion();
+ }
+ function renderHomeworkQuizQuestion(){
+  const body=document.getElementById("homeworkQuizBody");
+  const quiz=HOMEWORK_STATE.quiz;
+  if(!body||!quiz) return;
+  const question=quiz.questions[quiz.currentIndex];
+  const total=quiz.questions.length;
+  const isLast=quiz.currentIndex===total-1;
+  body.innerHTML=`
+   <div class="homework-quiz-card">
+    <div class="homework-quiz-progress">
+     <div class="homework-quiz-track"><div id="homeworkQuizBar" class="homework-quiz-bar"></div></div>
+     <div id="homeworkQuizTimer" class="homework-quiz-timer"></div>
+    </div>
+    <div class="homework-quiz-header">
+     <div>
+      <h4>${escHtml(quiz.test.title||"Test sans titre")}</h4>
+      <div class="homework-quiz-badges"><span>${escHtml(quiz.test.subject||"")}</span></div>
+     </div>
+    </div>
+    <div class="homework-quiz-question-counter">Question ${quiz.currentIndex+1} / ${total}</div>
+    <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
+    ${renderHomeworkQuizInput(question)}
+    <div class="homework-quiz-actions">
+     <button type="button" class="btn" data-hw-action="quiz-prev" ${quiz.currentIndex===0 ? "disabled" : ""}>←</button>
+     ${isLast ? `<button type="button" class="btn btn-primary" data-hw-action="quiz-submit">Rendre</button>` : `<button type="button" class="btn btn-primary" data-hw-action="quiz-next">→</button>`}
+    </div>
+   </div>
+  `;
+  hydrateHomeworkQuizInputs(question);
+  updateHomeworkQuizTimer();
+ }
+ function renderHomeworkPublishedCorrection(submission){
+  const result=submission.autoResult;
+  if(!result || !Array.isArray(result.details)) return "";
+  return `
+   <div class="homework-correction-summary">
+    ${result.details.map((detail,index)=>{
+     const answer=formatHomeworkUserAnswer(detail.question, detail.answer);
+     const expected=detail.expected ? formatHomeworkExpectedAnswer(detail.question, detail) : "Correction personnalisée par l’enseignant";
+     const score=submission.review?.questionScores?.[detail.question.id];
+     const shownScore=(score!=null && score!=="") ? ` · ${escHtml(String(score))} / ${fmt(detail.question.points,2).replace(/\.00$/,"")}` : "";
+     return `
+      <div class="online-preview-correction-item ${detail.correct===true ? "is-correct" : "is-wrong"}">
+       <strong>Question ${index+1}${shownScore}</strong>
+       <small>Ta réponse : ${answer}</small>
+       <small>Attendu : ${expected}</small>
+      </div>
+     `;
+    }).join("")}
+   </div>
+  `;
+ }
+ function renderHomeworkQuizResult(homework,test,submission,result,reason){
+  const body=document.getElementById("homeworkQuizBody");
+  if(!body) return;
+  const reasonText=reason==="timeout" ? "Le temps imparti est écoulé." : "Le test a été rendu.";
+  const noteValue=submission.manualOverride || (submission.review?.finalScore!=null ? submission.review.finalScore : (!result.manualReview && !test.options?.hideGrade ? result.earned : ""));
+  const total=fmt(result.total,2).replace(/\.00$/,"");
+  const showScore=noteValue!=="" && noteValue!=null && !test.options?.hideGrade && !result.manualReview;
+  body.innerHTML=`
+   <div class="homework-quiz-card">
+    <p class="online-preview-note">${escHtml(reasonText)} ${result.manualReview ? "La correction et l’attribution des points seront faites par le professeur." : (test.options?.hideGrade ? "La note reste masquée jusqu’à validation par l’enseignant." : "Le devoir a bien été enregistré.")}</p>
+    ${showScore ? `<div class="online-preview-score">Résultat : ${escHtml(String(noteValue))} / ${total}</div>` : ""}
+    ${test.conclusion ? `<p class="online-preview-message">${escHtml(test.conclusion).replace(/\n/g,"<br>")}</p>` : ""}
+    ${test.options?.trainingMode && !result.manualReview ? buildOnlinePreviewCorrectionHtml(result) : ""}
+    <div class="homework-quiz-actions">
+     <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
+    </div>
+   </div>
+  `;
+ }
+ function openHomeworkStudentResult(homework,test,submission){
+  const body=document.getElementById("homeworkQuizBody");
+  const rawResult=submission.autoResult || { total:getOnlineTestTotalPoints(test), details:[] };
+  const finalValue=submission.manualOverride || submission.review?.finalScore || rawResult.earned || "";
+  const total=fmt(rawResult.total || getOnlineTestTotalPoints(test),2).replace(/\.00$/,"");
+  if(!body) return;
+  body.innerHTML=`
+   <div class="homework-quiz-card">
+    <div class="homework-quiz-header">
+     <div>
+      <h4>${escHtml(test.title||"Test sans titre")}</h4>
+      <div class="homework-quiz-badges"><span>Correction publiée</span></div>
+     </div>
+    </div>
+    <p class="online-preview-note">La correction validée par l’enseignant est disponible.</p>
+    ${finalValue!=="" ? `<div class="online-preview-score">Note : ${escHtml(String(finalValue))} / ${total}</div>` : ""}
+    ${renderHomeworkPublishedCorrection(submission)}
+    <div class="homework-quiz-actions">
+     <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
+    </div>
+   </div>
+  `;
+  setModalOpen(homeworkQuizModal,true);
+ }
+ function openHomeworkStudentTest(homeworkId,testId){
+  const homework=getHomeworkById(homeworkId);
+  const test=getHomeworkTest(testId);
+  const studentId=homeworkStudentId();
+  if(!homework || !test || !studentId) return;
+  const submission=getHomeworkSubmission(homework.id,test.id,studentId);
+  document.getElementById("homeworkQuizTitle").textContent=`${test.title||"Test"} · ${homework.subject}`;
+  if(submission?.publishedAt){
+   openHomeworkStudentResult(homework,test,submission);
+   return;
+  }
+  HOMEWORK_STATE.quiz={
+   homework,
+   test: sanitizeOnlineTest(test),
+   questions: deepClone(test.questions||[]),
+   answers:{},
+   currentIndex:0,
+   remainingSeconds:null,
+   totalSeconds:null,
+   timerId:null,
+   submitted:false
+  };
+  renderHomeworkQuizIntro(homework,test,submission);
+  setModalOpen(homeworkQuizModal,true);
+ }
+ function getHomeworkReviewAssignments(filterTestId){
+  ensureHomeworkStore();
+  const list=[];
+  (DATA.homework||[]).forEach(homework=>{
+   (homework.testIds||[]).forEach(testId=>{
+    const test=getHomeworkTest(testId);
+    if(!test || test.options?.trainingMode) return;
+    if(filterTestId && test.id!==filterTestId) return;
+    const cls=homeworkClassById(homework.classId);
+    const memberIds=(cls?.memberIds||[]).slice();
+    const submissions=memberIds.map(studentId=>getHomeworkSubmission(homework.id,test.id,studentId)).filter(Boolean);
+    const pending=submissions.filter(sub=>!sub.validatedAt && !sub.manualOverride).length;
+    list.push({
+     key:`${homework.id}::${test.id}`,
+     homework,
+     test,
+     className:cls?.name || "Classe inconnue",
+     pending,
+     submitted:submissions.length,
+     totalStudents:memberIds.length
+    });
+   });
+  });
+  const mode=document.getElementById("homeworkReviewSort")?.value || "class";
+  list.sort((a,b)=>{
+   if(mode==="uncorrected" && b.pending!==a.pending) return b.pending-a.pending;
+   const classCompare=a.className.localeCompare(b.className,"fr",{sensitivity:"base"});
+   if(classCompare) return classCompare;
+   const subjectCompare=String(a.homework.subject||"").localeCompare(String(b.homework.subject||""),"fr",{sensitivity:"base"});
+   if(subjectCompare) return subjectCompare;
+   return String(a.test.title||"").localeCompare(String(b.test.title||""),"fr",{sensitivity:"base"});
+  });
+  return list;
+ }
+ function getHomeworkResolvedGrade(submission,test){
+  if(!submission) return "";
+  if(submission.manualOverride) return submission.manualOverride;
+  if(submission.review?.finalScore!=null && submission.review.finalScore!=="") return String(submission.review.finalScore);
+  if(!test.options?.manualReviewRequired && submission.autoResult) return String(fmt(submission.autoResult.earned,2).replace(/\.00$/,""));
+  return "";
+ }
+ function isHomeworkGradeValidated(submission,test){
+  if(!submission) return false;
+  if(submission.manualOverride) return true;
+  if(submission.validatedAt) return true;
+  return !test.options?.manualReviewRequired && !!submission.autoResult;
+ }
+ function renderHomeworkReviewModal(){
+  const assignmentsWrap=document.getElementById("homeworkReviewAssignments");
+  const studentsWrap=document.getElementById("homeworkReviewStudents");
+  if(!assignmentsWrap||!studentsWrap) return;
+  const assignments=getHomeworkReviewAssignments(HOMEWORK_STATE.reviewFilterTestId);
+  if(!HOMEWORK_STATE.reviewSelectedKey && assignments[0]) HOMEWORK_STATE.reviewSelectedKey=assignments[0].key;
+  if(assignments.every(item=>item.key!==HOMEWORK_STATE.reviewSelectedKey)) HOMEWORK_STATE.reviewSelectedKey=assignments[0]?.key || "";
+  assignmentsWrap.innerHTML = assignments.length ? assignments.map(item=>`
+   <button type="button" class="homework-review-assignment ${item.key===HOMEWORK_STATE.reviewSelectedKey ? "active" : ""}" data-hw-action="select-review-assignment" data-key="${escHtml(item.key)}">
+    <strong>${escHtml(item.className)} - ${escHtml(item.homework.subject)}</strong>
+    <span>${escHtml(homeworkDateToFr(item.homework.dateISO))} · ${escHtml(item.test.title||"Test")}</span>
+    <small>${item.submitted}/${item.totalStudents} rendu(s) · ${item.pending} à valider</small>
+   </button>
+  `).join("") : '<div class="homework-empty">Aucune assignation de test hors entraînement.</div>';
+  const current=assignments.find(item=>item.key===HOMEWORK_STATE.reviewSelectedKey);
+  if(!current){
+   studentsWrap.innerHTML='<div class="homework-empty">Sélectionne une assignation.</div>';
+   return;
+  }
+  const cls=homeworkClassById(current.homework.classId);
+  const students=(cls?.memberIds||[]).map(studentId=>homeworkStudentById(studentId)).filter(Boolean).sort((a,b)=>`${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`,"fr",{sensitivity:"base"}));
+  studentsWrap.innerHTML=`
+   <div style="margin-bottom:12px;">
+    <strong>${escHtml(current.className)} - ${escHtml(current.homework.subject)}</strong>
+    <div style="color:#64748b;margin-top:4px;">${escHtml(current.test.title||"Test")} · ${escHtml(homeworkDateToFr(current.homework.dateISO))}</div>
+   </div>
+   ${students.map(stu=>{
+    const submission=getHomeworkSubmission(current.homework.id,current.test.id,stu.id);
+    const done=!!submission?.submittedAt;
+    const grade=getHomeworkResolvedGrade(submission,current.test);
+    const validated=isHomeworkGradeValidated(submission,current.test);
+    return `
+     <div class="homework-review-student">
+      <span class="homework-status-dot ${done ? "is-done" : ""}"></span>
+      <div>
+       <strong>${escHtml(stu.first)} ${escHtml(stu.last)}</strong>
+       <div style="color:#64748b;font-size:13px;">${done ? "Test réalisé" : "Pas encore fait"} ${submission?.publishedAt ? "· note publiée" : ""}</div>
+      </div>
+      <input class="homework-grade-input" data-hw-action="grade-input" data-homework-id="${escHtml(current.homework.id)}" data-test-id="${escHtml(current.test.id)}" data-student-id="${escHtml(stu.id)}" value="${escHtml(grade)}" placeholder="Note">
+      <div style="display:flex;align-items:center;gap:8px;">
+       ${validated ? "" : '<span class="homework-review-warning" title="Note non validée">⚠</span>'}
+       <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(current.homework.id)}" data-test-id="${escHtml(current.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
+      </div>
+     </div>
+    `;
+   }).join("")}
+  `;
+ }
+ function openHomeworkReviewModal(filterTestId=""){
+  HOMEWORK_STATE.reviewFilterTestId=filterTestId || "";
+  HOMEWORK_STATE.reviewSelectedKey="";
+  document.getElementById("homeworkReviewSort").value="class";
+  renderHomeworkReviewModal();
+  setModalOpen(homeworkReviewModal,true);
+ }
+ function closeHomeworkReviewModal(){
+  setModalOpen(homeworkReviewModal,false);
+ }
+ function openHomeworkCorrection(homeworkId,testId,studentId){
+  const homework=getHomeworkById(homeworkId);
+  const test=getHomeworkTest(testId);
+  const student=homeworkStudentById(studentId);
+  const submission=getHomeworkSubmission(homeworkId,testId,studentId);
+  if(!homework || !test || !student || !submission){ alert("Aucune copie disponible pour cet élève."); return; }
+  HOMEWORK_STATE.correction={ homeworkId, testId, studentId };
+  document.getElementById("homeworkCorrectionTitle").textContent=`Correction · ${student.first} ${student.last}`;
+  const body=document.getElementById("homeworkCorrectionBody");
+  if(!body) return;
+  body.innerHTML=(test.questions||[]).map((question,index)=>{
+   const detail=(submission.autoResult?.details||[]).find(item=>item.question?.id===question.id) || { question, answer: submission.answers?.[question.id], expected: [] };
+   const defaultScore=submission.review?.questionScores?.[question.id] ?? (detail.correct===true ? Number(question.points)||0 : 0);
+   return `
+    <section class="homework-correction-question">
+     <h4>Question ${index+1}</h4>
+     <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
+     <div class="homework-correction-answer"><strong>Réponse élève :</strong> ${formatHomeworkUserAnswer(question, detail.answer)}</div>
+     <div class="homework-correction-expected"><strong>Réponse attendue :</strong> ${detail.expected ? formatHomeworkExpectedAnswer(question, detail) : "Correction libre"}</div>
+     <div class="homework-correction-score">
+      <label>Points</label>
+      <input type="number" min="0" max="${Number(question.points)||0}" step="0.25" data-question-id="${escHtml(question.id)}" value="${escHtml(String(defaultScore))}">
+      <span>/ ${fmt(question.points,2).replace(/\.00$/,"")}</span>
+     </div>
+    </section>
+   `;
+  }).join("");
+  setModalOpen(homeworkCorrectionModal,true);
+ }
+ function closeHomeworkCorrectionModal(){
+  HOMEWORK_STATE.correction=null;
+  setModalOpen(homeworkCorrectionModal,false);
+ }
+ function validateHomeworkCorrection(){
+  const ctx=HOMEWORK_STATE.correction;
+  if(!ctx) return;
+  const submission=getHomeworkSubmission(ctx.homeworkId,ctx.testId,ctx.studentId);
+  const test=getHomeworkTest(ctx.testId);
+  if(!submission || !test) return;
+  const scores={};
+  let total=0;
+  document.querySelectorAll("#homeworkCorrectionBody input[data-question-id]").forEach(input=>{
+   const question=(test.questions||[]).find(item=>item.id===input.dataset.questionId);
+   if(!question) return;
+   let value=parseFloat(input.value);
+   if(Number.isNaN(value)) value=0;
+   value=Math.max(0, Math.min(Number(question.points)||0, value));
+   scores[question.id]=value;
+   total += value;
+  });
+  submission.review={
+   ...(submission.review||{}),
+   questionScores:scores,
+   finalScore:fmt(total,2).replace(/\.00$/,"")
+  };
+  submission.validatedAt=new Date().toISOString();
+  upsertHomeworkSubmission(submission);
+  saveData();
+  closeHomeworkCorrectionModal();
+  renderHomeworkReviewModal();
+  renderOnlineTestsView();
+ }
+ function upsertHomeworkPublishedNote(homework,test,studentId,value,submission){
+  if(value==null || value==="") return null;
+  if(!DATA.notes[studentId]) DATA.notes[studentId]=[];
+  const notes=DATA.notes[studentId];
+  let note=notes.find(item=>item.id===submission.noteId || item.homeworkSubmissionId===submission.id);
+  if(!note){
+   note={ id: submission.noteId || makeUid("nhw") };
+   notes.push(note);
+  }
+  submission.noteId=note.id;
+  const cleaned=String(value).trim();
+  Object.assign(note,{
+   id: note.id,
+   subject: homework.subject,
+   label: test.title || `Devoir ${homework.subject}`,
+   dateJJMMAA: homeworkDateToFr(homework.dateISO),
+   isoDate: homework.dateISO,
+   outof: getOnlineTestTotalPoints(test),
+   coef: 1,
+   period: homeworkPeriodFromDate(homework.dateISO),
+   important: !!homework.isExam,
+   homeworkSubmissionId: submission.id
+  });
+  if(SPECIAL_VALUES.has(cleaned)){
+   note.noteText=cleaned;
+   delete note.note;
+  }else{
+   const numeric=parseFloat(cleaned.replace(",","."));
+   if(Number.isNaN(numeric)) return null;
+   note.note=numeric;
+   delete note.noteText;
+  }
+  return note;
+ }
+ function publishHomeworkGrades(){
+  const assignments=getHomeworkReviewAssignments(HOMEWORK_STATE.reviewFilterTestId);
+  const current=assignments.find(item=>item.key===HOMEWORK_STATE.reviewSelectedKey);
+  if(!current){ alert("Sélectionne une assignation."); return; }
+  const cls=homeworkClassById(current.homework.classId);
+  let publishedCount=0;
+  (cls?.memberIds||[]).forEach(studentId=>{
+   const submission=getHomeworkSubmission(current.homework.id,current.test.id,studentId);
+   if(!submission) return;
+   const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(current.homework.id)}"][data-test-id="${CSS.escape(current.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
+   const value=(input?.value || getHomeworkResolvedGrade(submission,current.test)).trim();
+   if(!value) return;
+   const note=upsertHomeworkPublishedNote(current.homework,current.test,studentId,value,submission);
+   if(!note) return;
+   submission.publishedAt=new Date().toISOString();
+   submission.validatedAt=submission.validatedAt || submission.publishedAt;
+   upsertHomeworkSubmission(submission);
+   publishedCount += 1;
+  });
+  saveData();
+  rebuildUI();
+  renderHomeworkReviewModal();
+  renderOnlineTestsView();
+  alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":"e"} dans les moyennes.`);
+ }
+ function getHomeworkReviewStateForTest(testId){
+  const assignments=getHomeworkReviewAssignments(testId);
+  let hasDanger=false;
+  let hasWarning=false;
+  assignments.forEach(item=>{
+   const cls=homeworkClassById(item.homework.classId);
+   (cls?.memberIds||[]).forEach(studentId=>{
+    const submission=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
+    if(!submission?.submittedAt) return;
+    if(item.test.options?.manualReviewRequired && !submission.validatedAt && !submission.manualOverride) hasDanger=true;
+    else if(!item.test.options?.manualReviewRequired && !submission.validatedAt && !submission.manualOverride) hasWarning=true;
+   });
+  });
+  return hasDanger ? "danger" : (hasWarning ? "warning" : "neutral");
+ }
+ function enhanceOnlineTestCardsForHomework(){
+  const list=document.getElementById("onlineTestsList");
+  if(!list) return;
+  list.querySelectorAll(".btn-preview-online-test").forEach(btn=>{
+   const actions=btn.closest(".online-test-card-actions");
+   if(!actions || actions.querySelector(`.btn-homework-review[data-testid="${CSS.escape(btn.dataset.testid)}"]`)) return;
+   const state=getHomeworkReviewStateForTest(btn.dataset.testid);
+   const reviewBtn=document.createElement("button");
+   reviewBtn.type="button";
+   reviewBtn.className=`btn-homework-review ${state==="danger" ? "is-danger" : (state==="warning" ? "is-warning" : "")}`;
+   reviewBtn.dataset.testid=btn.dataset.testid;
+   reviewBtn.title="Voir les soumissions";
+   reviewBtn.textContent="☰";
+   reviewBtn.addEventListener("click",()=>openHomeworkReviewModal(btn.dataset.testid));
+   actions.appendChild(reviewBtn);
+  });
+ }
+ function closeHomeworkAllModals(){
+  closeHomeworkAssignTestsModal();
+  closeHomeworkQuizModal();
+  closeHomeworkReviewModal();
+  closeHomeworkCorrectionModal();
+ }
+
+ document.getElementById("homeworkPrevMonth")?.addEventListener("click",()=>{
+  HOMEWORK_STATE.currentMonth=new Date(HOMEWORK_STATE.currentMonth.getFullYear(), HOMEWORK_STATE.currentMonth.getMonth()-1, 1);
+  renderHomeworkCalendar();
+ });
+ document.getElementById("homeworkNextMonth")?.addEventListener("click",()=>{
+  HOMEWORK_STATE.currentMonth=new Date(HOMEWORK_STATE.currentMonth.getFullYear(), HOMEWORK_STATE.currentMonth.getMonth()+1, 1);
+  renderHomeworkCalendar();
+ });
+ document.getElementById("homeworkAssignTestsClose")?.addEventListener("click",closeHomeworkAssignTestsModal);
+ document.getElementById("homeworkAssignTestsCancel")?.addEventListener("click",closeHomeworkAssignTestsModal);
+ document.getElementById("homeworkQuizClose")?.addEventListener("click",closeHomeworkQuizModal);
+ document.getElementById("homeworkReviewClose")?.addEventListener("click",closeHomeworkReviewModal);
+ document.getElementById("homeworkReviewCancel")?.addEventListener("click",closeHomeworkReviewModal);
+ document.getElementById("homeworkCorrectionClose")?.addEventListener("click",closeHomeworkCorrectionModal);
+ document.getElementById("homeworkCorrectionCancel")?.addEventListener("click",closeHomeworkCorrectionModal);
+ document.getElementById("homeworkCorrectionValidate")?.addEventListener("click",validateHomeworkCorrection);
+ document.getElementById("homeworkPublishGrades")?.addEventListener("click",publishHomeworkGrades);
+ [homeworkAssignTestsModal,homeworkQuizModal,homeworkReviewModal,homeworkCorrectionModal].forEach(modal=>{
+  modal?.addEventListener("click",e=>{ if(e.target===modal) closeHomeworkAllModals(); });
+ });
+ document.getElementById("homeworkAssignTestsValidate")?.addEventListener("click",()=>{
+  if(!HOMEWORK_STATE.draft) return;
+  HOMEWORK_STATE.draft.testIds=[...document.querySelectorAll("#homeworkAssignTestsList input[type='checkbox']:checked")].map(input=>input.value);
+  closeHomeworkAssignTestsModal();
+  renderHomeworkView();
+ });
+ document.getElementById("homeworkReviewSort")?.addEventListener("change",renderHomeworkReviewModal);
+ document.getElementById("homeworkView")?.addEventListener("change",e=>{
+  const target=e.target;
+  if(target.id==="homeworkClassSelect"){
+   renderHomeworkView();
+   return;
+  }
+  if(target.matches("[data-hw-action='grade-input']")){
+   const submission=getHomeworkSubmission(target.dataset.homeworkId,target.dataset.testId,target.dataset.studentId);
+   if(!submission) return;
+   submission.manualOverride=target.value.trim();
+   upsertHomeworkSubmission(submission);
+   saveData();
+   renderOnlineTestsView();
+   return;
+  }
+  if(target.dataset.hwAction==="editor-font-family"){
+   const editor=document.getElementById("homeworkEditorInput");
+   editor?.focus();
+   document.execCommand("fontName",false,target.value);
+   return;
+  }
+  if(target.dataset.hwAction==="editor-font-size"){
+   const editor=document.getElementById("homeworkEditorInput");
+   editor?.focus();
+   document.execCommand("fontSize",false,target.value);
+   return;
+  }
+  if(target.dataset.hwAction==="editor-fore-color"){
+   const editor=document.getElementById("homeworkEditorInput");
+   editor?.focus();
+   document.execCommand("foreColor",false,target.value);
+   return;
+  }
+  if(target.dataset.hwAction==="editor-back-color"){
+   const editor=document.getElementById("homeworkEditorInput");
+   editor?.focus();
+   document.execCommand("hiliteColor",false,target.value);
+  }
+ });
+ document.getElementById("homeworkView")?.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-hw-action]");
+  if(!btn) return;
+  const action=btn.dataset.hwAction;
+  if(action==="select-date"){
+   HOMEWORK_STATE.selectedDate=btn.dataset.date;
+   const d=new Date(`${btn.dataset.date}T12:00:00`);
+   HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
+   HOMEWORK_STATE.draft=null;
+   renderHomeworkView();
+   return;
+  }
+  if(action==="add-homework"){ startHomeworkDraft(); return; }
+  if(action==="cancel-homework"){ cancelHomeworkDraft(); return; }
+  if(action==="save-homework"){ saveHomeworkDraft(); return; }
+  if(action==="edit-homework"){ startHomeworkDraft(btn.dataset.homeworkId); return; }
+  if(action==="open-assign-tests"){ openHomeworkAssignTestsModal(); return; }
+  if(action==="remove-assigned-test"){
+   saveHomeworkDraftFromDom();
+   openConfirmModal({
+    message:"Dé-assigner ce test du devoir ?",
+    onConfirm:()=>{
+     HOMEWORK_STATE.draft.testIds=(HOMEWORK_STATE.draft.testIds||[]).filter(id=>id!==btn.dataset.testId);
+     renderHomeworkView();
+    }
+   });
+   return;
+  }
+  if(action==="editor-cmd"){
+   const editor=document.getElementById("homeworkEditorInput");
+   editor?.focus();
+   document.execCommand(btn.dataset.cmd,false,null);
+   return;
+  }
+  if(action==="open-student-test"){ openHomeworkStudentTest(btn.dataset.homeworkId,btn.dataset.testId); return; }
+  if(action==="start-quiz"){ startHomeworkQuiz(); return; }
+  if(action==="quiz-prev"){
+   saveHomeworkCurrentAnswer();
+   if(HOMEWORK_STATE.quiz?.currentIndex>0){
+    HOMEWORK_STATE.quiz.currentIndex -= 1;
+    renderHomeworkQuizQuestion();
+   }
+   return;
+  }
+  if(action==="quiz-next"){
+   saveHomeworkCurrentAnswer();
+   if(HOMEWORK_STATE.quiz && HOMEWORK_STATE.quiz.currentIndex<HOMEWORK_STATE.quiz.questions.length-1){
+    HOMEWORK_STATE.quiz.currentIndex += 1;
+    renderHomeworkQuizQuestion();
+   }
+   return;
+  }
+  if(action==="quiz-submit"){ finishHomeworkQuiz("submitted"); return; }
+  if(action==="close-quiz"){ closeHomeworkQuizModal(); return; }
+  if(action==="select-review-assignment"){
+   HOMEWORK_STATE.reviewSelectedKey=btn.dataset.key;
+   renderHomeworkReviewModal();
+   return;
+  }
+  if(action==="open-correction"){
+   openHomeworkCorrection(btn.dataset.homeworkId,btn.dataset.testId,btn.dataset.studentId);
+  }
+ });
+
+ const originalBuildCSVText=buildCSVText;
+ buildCSVText=function(){
+  ensureHomeworkStore();
+  const base=originalBuildCSVText();
+  const extra=[];
+  DATA.homework.forEach(item=>{
+   extra.push(["homework",item.id,item.dateISO,item.classId,escapeCsv(item.subject||""),escapeCsv(item.contentHtml||""),item.isExam?1:0,item.locked?1:0,escapeCsv(JSON.stringify(item.testIds||[])),item.createdAt||"",item.updatedAt||""].join(";"));
+  });
+  DATA.homeworkSubmissions.forEach(item=>{
+   extra.push(["homeworkSubmission",item.id,item.homeworkId,item.testId,item.studentId,escapeCsv(JSON.stringify(item.answers||{})),escapeCsv(JSON.stringify(item.autoResult||null)),item.submittedAt||"",escapeCsv(JSON.stringify(item.review||{})),item.validatedAt||"",item.publishedAt||"",escapeCsv(item.manualOverride||""),item.noteId||""].join(";"));
+  });
+  return extra.length ? `${base}\n${extra.join("\n")}` : base;
+ };
+
+ const originalImportCSV=importCSV;
+ importCSV=function(text){
+  originalImportCSV(text);
+  ensureHomeworkStore();
+  const lines=[]; let current="", inQuotes=false;
+  for(let i=0;i<text.length;i++){
+   const ch=text[i];
+   if(ch==='"') inQuotes=!inQuotes;
+   if((ch==='\n'||ch==='\r')&&!inQuotes){ if(current.trim()) lines.push(current); current=""; if(ch==='\r'&&text[i+1]==='\n') i++; }
+   else current+=ch;
+  }
+  if(current.trim()) lines.push(current);
+  if(lines.length>0 && /^type;/.test(lines[0])) lines.shift();
+  DATA.homework=[];
+  DATA.homeworkSubmissions=[];
+  lines.forEach(line=>{
+   const cols=parseCsvLine(line).map(s=>s.trim());
+   if(cols[0]==="homework"){
+    let testIds=[];
+    try{ testIds=JSON.parse(unescapeCsv(cols[8]||"[]"))||[]; }catch(e){ testIds=[]; }
+    DATA.homework.push(normalizeHomeworkEntry({
+     id: cols[1]||"",
+     dateISO: cols[2]||todayISO(),
+     classId: cols[3]||"",
+     subject: unescapeCsv(cols[4]||""),
+     contentHtml: unescapeCsv(cols[5]||""),
+     isExam: cols[6]==="1",
+     locked: cols[7]!=="0",
+     testIds,
+     createdAt: cols[9]||"",
+     updatedAt: cols[10]||""
+    }));
+   }else if(cols[0]==="homeworkSubmission"){
+    let answers={}; let autoResult=null; let review={};
+    try{ answers=JSON.parse(unescapeCsv(cols[5]||"{}"))||{}; }catch(e){ answers={}; }
+    try{ autoResult=JSON.parse(unescapeCsv(cols[6]||"null")); }catch(e){ autoResult=null; }
+    try{ review=JSON.parse(unescapeCsv(cols[8]||"{}"))||{}; }catch(e){ review={}; }
+    DATA.homeworkSubmissions.push(normalizeHomeworkSubmission({
+     id: cols[1]||"",
+     homeworkId: cols[2]||"",
+     testId: cols[3]||"",
+     studentId: cols[4]||"",
+     answers,
+     autoResult,
+     submittedAt: cols[7]||"",
+     review,
+     validatedAt: cols[9]||"",
+     publishedAt: cols[10]||"",
+     manualOverride: unescapeCsv(cols[11]||""),
+     noteId: cols[12]||""
+    }));
+   }
+  });
+ };
+
+ const originalRebuildUI=rebuildUI;
+ rebuildUI=function(){
+  ensureHomeworkStore();
+  originalRebuildUI();
+  renderHomeworkView();
+  enhanceOnlineTestCardsForHomework();
+ };
+
+ const originalActivateMainView=activateMainView;
+ activateMainView=function(targetId){
+  originalActivateMainView(targetId);
+  if(targetId==="homeworkView") renderHomeworkView();
+ };
+
+ const originalRenderOnlineTestsView=renderOnlineTestsView;
+ renderOnlineTestsView=function(){
+  originalRenderOnlineTestsView();
+  enhanceOnlineTestCardsForHomework();
+ };
+
+ const originalApplyStudentMode=applyStudentMode;
+ applyStudentMode=function(){
+  originalApplyStudentMode();
+  const t=document.querySelector('.tab-btn[data-target="homeworkView"]');
+  if(t) t.textContent="Mes devoirs";
+  renderHomeworkView();
+ };
+})();
 
 /**
  * Tests de non-régression pour la préservation des compétences
