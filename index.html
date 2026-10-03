@@ -595,7 +595,7 @@ body.student-mode .import-btn{ display:none !important }
 .modern-input:focus,.modern-select:focus{ outline:2px solid #bfdbfe; border-color:#93c5fd }
 .pl{ border:1px solid var(--border); border-radius:12px; background:#fff; height:340px; overflow-y:auto; padding:6px }
 .pl-item{ padding:9px 12px; border:1px solid #000; border-radius:8px; cursor:pointer; font-size:14.5px; line-height:1.25; user-select:none }
-#studentListUI .pl-item{ font-size:13.5px }
+#studentListUI .pl-item,#appreciationListUI .pl-item{ font-size:13.5px }
 .pl-item + .pl-item{ margin-top:5px }
 .pl-item:hover{ background:#f1f5f9 }
 .pl-item.sel{ background:#e0e7ff; color:#1e3a8a; font-weight:600 }
@@ -905,10 +905,10 @@ body.student-mode #homeworkView .card-header strong::after{ content:""; }
 
 /* ═══ Modifications : liste élèves compacte, import dans les titres, bulletin, appréciations ═══ */
 /* Liste des élèves : boutons plus bas, sans contour (contour bleu au survol) */
-#studentListUI .pl-item{ padding:4px 10px; border:1px solid transparent; font-size:13.5px; line-height:1.2 }
-#studentListUI .pl-item + .pl-item{ margin-top:2px }
-#studentListUI .pl-item:hover{ background:transparent; border-color:#3b82f6 }
-#studentListUI .pl-item.sel:hover{ background:#e0e7ff }
+#studentListUI .pl-item,#appreciationListUI .pl-item{ padding:4px 10px; border:1px solid transparent; font-size:13.5px; line-height:1.2 }
+#studentListUI .pl-item + .pl-item,#appreciationListUI .pl-item + .pl-item{ margin-top:2px }
+#studentListUI .pl-item:hover,#appreciationListUI .pl-item:hover{ background:transparent; border-color:#3b82f6 }
+#studentListUI .pl-item.sel:hover,#appreciationListUI .pl-item.sel:hover{ background:#e0e7ff }
 /* Bouton d'import dans les en-têtes de carte */
 .card-header .hdr-left{ display:flex; align-items:center; gap:12px; min-width:0 }
 .card-header .import-btn{ margin:0; align-self:center; padding:6px 9px; border:1px solid #cbd5e1; background:#fff; color:#1e3a8a }
@@ -1048,6 +1048,8 @@ body.student-mode .sch-prof-only{display:none!important}
 .sch-classes{display:flex;flex-wrap:wrap;gap:6px 14px}.sch-classes label{margin:0!important;display:flex!important;gap:5px;align-items:center}.sch-classes input{width:auto!important}
 .sch-room{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border)}
 .sch-x{border:none;background:none;color:#b91c1c;font-size:18px;cursor:pointer}
+.sch-x.sch-pen{font-size:14px;padding:0 6px 0 0}
+#schRoomList .sch-room{display:flex;align-items:center;gap:4px}
 /* Bandeau d'enregistrement dans l'en-tête, à droite du titre */
 .hdr-left{display:flex;align-items:center;gap:18px;min-width:0;flex-wrap:wrap}
 header .save-status-banner{margin:0;height:32px;min-height:0;padding:0 12px;font-size:14px;line-height:30px;font-weight:700;border-radius:8px;white-space:nowrap}
@@ -1138,11 +1140,11 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
 .hol-row input{padding:9px 11px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;font-size:14px;outline:none}
 .hol-row input:focus{border-color:#2563eb;background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.13)}
 .hol-row .hol-n{flex:1;min-width:150px}
-.sch-hd div.sch-hol{background:#fef3c7;color:#92400e}
-.sch-hol-n{display:block;font-size:10.5px;font-weight:700;text-transform:none;color:#92400e;line-height:1.2}
-.sch-col.sch-hol-col{background:repeating-linear-gradient(180deg,transparent 0,transparent 53px,#e5e7eb 53px,#e5e7eb 54px),repeating-linear-gradient(135deg,#fffbeb 0,#fffbeb 10px,#fef3c7 10px,#fef3c7 20px)}
-.sch-month>div.sch-hol-cell{background:#fffbeb}
-.sch-hol-chip{background:#fde68a;color:#78350f;font-size:11px;font-weight:700;border-radius:4px;padding:1px 5px;margin:2px 0}
+.sch-hd div.sch-hol{background:#e5e7eb;color:#4b5563}
+.sch-hol-n{display:block;font-size:10.5px;font-weight:700;text-transform:none;color:#4b5563;line-height:1.2}
+.sch-col.sch-hol-col{background:repeating-linear-gradient(180deg,transparent 0,transparent 53px,#e5e7eb 53px,#e5e7eb 54px),repeating-linear-gradient(135deg,#f3f4f6 0,#f3f4f6 10px,#e5e7eb 10px,#e5e7eb 20px)}
+.sch-month>div.sch-hol-cell{background:#f3f4f6}
+.sch-hol-chip{background:#d1d5db;color:#374151;font-size:11px;font-weight:700;border-radius:4px;padding:1px 5px;margin:2px 0}
 
 .vs-tab.vs-warn{border:2px solid #dc2626;border-radius:8px;color:#b91c1c;margin-bottom:2px}
 .vs-loc{align-self:center;margin-left:8px;padding:3px 10px;font-size:12px;font-weight:600;border:1px solid #dc2626;color:#b91c1c;background:#fef2f2;border-radius:14px;cursor:pointer}
@@ -1291,10 +1293,11 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
    <div class="card-body split">
     <div class="panel">
      <div class="search-row">
-      <input id="appreciationSearch" placeholder="Rechercher élève..." style="flex:1;">
-      <select id="appreciationClassFilter" style="width:140px;"><option value="">(Toutes)</option></select>
+      <input id="appreciationSearch" class="modern-input" placeholder="Rechercher élève..." style="flex:1;">
+      <select id="appreciationClassFilter" class="modern-select" style="width:140px;"><option value="">(Toutes)</option></select>
      </div>
-     <select id="appreciationStudentList" class="list-select" size="12"></select>
+     <div id="appreciationListUI" class="pl" role="listbox" aria-label="Liste des élèves"></div>
+     <select id="appreciationStudentList" size="12" style="display:none"></select>
     </div>
     <div class="panel" id="appreciationPanel">
      <div id="appreciationPlaceholder" style="color:#64748b;">Sélectionne un élève pour gérer ses appréciations et bulletins.</div>
@@ -4245,6 +4248,7 @@ function bindPrettyList(selId,uiId,panelId){
 }
 bindPrettyList("studentList","studentListUI","studentPanel");
 bindPrettyList("classList","classListUI","classPanel");
+bindPrettyList("appreciationStudentList","appreciationListUI","appreciationPanel");
 
 let LAST_ACTIVE_STUDENT_PERIOD="T1";
 let CURRENT_PREVIEW_CLASS_ID = null;
@@ -8708,6 +8712,7 @@ function renderAppreciationStudentList(){
   
   appreciationStudentList.appendChild(opt);
  });
+ renderPrettyList("appreciationStudentList","appreciationListUI","student");
 }
 
 function calculateStudentAverages(studentId, period) {
@@ -9669,6 +9674,7 @@ function applyStudentMode(){
  const list=document.getElementById("studentList"); list.value=sid; openStudent(sid);
  renderAppreciationStudentList();
  const al=document.getElementById("appreciationStudentList"); if(al) al.value=sid;
+ { const ui=document.getElementById("appreciationListUI"); if(ui){ ui.dataset.sel=sid; renderPrettyList("appreciationStudentList","appreciationListUI","student"); } }
  openAppreciationStudent(sid);
 }
 function applyProfMode(){
@@ -13361,7 +13367,7 @@ document.getElementById("schSigNo").onclick=()=>schSignal(false);
 const roomModal=document.getElementById("schRoomsModal");
 function renderRooms(){
  const l=[...schEns().rooms].sort((a,b)=>a.localeCompare(b,"fr",{numeric:true,sensitivity:"base"}));
- document.getElementById("schRoomList").innerHTML=l.length?l.map(r=>`<div class="sch-room"><span>${escHtml(r)}</span><button class="sch-x" title="Supprimer" data-room="${escHtml(r)}">×</button></div>`).join(""):"<div class='hint'>Aucune salle.</div>";
+ document.getElementById("schRoomList").innerHTML=l.length?l.map(r=>`<div class="sch-room"><button class="sch-x sch-pen" title="Renommer" data-redit="${escHtml(r)}">✏️</button><span style="flex:1">${escHtml(r)}</span><button class="sch-x" title="Supprimer" data-room="${escHtml(r)}">×</button></div>`).join(""):"<div class='hint'>Aucune salle.</div>";
 }
 document.getElementById("schRooms").onclick=()=>{ renderRooms(); roomModal.classList.add("open"); roomModal.setAttribute("aria-hidden","false"); document.getElementById("schRoomInput").focus(); };
 document.getElementById("schRoomsClose").onclick=()=>{roomModal.classList.remove("open");roomModal.setAttribute("aria-hidden","true");};
@@ -13370,7 +13376,24 @@ document.getElementById("schRoomForm").addEventListener("submit",ev=>{
  if(!n||s.rooms.some(r=>r.toLowerCase()===n.toLowerCase())){ i.value=""; return; }
  s.rooms.push(n); i.value=""; renderRooms(); saveData();
 });
+function roomRename(old,nv){
+ nv=nv.trim(); const s=schEns();
+ if(!nv||nv===old) return true;
+ if(s.rooms.some(r=>r!==old&&r.toLowerCase()===nv.toLowerCase())){ alert("Une salle porte déjà ce nom."); return false; }
+ s.rooms=s.rooms.map(r=>r===old?nv:r);
+ s.events.forEach(e=>{ if(e.room===old) e.room=nv; });
+ saveData(); renderSchedule(); if(typeof HIST!=="undefined"&&document.getElementById("vieView").classList.contains("active")) renderVie();
+ return true;
+}
 document.getElementById("schRoomList").addEventListener("click",ev=>{
+ const pen=ev.target.closest("[data-redit]");
+ if(pen){ const old=pen.dataset.redit, row=pen.parentElement, sp=row.querySelector("span");
+  const inp=document.createElement("input"); inp.value=old; inp.style.cssText="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:6px;min-width:0";
+  sp.replaceWith(inp); inp.focus(); inp.select(); let done=false;
+  const fin=ok=>{ if(done) return; done=true; if(ok&&!roomRename(old,inp.value)){ done=false; inp.focus(); return; } renderRooms(); };
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); fin(true); } else if(e.key==="Escape"){ e.preventDefault(); fin(false); } });
+  inp.addEventListener("blur",()=>fin(true));
+  return; }
  const b=ev.target.closest("[data-room]"); if(!b) return; const n=b.dataset.room;
  openConfirmModal({message:`Supprimer la salle « ${n} » ? Les cours déjà planifiés gardent son nom.`,onConfirm:()=>{ const s=schEns(); s.rooms=s.rooms.filter(r=>r!==n); renderRooms(); saveData(); }});
 });
