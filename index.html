@@ -623,6 +623,7 @@ body.student-mode .import-btn{ display:none !important }
 /* ── Onglets principaux : style intercalaire ── */
 .topbar{ max-width:1400px; margin:12px auto 0; padding:0 12px; gap:14px; align-items:flex-end; position:relative; z-index:2 }
 .container{ margin:0 auto 18px }
+.container .card{ border-top-left-radius:0 }
 .tabs{ gap:4px; align-items:flex-end }
 .import-btn{ align-self:center; margin:0 10px 6px 0 }
 .tab-btn{
@@ -5227,9 +5228,10 @@ function renderEleveViewForPeriod(studentId,periodKey){
     if(isSpecial(n)){btn.textContent=n.noteText;}
     else{
      let base=fmt(n.note);
-     if(n.coef===0) base=n.outof!==20?`(${base}/${fmt(n.outof)})`:`(${base})`;
-     btn.innerHTML=base;
-     if(n.outof!==20&&n.coef!==0){const sub=document.createElement("sub");sub.textContent=`/${fmt(n.outof)}`;btn.appendChild(sub);}
+     const zero=n.coef===0;
+     btn.textContent=zero?`(${base}`:base;
+     if(n.outof!==20){const sub=document.createElement("sub");sub.textContent=`/${fmt(n.outof)}`;btn.appendChild(sub);}
+     if(zero) btn.appendChild(document.createTextNode(")"));
      if(n.coef!==1&&n.coef!==0){
       const sup=document.createElement("sup");
       sup.style.marginLeft="1px";
@@ -10013,10 +10015,31 @@ function updateTabWarningIndicators(){
     });
   });
   
+  // Résultats individuels : masqués / non saisis (notes et compétences)
+  let hasMissingS = false, hasHiddenS = false, hasMissingSC = false, hasHiddenSC = false;
+  if(AUTH.role === "prof"){
+    (DATA.students || []).forEach(st => {
+      (DATA.notes[st.id] || []).forEach(n => {
+        const miss = typeof n.note !== 'number' && !isSpecial(n), hid = !!n.hideFromStudent;
+        if(miss) hasMissingS = true; if(hid) hasHiddenS = true;
+        if(n.classCommon){ if(miss) hasMissingSC = true; if(hid) hasHiddenSC = true; }
+      });
+    });
+    (DATA.competencies || []).forEach(c => {
+      const miss = !c.color, hid = !!c.hideFromStudent;
+      if(miss) hasMissingS = true; if(hid) hasHiddenS = true;
+      if(miss) hasMissingSC = true; if(hid) hasHiddenSC = true;
+    });
+  }
   const tabBtnC = document.querySelector('.tab-btn[data-target="classesView"]');
   if(tabBtnC) {
-    tabBtnC.classList.toggle("has-empty-eval", hasMissingC);
-    tabBtnC.classList.toggle("has-hidden-eval", hasHiddenC);
+    tabBtnC.classList.toggle("has-empty-eval", hasMissingC || hasMissingSC);
+    tabBtnC.classList.toggle("has-hidden-eval", hasHiddenC || hasHiddenSC);
+  }
+  const tabBtnN = document.querySelector('.tab-btn[data-target="elevesView"]');
+  if(tabBtnN) {
+    tabBtnN.classList.toggle("has-empty-eval", hasMissingS);
+    tabBtnN.classList.toggle("has-hidden-eval", hasHiddenS);
   }
 
   // Appréciations manquantes
