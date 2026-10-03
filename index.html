@@ -584,7 +584,7 @@ body.student-mode #studentLegend{ display:block }
 /* ── Bouton d'import ── */
 .import-btn{ padding:8px 10px; border-radius:8px; border:1px solid #fff; background:#fff; color:#1e3a8a; cursor:pointer; display:inline-flex; align-items:center; justify-content:center }
 .import-btn:hover{ background:#e0e7ff }
-body.student-mode #importSheetBtn{ display:none !important }
+body.student-mode .import-btn{ display:none !important }
 /* ── Statut d'enregistrement ── */
 .save-status-banner small{ font-weight:400; font-size:11px; opacity:.8; margin-left:8px }
 /* ── Listes modernes ── */
@@ -902,6 +902,121 @@ body.student-mode #homeworkView .card-header strong::after{ content:""; }
  .homework-review-student{ grid-template-columns:auto 1fr; }
  .homework-grade-input{ grid-column:1/-1 }
 }
+
+/* ═══ Modifications : liste élèves compacte, import dans les titres, bulletin, appréciations ═══ */
+/* Liste des élèves : boutons plus bas, sans contour (contour bleu au survol) */
+#studentListUI .pl-item{ padding:4px 10px; border:1px solid transparent; font-size:13.5px; line-height:1.2 }
+#studentListUI .pl-item + .pl-item{ margin-top:2px }
+#studentListUI .pl-item:hover{ background:transparent; border-color:#3b82f6 }
+#studentListUI .pl-item.sel:hover{ background:#e0e7ff }
+/* Bouton d'import dans les en-têtes de carte */
+.card-header .hdr-left{ display:flex; align-items:center; gap:12px; min-width:0 }
+.card-header .import-btn{ margin:0; align-self:center; padding:6px 9px; border:1px solid #cbd5e1; background:#fff; color:#1e3a8a }
+.card-header .import-btn:hover{ background:#e0e7ff; border-color:#93c5fd }
+/* Bulletin élève : nom de matière + moyenne sur fond bleuté, notes à droite */
+#studentElevePeriodViews .matiere-line, body.student-mode #studentContent .matiere-line{
+ grid-template-columns:minmax(300px,34%) minmax(0,1fr); gap:0; padding:0; align-items:stretch
+}
+.matiere-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--blueBox); padding:12px 16px; min-width:0 }
+.matiere-head .matiere-name{ flex:1 1 auto; min-width:0; color:#1e3a8a; overflow-wrap:anywhere }
+.matiere-head .avg-box{ flex:0 0 112px; background:#fff }
+#studentElevePeriodViews .matiere-line > .notes-list{ padding:12px 16px; align-self:center }
+body.student-mode #studentContent .matiere-head{ padding:9px 14px }
+body.student-mode #studentContent .matiere-line > .notes-list{ padding:9px 14px }
+@media (max-width:900px){
+ #studentElevePeriodViews .matiere-line, body.student-mode #studentContent .matiere-line{ grid-template-columns:minmax(0,1fr) !important }
+ .matiere-head .avg-box{ flex-basis:96px }
+}
+/* Appréciations : bouton ✓ / ✕ à droite de la zone de texte */
+.app-row{ display:flex; gap:8px; align-items:flex-start }
+.app-row > textarea{ flex:1 1 auto; min-width:0 }
+.app-ok-btn{ flex:0 0 auto; width:40px; height:40px; border-radius:10px; border:1px solid #16a34a; background:#22c55e; color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:filter .15s }
+.app-ok-btn:hover{ filter:brightness(1.08) }
+.app-ok-btn.off{ background:#ef4444; border-color:#dc2626 }
+.app-row > textarea.app-off, .app-row > textarea:disabled{ background:#e2e8f0 !important; color:#94a3b8; cursor:not-allowed; resize:none }
+.app-row > textarea:disabled::placeholder{ color:#64748b; font-style:italic }
+/* Barre du haut (écran large) : plus compacte pour que le bandeau d'enregistrement reste sur la même ligne */
+@media (min-width:901px){
+ .topbar{ gap:10px }
+ .tab-btn{ padding-left:16px; padding-right:16px }
+ .locks{ margin-left:0; gap:4px }
+ .lock-btn{ min-width:36px; padding-left:6px; padding-right:6px }
+ .lock-item{ min-width:60px }
+ .top-actions .btn{ padding:0 12px }
+ .save-status-banner{ padding:0 10px; font-size:14px }
+ body.student-mode .tab-btn{ padding-left:8px; padding-right:8px }
+}
+
+/* ═══ Lot 2 : alignement moyenne générale, coef, police des notes, champs modernes ═══ */
+/* Coef sous le nom de la matière */
+.matiere-title{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px }
+.matiere-title .matiere-name{ flex:none }
+.matiere-coef{ font-size:12.5px; font-weight:600; color:#1e3a8a; line-height:1.1 }
+.matiere-head .avg-box{ padding:10px 10px }
+/* Moyenne générale à gauche, alignée sur la colonne des moyennes de matières */
+#studentElevePeriodViews .general-line{ justify-content:flex-start }
+#studentElevePeriodViews .general-box{
+ width:max(300px,34%); min-width:0; flex-direction:row; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px
+}
+#studentElevePeriodViews .general-box .avg-label{ margin:0; font-size:13px; text-align:left }
+#studentElevePeriodViews .general-box .avg-value{ flex:0 0 112px; text-align:center }
+body.student-mode #studentContent .general-box{ padding:9px 14px }
+@media (max-width:900px){ #studentElevePeriodViews .general-box{ width:100% } }
+/* Notes : police Arial (affichage vision élève / compte élève uniquement) */
+#studentElevePeriodViews .note-pill, #studentLegend .note-pill{ font-family:Arial, Helvetica, sans-serif }
+
+/* Zones de texte : plus de redimensionnement manuel, la hauteur suit le contenu */
+textarea{ resize:none !important; overflow:hidden; box-sizing:border-box }
+
+/* Création d'un test en ligne : champs « modernes » */
+#onlineTestSetupModal label:not(.online-check-item), #onlineTestBuilderModal label, #onlineTestAnswersModal label{
+ display:block; margin:12px 0 6px; font-weight:600; font-size:13.5px; color:#334155
+}
+#onlineTestSetupModal .online-check-item, #onlineTestBuilderModal .online-check-item{ margin:0 }
+:is(#onlineTestSetupModal,#onlineTestBuilderModal,#onlineTestAnswersModal) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background-color:#fff;
+ font-size:14px; line-height:1.4; color:var(--text); font-family:inherit; transition:border-color .15s, box-shadow .15s
+}
+:is(#onlineTestSetupModal,#onlineTestBuilderModal,#onlineTestAnswersModal) :is(input,select,textarea):focus{
+ outline:none; border-color:#60a5fa; box-shadow:0 0 0 3px rgba(147,197,253,.45)
+}
+:is(#onlineTestSetupModal,#onlineTestBuilderModal,#onlineTestAnswersModal) :is(input,textarea)::placeholder{ color:#94a3b8 }
+:is(#onlineTestSetupModal,#onlineTestBuilderModal,#onlineTestAnswersModal) select{
+ appearance:none; -webkit-appearance:none; cursor:pointer; padding-right:36px; background-repeat:no-repeat; background-position:right 12px center;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+}
+#onlineTestBuilderModal .online-type-grid{ gap:14px }
+#onlineTestBuilderModal .online-choice-row{ align-items:center }
+#onlineTestBuilderModal .online-choice-row .btn-danger{ padding:8px 12px; border-radius:10px }
+/* Espace entre l'encart d'explication et la zone de correction */
+.online-modal-note + .online-answer-target{ margin-top:14px }
+.online-answer-target{ margin-top:14px }
+
+/* ═══ Lot 3 : coef plus léger, séparateurs bleus, titre de devoir modifiable ═══ */
+.matiere-coef{ font-weight:400 }
+/* Lignes entre matières : bleu foncé (visibles sur la zone bleutée) */
+#studentElevePeriodViews .matiere-line{ border-bottom:1px solid #1e3a8a }
+#studentElevePeriodViews .eleveLines .matiere-line:first-child{ border-top:1px solid #1e3a8a }
+/* Titre de devoir : crayon + listes déroulantes */
+.homework-entry-title h4{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.homework-title-pencil{
+ width:30px; height:30px; flex:0 0 auto; border-radius:9px; border:1px solid #bfdbfe; background:#eff6ff; color:#1d4ed8;
+ cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0; transition:background .15s
+}
+.homework-title-pencil:hover{ background:#dbeafe }
+.homework-title-edit{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.homework-title-edit select{
+ min-width:150px; max-width:260px; padding:9px 34px 9px 12px; border:1px solid var(--border); border-radius:10px; background-color:#fff;
+ font-size:15px; font-weight:600; color:var(--text); font-family:inherit; cursor:pointer; appearance:none; -webkit-appearance:none;
+ background-repeat:no-repeat; background-position:right 12px center;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+}
+.homework-title-edit select:focus{ outline:none; border-color:#60a5fa; box-shadow:0 0 0 3px rgba(147,197,253,.45) }
+.homework-title-ok{
+ width:38px; height:38px; flex:0 0 auto; border-radius:10px; border:1px solid #16a34a; background:#22c55e; color:#fff;
+ cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0
+}
+.homework-title-ok:hover{ filter:brightness(1.08) }
 </style>
 </head>
 <body class="auth-pending">
@@ -915,9 +1030,6 @@ body.student-mode #homeworkView .card-header strong::after{ content:""; }
 </header>
 <div class="topbar">
  <div class="tabs" id="mainTabs">
-  <button class="import-btn" id="importSheetBtn" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur">
-   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-  </button>
   <input type="file" id="importFileInput" accept=".xlsx,.xls,.ods,.csv" style="display:none">
   <button class="tab-btn active" data-target="elevesView">Élèves</button>
   <button class="tab-btn" data-target="classesView">Classes</button>
@@ -946,7 +1058,7 @@ body.student-mode #homeworkView .card-header strong::after{ content:""; }
  <section id="elevesView" class="view active">
   <div class="card">
    <div class="card-header">
-    <strong>Gestion des élèves</strong>
+    <div class="hdr-left"><strong>Gestion des élèves</strong><button class="import-btn" id="importSheetBtn" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteStudentBtn">Supprimer élève</button>
     </div>
@@ -1001,7 +1113,7 @@ body.student-mode #homeworkView .card-header strong::after{ content:""; }
  <section id="classesView" class="view">
   <div class="card">
    <div class="card-header">
-    <strong>Gestion des classes et des matières</strong>
+    <div class="hdr-left"><strong>Gestion des classes et des matières</strong><button class="import-btn" id="importSheetBtn2" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteClassBtn">Supprimer classe</button>
     </div>
@@ -3435,7 +3547,7 @@ const COMPETENCIES_HIERARCHY = {
 };
 
 const SPECIAL_VALUES = new Set(["Abs","Disp","NE","NR"]);
-let DATA = { students:[], classes:[], notes:{}, competencies:[], appreciations:[], generalAppreciations: {}, onlineTests: [], competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY)) };
+let DATA = { students:[], classes:[], notes:{}, competencies:[], appreciations:[], generalAppreciations: {}, appreciationOff: {}, onlineTests: [], competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY)) };
 let LOCKED_PERIODS = { T1:false, T2:false, T3:false, T4:false };
 let COMP_TARGET_STUDENT = null;
 let COMP_TARGET_NOTE_ID = null;
@@ -3645,6 +3757,10 @@ function buildCSVText(){
    });
   });
  }
+ Object.keys(DATA.appreciationOff||{}).forEach(k=>{
+  const parts=k.split("|"); const sid=parts.shift(), per=parts.shift();
+  rows.push(["appreciationOff", sid, per, escapeCsv(parts.join("|"))].join(";"));
+ });
  ensureOnlineTestsStore();
  (DATA.onlineTests||[]).forEach(test=>{
   rows.push(["onlineTest",test.id||"",escapeCsv(test.title||""),escapeCsv(test.subject||""),escapeCsv(JSON.stringify(test.options||{})),escapeCsv(test.intro||""),escapeCsv(test.conclusion||""),test.defaultPoints||1,escapeCsv(JSON.stringify(test.questions||[])),test.createdAt||"",test.updatedAt||""].join(";"));
@@ -3675,7 +3791,7 @@ function exportCSV(){
 }
 
 function importCSV(text){
- DATA={students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},onlineTests:[],competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
+ DATA={students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},appreciationOff:{},onlineTests:[],competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
  SUBJECT_REGISTRY=[]; LOCKED_PERIODS={T1:false,T2:false,T3:false,T4:false};
  const lines=[]; let currentLine="",inQuotes=false;
  for(let i=0;i<text.length;i++){
@@ -3737,6 +3853,10 @@ function importCSV(text){
    const sid=cols[1], p=cols[2], text=unescapeCsv(cols[3]||"");
    if(!DATA.generalAppreciations[sid]) DATA.generalAppreciations[sid]={};
    DATA.generalAppreciations[sid][p]=text;
+  }
+  else if(type==="appreciationOff"){
+   if(!DATA.appreciationOff) DATA.appreciationOff={};
+   DATA.appreciationOff[cols[1]+"|"+cols[2]+"|"+unescapeCsv(cols[3]||"")]=true;
   }
   else if(type==="onlineTest"){
    try{
@@ -4931,14 +5051,18 @@ function renderEleveViewForPeriod(studentId,periodKey){
   const subjectCoef=getSubjectCoef(subject);
   if(!isCompRub&&hasNotes&&coefSum>0){
    const avgVal=sum/coefSum;
-   avg.innerHTML=`<div class="avg-value">${fmt(avgVal,2)}/20</div><div class="avg-coef">Coef. ${fmt(subjectCoef,2)}</div>`;
+   avg.innerHTML=`<div class="avg-value">${fmt(avgVal,2)}/20</div>`;
    avg.style.cursor="pointer"; avg.title="Voir les statistiques de la classe";
    avg.addEventListener("click",(e)=>{e.stopPropagation();openSubjectStats(studentId,subject,periodKey);});
    globalSum+=avgVal*subjectCoef; globalCoef+=subjectCoef;
   }else if(!isCompRub){
-   avg.innerHTML=`<div class="avg-value">--</div><div class="avg-coef">Coef. ${fmt(subjectCoef,2)}</div>`;
+   avg.innerHTML=`<div class="avg-value">--</div>`;
   }
-  line.appendChild(name); line.appendChild(notesWrap); line.appendChild(avg); container.appendChild(line);
+  const head=document.createElement("div"); head.className="matiere-head";
+  const titleWrap=document.createElement("div"); titleWrap.className="matiere-title"; titleWrap.appendChild(name);
+  if(!isCompRub){ const cf=document.createElement("div"); cf.className="matiere-coef"; cf.textContent="Coef. "+fmt(subjectCoef,2); titleWrap.appendChild(cf); }
+  head.appendChild(titleWrap); head.appendChild(avg);
+  line.appendChild(head); line.appendChild(notesWrap); container.appendChild(line);
  }
  if(globalCoef>0){
   const gAvg=globalSum/globalCoef;
@@ -8370,9 +8494,9 @@ function renderAppreciationStudentList(){
     const clsSubjects = (cls?.subjects || []).map(sub => typeof sub === 'object' ? sub.name : sub);
     clsSubjects.forEach(subName => {
       const avg = getStudentAverageForSubject(s.id, subName, CURRENT_APP_PERIOD);
-      if(avg !== null && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingApp = true;
+      if(avg !== null && !isAppOff(s.id, CURRENT_APP_PERIOD, subName) && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingApp = true;
     });
-    if(!generalApp || generalApp.trim() === "") missingApp = true;
+    if(!isAppOff(s.id, CURRENT_APP_PERIOD, "__GENERAL__") && (!generalApp || generalApp.trim() === "")) missingApp = true;
   }
   
   if(missingApp) opt.style.color = "var(--danger)";
@@ -8453,6 +8577,7 @@ function renderAppreciationUI(){
   const subName=typeof sub==='object'?sub.name:sub;
   const avg=getStudentAverageForSubject(stu.id,subName,CURRENT_APP_PERIOD);
   const app=getAppreciation(stu.id,CURRENT_APP_PERIOD,subName);
+  const off=isAppOff(stu.id,CURRENT_APP_PERIOD,subName);
   
   html+=`<tr style="border-bottom:1px solid #f1f5f9;">
    <td style="padding:12px; font-family:Georgia,'Times New Roman',serif; font-weight:700; color:#1e3a8a; font-size:1.1em;">${subName}</td>
@@ -8462,7 +8587,10 @@ function renderAppreciationUI(){
     </div>
    </td>
    <td style="padding:12px;">
-    <textarea class="app-input" data-subject="${subName}" style="width:100%; height:80px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; resize:vertical; background:#fff;" placeholder="Saisir l'appréciation pour ${subName}..." onblur="saveAppreciationInput(this)">${escHtml(app)}</textarea>
+    <div class="app-row">
+     <textarea class="app-input${off?' app-off':''}" data-subject="${escHtml(subName)}" ${off?'disabled':''} style="width:100%; height:80px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; resize:vertical; background:#fff;" placeholder="${off?'Aucune appréciation pour cette matière':'Saisir l\'appréciation pour '+escHtml(subName)+'...'}" onblur="saveAppreciationInput(this)">${off?'':escHtml(app)}</textarea>
+     ${appOkBtnHtml(off,escHtml(subName),false)}
+    </div>
    </td>
   </tr>`;
  });
@@ -8470,6 +8598,7 @@ function renderAppreciationUI(){
  // Appréciation Générale
  const averages = calculateStudentAverages(stu.id, CURRENT_APP_PERIOD);
  const genApp = (DATA.generalAppreciations || {})[stu.id]?.[CURRENT_APP_PERIOD] || "";
+ const genOff = isAppOff(stu.id,CURRENT_APP_PERIOD,"__GENERAL__");
  html+=`<tr style="background:#f0f9ff; border-top:2px solid #bae6fd;">
    <td style="padding:12px; font-weight:800; color:#0c4a6e; font-size:1.2em;">Appréciation Générale</td>
    <td style="padding:12px; text-align:center;">
@@ -8478,13 +8607,48 @@ function renderAppreciationUI(){
     </div>
    </td>
    <td style="padding:12px;">
-    <textarea class="gen-app-input" style="width:100%; height:120px; padding:12px; border:2px solid #bae6fd; border-radius:10px; font-family:inherit; font-weight:600; resize:vertical; background:#fff;" placeholder="Saisir l'appréciation générale du trimestre..." onblur="saveGeneralAppreciationInput(this)">${escHtml(genApp)}</textarea>
+    <div class="app-row">
+     <textarea class="gen-app-input${genOff?' app-off':''}" ${genOff?'disabled':''} style="width:100%; height:120px; padding:12px; border:2px solid #bae6fd; border-radius:10px; font-family:inherit; font-weight:600; resize:vertical; background:#fff;" placeholder="${genOff?'Aucune appréciation générale':'Saisir l\'appréciation générale du trimestre...'}" onblur="saveGeneralAppreciationInput(this)">${genOff?'':escHtml(genApp)}</textarea>
+     ${appOkBtnHtml(genOff,'',true)}
+    </div>
    </td>
   </tr>`;
  
  html+=`</tbody></table>`;
  appreciationContent.innerHTML=html;
 }
+
+
+// ── Appréciation « faite / désactivée » (bouton ✓ / ✕) ──
+function isAppOff(sid,period,subject){ return !!(DATA.appreciationOff||{})[sid+"|"+period+"|"+subject]; }
+function setAppOff(sid,period,subject,off){
+ if(!DATA.appreciationOff) DATA.appreciationOff={};
+ const k=sid+"|"+period+"|"+subject;
+ if(off) DATA.appreciationOff[k]=true; else delete DATA.appreciationOff[k];
+}
+function appOkBtnHtml(off,subjectEsc,isGeneral){
+ const ico=off
+  ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>'
+  : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+ const title=off?"Appréciation désactivée — cliquer pour la réactiver et resaisir":"Valider : aucune appréciation à saisir (la zone est verrouillée)";
+ return `<button type="button" class="app-ok-btn${off?' off':''}" data-subject="${subjectEsc}" data-general="${isGeneral?1:0}" title="${title}" aria-label="${title}" onclick="toggleAppOff(this)">${ico}</button>`;
+}
+window.toggleAppOff=function(btn){
+ if(!CURRENT_APP_STUDENT) return;
+ const isGen=btn.dataset.general==="1";
+ const subj=isGen?"__GENERAL__":btn.dataset.subject;
+ const ta=btn.parentElement.querySelector("textarea");
+ const wasOff=isAppOff(CURRENT_APP_STUDENT,CURRENT_APP_PERIOD,subj);
+ if(!wasOff && ta){ // on enregistre ce qui a été tapé avant de verrouiller
+  if(isGen){
+   if(!DATA.generalAppreciations) DATA.generalAppreciations={};
+   if(!DATA.generalAppreciations[CURRENT_APP_STUDENT]) DATA.generalAppreciations[CURRENT_APP_STUDENT]={};
+   DATA.generalAppreciations[CURRENT_APP_STUDENT][CURRENT_APP_PERIOD]=ta.value.trim();
+  }else saveAppreciation(CURRENT_APP_STUDENT,CURRENT_APP_PERIOD,subj,ta.value.trim());
+ }
+ setAppOff(CURRENT_APP_STUDENT,CURRENT_APP_PERIOD,subj,!wasOff);
+ saveData(); renderAppreciationUI(); renderAppreciationStudentList(); updateTabWarningIndicators();
+};
 
 window.saveGeneralAppreciationInput=function(el){
   if(!CURRENT_APP_STUDENT) return;
@@ -9472,11 +9636,11 @@ function loadData(){ /* les données viennent uniquement du serveur après conne
  const findClass=n=>DATA.classes.find(c=>c.name.trim().toLowerCase()===n.trim().toLowerCase());
  let SLIDES=[], idx=0, seen=new Set();
  function closeImp(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");SLIDES=[];}
- document.getElementById("importSheetBtn").addEventListener("click",()=>{
+ document.querySelectorAll(".import-btn").forEach(b=>b.addEventListener("click",()=>{
   if(AUTH.role!=="prof") return;
   if(typeof XLSX==="undefined"){alert("Le module d'import n'a pas pu être chargé. Vérifiez votre connexion internet puis rechargez la page.");return;}
   fileIn.value=""; fileIn.click();
- });
+ }));
  fileIn.addEventListener("change",async()=>{
   const f=fileIn.files[0]; if(!f) return;
   try{
@@ -9661,9 +9825,10 @@ function updateTabWarningIndicators(){
         let missingSubjectApp = false;
         clsSubjects.forEach(subName => {
           const avg = getStudentAverageForSubject(s.id, subName, p);
-          if (avg !== null && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingSubjectApp = true;
+          if (avg !== null && !isAppOff(s.id, p, subName) && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingSubjectApp = true;
         });
-        if (missingSubjectApp || !generalApp || generalApp.trim() === "") missingPeriodsA.add(p);
+        const genMissing = !isAppOff(s.id, p, "__GENERAL__") && (!generalApp || generalApp.trim() === "");
+        if (missingSubjectApp || genMissing) missingPeriodsA.add(p);
       }
     });
   });
@@ -10883,6 +11048,7 @@ window.downloadStudentBulletin = function(studentId, period) {
 
     const avg = getStudentAverageForSubject(studentId, subName, period);
     const appreciation = getAppreciation(studentId, period, subName);
+    const appOff = isAppOff(studentId, period, subName);
     
     // Stats classe
     const classNotes = [];
@@ -10901,7 +11067,9 @@ window.downloadStudentBulletin = function(studentId, period) {
       { content: classMin !== null ? fmt(classMin, 2) : "-", styles: { halign: 'center' } },
       { content: classMax !== null ? fmt(classMax, 2) : "-", styles: { halign: 'center' } },
       { content: classAvg !== null ? fmt(classAvg, 2) : "-", styles: { halign: 'center' } },
-      appreciation || "-"
+      appOff
+        ? { content: "Aucune appréciation pour cette matière", styles: { fontStyle: 'italic', textColor: [100, 116, 139], fillColor: [226, 232, 240] } }
+        : (appreciation || "-")
     ]);
   });
   
@@ -10929,7 +11097,8 @@ window.downloadStudentBulletin = function(studentId, period) {
   // Summary Box
   doc.setDrawColor(30, 64, 175);
   doc.setFillColor(239, 246, 255);
-  doc.rect(20, finalY, pageWidth - 40, 45, 'FD');
+  const genOff = isAppOff(studentId, period, "__GENERAL__");
+  doc.rect(20, finalY, pageWidth - 40, genOff ? 24 : 45, 'FD');
   
   const allGenAverages = [];
   (cls?.memberIds || []).forEach(sid => {
@@ -10953,14 +11122,16 @@ window.downloadStudentBulletin = function(studentId, period) {
   doc.setTextColor(71, 85, 105);
   doc.text(`Statistiques de la classe : Moyenne minimale ${genMin!==null?fmt(genMin,2):"-"}  |  Moyenne maximale ${genMax!==null?fmt(genMax,2):"-"}  |  Moyenne de classe ${genAvgClass!==null?fmt(genAvgClass,2):"-"}`, 25, finalY + 17);
   
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(30, 58, 138);
-  doc.text("APPRÉCIATION GÉNÉRALE :", 25, finalY + 28);
-  
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(15, 23, 42);
-  const splitAppr = doc.splitTextToSize(genAppr || "Pas d'appréciation générale saisie.", pageWidth - 50);
-  doc.text(splitAppr, 25, finalY + 34);
+  if (!genOff) {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 58, 138);
+    doc.text("APPRÉCIATION GÉNÉRALE :", 25, finalY + 28);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(15, 23, 42);
+    const splitAppr = doc.splitTextToSize(genAppr || "Pas d'appréciation générale saisie.", pageWidth - 50);
+    doc.text(splitAppr, 25, finalY + 34);
+  }
   
   // Footer
   const pageCount = doc.internal.getNumberOfPages();
@@ -11284,6 +11455,7 @@ function initApp(){
   selectedDate: todayISO(),
   currentMonth: (()=>{ const d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })(),
   draft: null,
+  editTitle: false,
   assignSelection: [],
   reviewFilterTestId: "",
   reviewSelectedKey: "",
@@ -11455,6 +11627,7 @@ function syncStudentHomeworkDate(force=false){
  }
  function startHomeworkDraft(homeworkId=null){
   ensureHomeworkStore();
+  HOMEWORK_STATE.editTitle=false;
   if(homeworkId){
    const existing=getHomeworkById(homeworkId);
    if(!existing) return;
@@ -11611,13 +11784,22 @@ function syncStudentHomeworkDate(force=false){
  }
  function renderHomeworkEditorCard(){
   const draft=HOMEWORK_STATE.draft;
-  if(!draft) return "";
+  if(!draft){ HOMEWORK_STATE.editTitle=false; return ""; }
   const className=homeworkClassName(draft.classId);
+  const titleHtml = HOMEWORK_STATE.editTitle ? `
+      <div class="homework-title-edit">
+       <select id="homeworkDraftClassSelect" aria-label="Classe">${homeworkSortedClasses().map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===draft.classId?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+       <select id="homeworkDraftSubjectSelect" aria-label="Matière">${(()=>{ const subs=homeworkClassSubjects(draft.classId); if(draft.subject && !subs.includes(draft.subject)) subs.unshift(draft.subject); return subs.map(sub=>`<option value="${escHtml(sub)}" ${sub===draft.subject?"selected":""}>${escHtml(sub)}</option>`).join(""); })()}</select>
+       <button type="button" class="homework-title-ok" data-hw-action="confirm-title" title="Valider la classe et la matière" aria-label="Valider la classe et la matière"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+      </div>` : `
+      <h4><span class="class-name">${escHtml(className)}</span> - <span class="subject-name">${escHtml(draft.subject)}</span>
+       <button type="button" class="homework-title-pencil" data-hw-action="edit-title" title="Modifier la classe et la matière" aria-label="Modifier la classe et la matière"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+      </h4>`;
   return `
    <article class="homework-entry-card">
     <div class="homework-entry-title">
      <div>
-      <h4><span class="class-name">${escHtml(className)}</span> - <span class="subject-name">${escHtml(draft.subject)}</span></h4>
+      ${titleHtml}
       <div class="homework-entry-date">${escHtml(homeworkFormatLong(draft.dateISO))}</div>
      </div>
     </div>
@@ -12432,6 +12614,14 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    renderHomeworkView();
    return;
   }
+  if(target.id==="homeworkDraftClassSelect"){
+   const subSel=document.getElementById("homeworkDraftSubjectSelect");
+   if(subSel){
+    const subs=homeworkClassSubjects(target.value);
+    subSel.innerHTML=subs.map(sub=>`<option value="${escHtml(sub)}">${escHtml(sub)}</option>`).join("");
+   }
+   return;
+  }
   if(target.matches("[data-hw-action='grade-input']")){
    const submission=getHomeworkSubmission(target.dataset.homeworkId,target.dataset.testId,target.dataset.studentId);
    if(!submission) return;
@@ -12487,6 +12677,30 @@ function handleHomeworkActionClick(btn){
    return;
   }
   if(action==="save-homework"){ saveHomeworkDraft(); return; }
+  if(action==="edit-title"){
+   if(!HOMEWORK_STATE.draft) return;
+   saveHomeworkDraftFromDom();
+   HOMEWORK_STATE.editTitle=true;
+   renderHomeworkView();
+   return;
+  }
+  if(action==="confirm-title"){
+   if(!HOMEWORK_STATE.draft) return;
+   const classId=document.getElementById("homeworkDraftClassSelect")?.value || HOMEWORK_STATE.draft.classId;
+   const subject=document.getElementById("homeworkDraftSubjectSelect")?.value || HOMEWORK_STATE.draft.subject;
+   if(!subject){ alert("Cette classe n’a aucune matière : ajoute-en une d’abord."); return; }
+   saveHomeworkDraftFromDom();
+   const test={...HOMEWORK_STATE.draft, classId, subject};
+   if(hasHomeworkCollision(test)){
+    alert("Un devoir existe déjà pour cette classe, cette matière et cette date.");
+    return;
+   }
+   HOMEWORK_STATE.draft.classId=classId;
+   HOMEWORK_STATE.draft.subject=subject;
+   HOMEWORK_STATE.editTitle=false;
+   renderHomeworkView();
+   return;
+  }
   if(action==="edit-homework"){ startHomeworkDraft(btn.dataset.homeworkId); return; }
   if(action==="open-assign-tests"){ openHomeworkAssignTestsModal(); return; }
   if(action==="remove-assigned-test"){
@@ -12745,6 +12959,30 @@ function runNonRegressionTests() {
 
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initApp();bootAuth();});
 else {initApp();bootAuth();}
+
+// ── Zones de texte : hauteur automatique (aucun redimensionnement manuel) ───
+(function(){
+ function fit(ta){
+  if(ta.offsetParent===null) return;                       // masquée : on attend
+  const w=ta.clientWidth, v=ta.value;
+  if(ta._agV===v && ta._agW===w) return;
+  if(ta._agMin==null) ta._agMin=ta.offsetHeight;           // hauteur de départ = minimum
+  ta.style.height="auto";
+  const cs=getComputedStyle(ta);
+  let h=ta.scrollHeight;
+  if(cs.boxSizing==="border-box") h+=ta.offsetHeight-ta.clientHeight;
+  else h-=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);
+  ta.style.height=Math.max(h,ta._agMin)+"px";
+  ta._agV=v; ta._agW=ta.clientWidth;
+ }
+ function fitAll(){ document.querySelectorAll("textarea").forEach(fit); }
+ document.addEventListener("input",e=>{ if(e.target&&e.target.tagName==="TEXTAREA"){ e.target._agV=null; fit(e.target); } },true);
+ let raf=0; const sched=()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; fitAll(); }); };
+ new MutationObserver(sched).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class","aria-hidden"]});
+ window.addEventListener("resize",()=>{ document.querySelectorAll("textarea").forEach(t=>{t._agW=null;}); sched(); });
+ setInterval(fitAll,500);   // valeurs remplies par programme
+ fitAll();
+})();
 </script>
 </body>
 </html>
