@@ -9,7 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Ecole Directe</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e40af">
 <style>
 :root{
  --bg:#f6f8fb; --card:#ffffff; --text:#0f172a; --muted:#64748b;
@@ -545,6 +546,13 @@ body.auth-pending #loginOverlay{ display:flex }
 .btn-link{ border:none; background:none; padding:0; color:#1e40af; font-weight:600; cursor:pointer; font-size:inherit }
 .btn-link:hover{ text-decoration:underline }
 .hint{ font-size:12px; color:var(--muted); margin-top:4px }
+.cl-tabs{ display:flex; gap:4px; background:#eef2f7; padding:4px; border-radius:11px; margin-bottom:12px }
+.cl-tab{ flex:1; border:none; background:transparent; padding:9px 10px; border-radius:8px; font-weight:700; font-size:14px; color:#334155; cursor:pointer }
+.cl-tab:hover:not(.active){ background:rgba(255,255,255,.7); color:#1e40af }
+.cl-tab.active{ background:var(--grad); color:#fff; box-shadow:0 2px 6px rgba(37,99,235,.35) }
+.grp-subs{ display:flex; flex-wrap:wrap; gap:6px 16px; margin:6px 0 14px }
+.grp-subs label{ display:inline-flex!important; gap:6px; align-items:center; margin:0!important; font-weight:400!important }
+.grp-subs input{ width:auto!important }
 .cl-sec{ margin:0 0 8px; color:#1e3a8a; font-size:15px; letter-spacing:.2px }
 /* Mode élève : consultation uniquement */
 body.student-mode .locks, body.student-mode #manageSubjectsBtnTop, body.student-mode #manageCompetenciesBtn,
@@ -1161,6 +1169,123 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
 #vsPop label.scp-opt:hover{border-color:#93c5fd;background:#eff6ff}
 #vsPop .scp-opt input{width:auto;margin:0}
 #vsPop .scp-opt small{margin-left:auto;color:#64748b}
+
+/* ═══════════════ MOBILE / TABLETTE : menu "appli" (hamburger + volet) ═══════════════ */
+#navBurger,#navCurrent,#navOverlay,#navDrawer{ display:none }
+html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
+@media (max-width:900px){
+ body{ overflow-x:hidden }
+ header{ padding:8px 10px; padding-top:calc(8px + env(safe-area-inset-top,0px)); gap:8px; flex-wrap:nowrap; align-items:center }
+ header .hdr-left{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:2px }
+ header h1{ font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+ #navBurger{ display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.16); color:#fff; cursor:pointer; padding:0; position:relative }
+ #navBurger:active{ background:rgba(255,255,255,.3) }
+ #navBurger.has-alert::after{ content:""; position:absolute; top:6px; right:6px; width:10px; height:10px; border-radius:50%; background:#f59e0b; border:2px solid #1e40af }
+ #navCurrent{ display:block; font-size:12.5px; opacity:.9; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+ header .header-actions{ flex:0 0 auto }
+ header .locks, header #userLabel, header #logoutBtn{ display:none }
+ .topbar .tabs{ display:none !important }
+ .topbar{ margin:0; padding:0 }
+ .topbar .status-wrap{ margin:0 }
+ .container{ margin:8px auto 14px; padding:0 8px; padding-bottom:calc(14px + env(safe-area-inset-bottom,0px)) }
+ .card{ border-radius:12px }
+
+ #navOverlay{ display:block; position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:900; opacity:0; pointer-events:none; transition:opacity .22s }
+ #navDrawer{ display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; width:min(86vw,330px); background:#fff; z-index:901; transform:translateX(-102%); transition:transform .25s ease; box-shadow:6px 0 28px rgba(15,23,42,.3) }
+ body.nav-open #navOverlay{ opacity:1; pointer-events:auto }
+ body.nav-open #navDrawer{ transform:none }
+ body.nav-open{ overflow:hidden }
+ .dr-head{ display:flex; align-items:center; gap:10px; padding:14px 14px 12px; padding-top:calc(14px + env(safe-area-inset-top,0px)); background:linear-gradient(90deg,#1e40af,#2563eb); color:#fff }
+ .dr-head b{ flex:1; font-size:18px }
+ .dr-close{ width:40px; height:40px; border-radius:10px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.16); color:#fff; font-size:22px; line-height:1; cursor:pointer }
+ .dr-body{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:8px 8px 12px }
+ .dr-item{ display:flex; align-items:center; gap:12px; width:100%; min-height:50px; padding:10px 14px; margin:3px 0; border:none; border-radius:12px; background:transparent; color:#1e293b; font-size:16px; font-weight:600; text-align:left; cursor:pointer }
+ .dr-item:active{ background:#e0e7ff }
+ .dr-item.active{ background:#1e3a8a; color:#fff }
+ .dr-item .dr-ico{ flex:0 0 26px; text-align:center; font-size:19px }
+ .dr-item .dr-lbl{ flex:1; min-width:0 }
+ .dr-item .dr-bdg{ flex:0 0 auto; font-size:15px }
+ .dr-sep{ height:1px; background:#e2e8f0; margin:8px 6px }
+ .dr-foot{ border-top:1px solid #e2e8f0; padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px)); background:#f8fafc }
+ .dr-locks .locks{ display:flex !important; margin:0; width:100%; gap:6px }
+ .dr-locks .lock-item{ flex:1; display:flex; flex-direction:column; gap:3px; align-items:stretch }
+ .dr-locks .lock-label{ color:#475569; font-size:11px; text-align:center }
+ .dr-locks .lock-btn{ background:#fff; border:1px solid #cbd5e1; color:#1f2937; justify-content:center; padding:8px 4px; min-height:40px }
+ .dr-locks .lock-btn.locked{ background:#fee2e2; color:#991b1b; border-color:#fecaca }
+ .dr-foot #userLabel{ display:flex !important; align-items:center; gap:8px; color:#1e293b !important; font-size:14px; margin:0 0 10px !important; font-weight:600 }
+ .dr-foot #userLabel svg{ fill:#1e3a8a !important }
+ .dr-foot #logoutBtn{ display:flex !important; width:100%; justify-content:center; background:#fff; color:#b91c1c; border:1px solid #fecaca; min-height:44px }
+
+ #appelCtl{ width:100%; display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+ #appelCtl select{ width:100%; font-size:15px; padding:10px; min-height:44px }
+ #appelCtl .btn{ flex:1 1 auto; min-height:44px }
+ #appelView .card-header{ flex-direction:column; align-items:stretch }
+ .ap-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px }
+ .ap-card{ padding:10px 6px 10px }
+ .ap-card svg{ width:84px; height:84px }
+ .ap-card .ap-n{ font-size:14.5px }
+ .ap-veil{ font-size:19px; padding-top:34px }
+ .ap-grid-s{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px }
+ .ap-grid-s .ap-card svg{ width:64px; height:64px }
+
+ .sch-nav{ gap:6px }
+ .sch-nav .btn{ min-height:42px }
+ .sch-title{ order:5; width:100%; margin:2px 0 0; font-size:16px }
+ .sch-views{ margin-left:auto }
+ .sch-bar .btn{ flex:1 1 auto; min-height:42px }
+ .sch-row,.sch-month{ min-width:0 }
+ .sch-hd div{ font-size:11px; padding:6px 1px }
+ .sch-ev{ font-size:10.5px; padding:2px 3px }
+ .sch-ev .sch-s{ font-size:10.5px }
+ .sch-month>div{ min-height:62px; padding:2px; font-size:10px }
+ .sch-chip{ font-size:9.5px }
+
+ #elevesView table, #classesView table, #homeworkView table, #vieBody table, .imp-table-wrap table{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch }
+
+ #appreciationContent table, #appreciationContent tbody{ display:block; width:100% }
+ #appreciationContent thead, #appreciationContent thead tr{ display:block }
+ #appreciationContent thead th{ display:none !important }
+ #appreciationContent thead th:last-child{ display:block !important; width:100% !important; padding:6px 0 !important }
+ #appreciationContent thead th:last-child > div{ justify-content:flex-end !important }
+ #appreciationContent tbody tr{ display:flex !important; flex-wrap:wrap; align-items:center; gap:6px 10px; margin-bottom:12px; padding:10px; border:1px solid #e2e8f0 !important; border-radius:12px; background:#fff }
+ #appreciationContent tbody td{ display:block; padding:0 !important; width:auto !important; border:none !important }
+ #appreciationContent tbody td:first-child{ flex:1 1 0; min-width:0; font-size:1.05em !important }
+ #appreciationContent tbody td:nth-child(2){ flex:0 0 auto }
+ #appreciationContent tbody td:nth-child(3){ flex:1 1 100%; width:100% !important }
+ #appreciationContent .app-row textarea{ height:96px !important }
+ #appreciationContent .period-tabs .btn{ margin-left:0 !important; width:100% }
+
+ .student-header-section > div{ flex-wrap:wrap }
+ .student-header-section .btn{ flex:1 1 auto; min-height:42px }
+ .notes-list{ gap:6px 8px }
+ .note-pill{ min-height:34px; display:inline-flex; align-items:center }
+ .period-tabs .period-btn, .subtabs .subtab-btn{ flex:1 1 auto; text-align:center }
+
+ .homework-calendar-grid{ gap:4px }
+ .homework-calendar-day{ min-height:42px; padding:4px 2px; font-size:13px }
+ .homework-calendar-title{ font-size:16px }
+ .homework-calendar-panel{ padding:10px }
+
+ .modal-card{ width:100vw !important; max-width:100vw !important; max-height:100dvh; border-radius:14px 14px 0 0 !important; margin-top:auto }
+ .modal{ align-items:flex-end !important }
+ .modal-actions .btn{ flex:1 1 auto; min-height:44px }
+ #vsPop .btn{ min-height:44px }
+}
+@media (max-width:600px){
+ .ap-grid,.ap-grid-s{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+ .ap-card svg{ width:92px; height:92px }
+ .ap-grid-s .ap-card svg{ width:70px; height:70px }
+ .container{ padding-left:6px; padding-right:6px }
+ .card-body{ padding:8px }
+ .card-header strong{ font-size:16px }
+ .sch-views .btn{ padding:8px 10px }
+ table{ font-size:12.5px }
+}
+@media (min-width:601px) and (max-width:900px){
+ .ap-grid,.ap-grid-s{ grid-template-columns:repeat(4,minmax(0,1fr)) }
+ .modal-card{ width:min(94vw,640px) !important; max-width:94vw !important; border-radius:14px !important; margin-top:0 }
+ .modal{ align-items:center !important }
+}
 </style>
 </head>
 <body class="auth-pending">
@@ -1264,7 +1389,11 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
    </div>
    <div class="card-body split">
     <div class="panel">
-     <h4 class="cl-sec">Classes</h4>
+     <div class="cl-tabs" id="clTabs" role="tablist">
+      <button type="button" class="cl-tab active" data-cltab="classes" role="tab">Classes</button>
+      <button type="button" class="cl-tab" data-cltab="groups" role="tab">Groupes</button>
+     </div>
+     <div id="clPaneClasses">
      <button class="btn btn-primary add-big" id="addClassBtn" type="button">＋ Ajouter classe</button>
      <div class="search-row">
       <input id="classSearch" class="modern-input" placeholder="Rechercher classe..." style="flex:1;">
@@ -1277,7 +1406,8 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
      <div id="subjectsEmptyWarn" class="import-banner" style="display:none;">
       Le registre des matières est vide. Clique sur « Gérer les matières » pour ajouter des matières.
      </div>
-     <h4 class="cl-sec" style="margin-top:22px">Groupes</h4>
+     </div>
+     <div id="clPaneGroups" style="display:none">
      <button class="btn btn-primary add-big" id="addGroupBtn" type="button">＋ Ajouter groupe</button>
      <div class="search-row">
       <input id="groupSearch" class="modern-input" placeholder="Rechercher groupe..." style="flex:1;">
@@ -1286,6 +1416,7 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
      <select id="groupList" size="6" style="display:none"></select>
      <div class="form-row">
       <button class="btn" id="editGroupBtn">Modifier groupe</button>
+     </div>
      </div>
     </div>
     <div class="panel" id="classPanel">
@@ -3930,7 +4061,7 @@ function buildCSVText(){
   const cls=DATA.classes.find(c=>c.id===s.classId);
   rows.push(["student",s.id,escapeCsv(s.first),escapeCsv(s.last),s.classId||"",escapeCsv(cls?.name||""),s.sex||""].join(";"));
  });
- (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[]))].join(";")));
+ (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
  (DATA.groups||[]).forEach(g=>{
   (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null))].join(";")));
   (g.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0].join(";")));
@@ -4100,7 +4231,7 @@ function importCSV(text){
   else if(type==="sanction"){ let d={}; try{d=JSON.parse(unescapeCsv(cols[7]||"{}"))||{};}catch(e){}
    vsEns().sanctions.push({id:cols[1],sid:cols[2],level:cols[3],date:cols[4],time:cols[5],motif:unescapeCsv(cols[6]||""),d,prof:unescapeCsv(cols[8]||""),createdAt:cols[9]||""}); }
   else if(type==="holiday"){ holEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),from:cols[3],to:cols[4]}); }
-  else if(type==="group"){ let mi=[]; try{mi=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} if(cols[1]) grpEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),memberIds:mi}); }
+  else if(type==="group"){ let mi=[]; try{mi=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} let ss; try{ const raw=unescapeCsv(cols[4]||""); ss=raw?JSON.parse(raw):undefined; }catch(e){ ss=undefined; } if(cols[1]) grpEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),memberIds:mi,subjectsSel:Array.isArray(ss)?ss:undefined}); }
   else if(type==="room"){ const r=unescapeCsv(cols[2]||""); if(r) schEns().rooms.push(r); }
   else if(type==="scheduleEvent"){ let ci=[]; try{ci=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} schEns().events.push({id:cols[1],subject:unescapeCsv(cols[2]||""),classIds:ci,room:unescapeCsv(cols[4]||""),date:cols[5],start:cols[6],end:cols[7],cancelled:cols[8]==="1",changed:cols[9]==="1",serie:cols[10]||"",hors:cols[11]==="1",holCancel:cols[12]==="1",created:cols[13]||""}); }
   else if(type==="compHierarchy"){
@@ -4291,6 +4422,7 @@ function openPreviewClass(classId){
   document.querySelectorAll("#mainTabs .tab-btn").forEach(b => {
     if(b.dataset.target === "classesView") b.click();
   });
+  if(window.clShowTab) window.clShowTab("classes");
   
   // Sélectionner la classe dans la liste
   const classList = document.getElementById("classList");
@@ -4808,7 +4940,7 @@ function openStudent(studentId){
  const subjSel=content.querySelector("#profSubjectFilter");
  if(subjSel){
   const clsObj2=DATA.classes.find(c=>c.id===stu.classId);
-  const subs=(clsObj2?.subjects||[]).slice();
+  const subs=studentSubjectNames(stu);
   subjSel.innerHTML=['<option value="__ALL__">(Toutes)</option>',...subs.map(s=>`<option value="${typeof s==='object'?s.name:s}">${typeof s==='object'?s.name:s}</option>`)].join("");
   subjSel.value="__ALL__";
   subjSel.addEventListener("change",()=>{const key=content.querySelector(".period-btn.active").dataset.period;renderProfViewForPeriod(stu.id,key);});
@@ -5161,8 +5293,8 @@ function renderEleveViewForPeriod(studentId,periodKey){
  const clsObj=DATA.classes.find(c=>c.id===stuObj?.classId);
  const globalOrder=SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s);
  let sortedSubjectNames=[];
- if(clsObj&&clsObj.subjects&&clsObj.subjects.length>0){
-  const classSubs=clsObj.subjects.map(s=>typeof s==='object'?s.name:s);
+ if((clsObj&&clsObj.subjects&&clsObj.subjects.length>0)||studentSubjectNames(stuObj).length){
+  const classSubs=studentSubjectNames(stuObj);
   sortedSubjectNames=globalOrder.filter(s=>classSubs.includes(s));
   classSubs.forEach(s=>{if(!sortedSubjectNames.includes(s)) sortedSubjectNames.push(s);});
  }else sortedSubjectNames=globalOrder;
@@ -6563,7 +6695,8 @@ function openGroupNoteSetupModal(studentId){
  const stu=DATA.students.find(s=>s.id===studentId);
  if(!stu) return;
  const cls=DATA.classes.find(c=>c.id===stu.classId);
- const subs=(Array.isArray(cls?.subjects)&&cls.subjects.length?cls.subjects:SUBJECT_REGISTRY).map(s=>typeof s==='object'?s.name:s);
+ const _ss=studentSubjectNames(stu);
+ const subs=(_ss.length?_ss:SUBJECT_REGISTRY).map(s=>typeof s==='object'?s.name:s);
  GROUP_NOTE_STATE = {
   studentId,
   subject:subs[0]||"",
@@ -8703,7 +8836,7 @@ document.getElementById("editSubjectForm")?.addEventListener("submit",e=>{
  });
 
  if(oldName!==newName){
-  [...DATA.classes,...grpEns()].forEach(c=>{c.subjects=(c.subjects||[]).map(x=>x===oldName?newName:x);(c.evals||[]).forEach(ev=>{if(ev.subject===oldName) ev.subject=newName;});});
+  [...DATA.classes,...grpEns()].forEach(c=>{c.subjects=(c.subjects||[]).map(x=>x===oldName?newName:x);(c.evals||[]).forEach(ev=>{if(ev.subject===oldName) ev.subject=newName;}); if(Array.isArray(c.subjectsSel)) c.subjectsSel=c.subjectsSel.map(x=>x===oldName?newName:x);});
   Object.values(DATA.notes).forEach(arr=>arr.forEach(n=>{if(n.subject===oldName) n.subject=newName;}));
  }
  editSubjectModal.classList.remove("open"); renderManageSubjectsTable(); renderClassPanelIfOpen(); rerenderOpenStudent(); saveData();
@@ -8751,7 +8884,7 @@ function renderAppreciationStudentList(){
               studentComps.some(c => c.hideFromStudent && (CURRENT_APP_PERIOD === "YEAR" || c.period === CURRENT_APP_PERIOD));
 
   if(hasAverages){
-    const clsSubjects = (cls?.subjects || []).map(sub => typeof sub === 'object' ? sub.name : sub);
+    const clsSubjects = studentSubjectNames(s);
     clsSubjects.forEach(subName => {
       const avg = getStudentAverageForSubject(s.id, subName, CURRENT_APP_PERIOD);
       if(avg !== null && !isAppOff(s.id, CURRENT_APP_PERIOD, subName) && !apps.find(a => a.subject === subName && a.text.trim() !== "")) missingApp = true;
@@ -8776,7 +8909,7 @@ function calculateStudentAverages(studentId, period) {
   let totalSum = 0, totalCoef = 0;
   const subjectAverages = [];
   
-  (cls.subjects || []).forEach(sub => {
+  studentSubjectNames(stu).forEach(sub => {
     const subName = typeof sub === 'object' ? sub.name : sub;
     const avg = getStudentAverageForSubject(studentId, subName, period);
     if(avg !== null) {
@@ -8824,7 +8957,7 @@ function renderAppreciationUI(){
  html+=`<h3>${periodLabels[CURRENT_APP_PERIOD]} — ${stu.first} ${stu.last}</h3>`;
  if(!cls){html+='<p>Élève sans classe.</p>';appreciationContent.innerHTML=html;return;}
  
- const _appKeys=[...(cls.subjects||[]).map(s=>typeof s==='object'?s.name:s),"__GENERAL__"];
+ const _appKeys=[...studentSubjectNames(stu),"__GENERAL__"];
  const _allOff=_appKeys.every(k=>isAppOff(stu.id,CURRENT_APP_PERIOD,k));
  html+=`<table style="width:100%; border-collapse:collapse;">
   <thead>
@@ -8836,7 +8969,7 @@ function renderAppreciationUI(){
   </thead>
   <tbody>`;
  
- (cls.subjects||[]).forEach(sub=>{
+ studentSubjectNames(stu).forEach(sub=>{
   const subName=typeof sub==='object'?sub.name:sub;
   const avg=getStudentAverageForSubject(stu.id,subName,CURRENT_APP_PERIOD);
   const app=getAppreciation(stu.id,CURRENT_APP_PERIOD,subName);
@@ -8916,7 +9049,7 @@ window.toggleAppOff=function(btn){
 window.toggleAllAppOff=function(){
  if(!CURRENT_APP_STUDENT) return;
  const stu=DATA.students.find(s=>s.id===CURRENT_APP_STUDENT); const cls=stu&&DATA.classes.find(c=>c.id===stu.classId); if(!cls) return;
- const keys=[...(cls.subjects||[]).map(s=>typeof s==='object'?s.name:s),"__GENERAL__"];
+ const keys=[...studentSubjectNames(stu),"__GENERAL__"];
  const allOff=keys.every(k=>isAppOff(CURRENT_APP_STUDENT,CURRENT_APP_PERIOD,k));
  if(!allOff){ // on enregistre ce qui a été tapé avant de verrouiller
   appreciationContent.querySelectorAll(".app-input:not(:disabled)").forEach(ta=>saveAppreciation(CURRENT_APP_STUDENT,CURRENT_APP_PERIOD,ta.dataset.subject,ta.value.trim()));
@@ -9302,7 +9435,7 @@ function openProfBatchEditModal(studentIdArg){
  if(subjSel){
   const stu = DATA.students.find(s=>s.id===studentId);
   const cls = DATA.classes.find(c=>c.id===stu?.classId);
-  const subs = cls?.subjects || SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s);
+  const subs = (studentSubjectNames(stu).length?studentSubjectNames(stu):SUBJECT_REGISTRY.map(s=>typeof s==='object'?s.name:s));
   subjSel.innerHTML = '<option value="">(Inchangé)</option>' + subs.map(s=>`<option>${typeof s==='object'?s.name:s}</option>`).join("");
  }
 
@@ -10117,7 +10250,7 @@ function updateTabWarningIndicators(){
   
   DATA.students.forEach(s => {
     const cls = DATA.classes.find(c => c.id === s.classId);
-    const clsSubjects = (cls?.subjects || []).map(sub => typeof sub === 'object' ? sub.name : sub);
+    const clsSubjects = studentSubjectNames(s);
     
     periodsToCheck.forEach(p => {
       const averages = calculateStudentAverages(s.id, p);
@@ -11339,7 +11472,7 @@ window.downloadStudentBulletin = function(studentId, period) {
   doc.text(`Édité le : ${today}`, pageWidth - 25, 58, { align: "right" });
   
   // Subjects Table
-  const subjects = (cls?.subjects || []).map(s => typeof s === 'object' ? s.name : s);
+  const subjects = studentSubjectNames(DATA.students.find(x=>x.id===studentId));
   const tableData = [];
   
   subjects.forEach(subName => {
@@ -13338,10 +13471,25 @@ function classLike(id){
  g.isGroup=true; if(!Array.isArray(g.memberIds)) g.memberIds=[]; if(!Array.isArray(g.evals)) g.evals=[]; if(!Array.isArray(g.compEvals)) g.compEvals=[]; if(!g.subjectCoefs) g.subjectCoefs={};
  const subs=[]; const add=n=>{ if(n && !subs.includes(n)) subs.push(n); };
  const order=(typeof SUBJECT_REGISTRY!=="undefined"?SUBJECT_REGISTRY:[]).map(s=>typeof s==="object"?s.name:s);
- g.memberIds.forEach(sid=>{ const st=DATA.students.find(s=>s.id===sid); const cl=st&&DATA.classes.find(x=>x.id===st.classId); ((cl&&cl.subjects)||[]).forEach(x=>add(typeof x==="object"?x.name:x)); });
+ if(Array.isArray(g.subjectsSel)) g.subjectsSel.forEach(add);   // matières choisies pour le groupe (indépendantes de la classe)
+ else g.memberIds.forEach(sid=>{ const st=DATA.students.find(s=>s.id===sid); const cl=st&&DATA.classes.find(x=>x.id===st.classId); ((cl&&cl.subjects)||[]).forEach(x=>add(typeof x==="object"?x.name:x)); });
  g.evals.forEach(e=>add(e.subject));
  g.subjects=order.filter(n=>subs.includes(n)).concat(subs.filter(n=>!order.includes(n)));
  return g;
+}
+/* Matières d'un élève = celles de sa classe + celles de ses groupes (même matière = même ligne, sans distinction) */
+function studentSubjectNames(stu){
+ const out=[]; const add=n=>{ if(n && !out.includes(n)) out.push(n); };
+ if(!stu) return out;
+ const cls=DATA.classes.find(c=>c.id===stu.classId);
+ (cls&&cls.subjects||[]).forEach(x=>add(typeof x==="object"?x.name:x));
+ grpEns().forEach(g=>{
+  if(!(g.memberIds||[]).includes(stu.id)) return;
+  (Array.isArray(g.subjectsSel)?g.subjectsSel:[]).forEach(add);
+  (g.evals||[]).forEach(e=>add(e.subject));
+ });
+ const order=(typeof SUBJECT_REGISTRY!=="undefined"?SUBJECT_REGISTRY:[]).map(x=>typeof x==="object"?x.name:x);
+ return order.filter(n=>out.includes(n)).concat(out.filter(n=>!order.includes(n)));
 }
 function grpById(id){ return grpEns().find(g=>g.id===id)||null; }
 function targetName(id){ const c=DATA.classes.find(x=>x.id===id); if(c) return c.name; const g=grpById(id); return g?g.name:""; }
@@ -13569,6 +13717,8 @@ document.getElementById("schSigNo").onclick=()=>schSignal(false);
   const m=mk("grpEditModal",43);
   m.innerHTML='<div class="modal-card" style="width:520px"><div class="modal-header"><h3>'+(g?"Modifier le groupe":"Créer un groupe")+'</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
    +'<label style="display:block;font-weight:600;margin-bottom:4px">Nom du groupe</label><input id="grpName" placeholder="Nom du groupe" maxlength="60" value="'+escHtml(g?g.name:"")+'">'
+   +'<label style="display:block;font-weight:600;margin:12px 0 2px">Matières du groupe</label><div style="color:#64748b;font-size:12.5px">Pas forcément celles de la classe. Une matière commune avec la classe d\'un élève apparaît sur la même ligne.</div>'
+   +'<div class="grp-subs" id="grpSubs">'+(function(){ ensureSubjectRegistry(); const cur=g?(Array.isArray(g.subjectsSel)?g.subjectsSel:(classLike(g.id)||{subjects:[]}).subjects):[]; const names=SUBJECT_REGISTRY.map(x=>typeof x==="object"?x.name:x); cur.forEach(n=>{ if(!names.includes(n)) names.push(n); }); return names.length?names.map(n=>'<label><input type="checkbox" data-name="'+escHtml(n)+'"'+(cur.includes(n)?" checked":"")+'> '+escHtml(n)+'</label>').join(""):"<span class='hint'>Aucune matière : créez-les d\'abord via « Gérer les matières ».</span>"; })()+'</div>'
    +'<div class="grp-f"><select id="grpCls"><option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr",{numeric:true,sensitivity:"base"})).map(c=>'<option value="'+escHtml(c.id)+'">'+escHtml(c.name)+'</option>').join("")+'</select><input id="grpSearch" type="search" placeholder="Rechercher un élève…"></div>'
    +'<div id="grpCount" style="color:#64748b;margin-bottom:6px"></div>'
    +'<div id="grpStuList" style="max-height:44vh;overflow:auto"></div>'
@@ -13593,11 +13743,13 @@ document.getElementById("schSigNo").onclick=()=>schSignal(false);
    if(!name){ alert("Donnez un nom au groupe."); m.querySelector("#grpName").focus(); return; }
    if(grpEns().some(x=>x.id!==GRP.editId&&x.name.toLowerCase()===name.toLowerCase())){ alert("Un groupe porte déjà ce nom."); return; }
    if(!GRP.sel.size){ alert("Sélectionnez au moins un élève."); return; }
+   const subsSel=[...m.querySelectorAll("#grpSubs input:checked")].map(i=>i.dataset.name);
+   if(!subsSel.length){ alert("Sélectionnez au moins une matière pour ce groupe."); return; }
    const ids=DATA.students.filter(s=>GRP.sel.has(s.id)).map(s=>s.id);
    const x0=GRP.editId?grpById(GRP.editId):null;
    const commit=()=>{
-    if(x0){ (x0.memberIds||[]).filter(i=>!ids.includes(i)).forEach(sid=>{ DATA.notes[sid]=(DATA.notes[sid]||[]).filter(n=>!(n.classCommon&&n.classId===x0.id)); }); x0.name=name; x0.memberIds=ids; }
-    else grpEns().push({id:"grp_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,memberIds:ids,evals:[],compEvals:[]});
+    if(x0){ (x0.memberIds||[]).filter(i=>!ids.includes(i)).forEach(sid=>{ DATA.notes[sid]=(DATA.notes[sid]||[]).filter(n=>!(n.classCommon&&n.classId===x0.id)); }); x0.name=name; x0.memberIds=ids; x0.subjectsSel=subsSel; }
+    else grpEns().push({id:"grp_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,memberIds:ids,subjectsSel:subsSel,evals:[],compEvals:[]});
     saveData(); close(); hide(mk("grpViewModal",42)); listRender(); refresh();
    };
    const goneN=x0?(x0.memberIds||[]).filter(i=>!ids.includes(i)&&(DATA.notes[i]||[]).some(n=>n.classCommon&&n.classId===x0.id)).length:0;
@@ -13607,6 +13759,25 @@ document.getElementById("schSigNo").onclick=()=>schSignal(false);
  }
  window.grpOpenEditor=editOpen; window.grpOpenList=listOpen; window.grpDelete=delGroup;
  document.getElementById("schGroups").onclick=listOpen;
+})();
+
+/* — Onglets Classes / Groupes (colonne de gauche des Notes Communes) — */
+(function(){
+ let cur="classes";
+ function showTab(name,force){
+  if(name===cur && !force) return;
+  cur=name;
+  document.querySelectorAll("#clTabs .cl-tab").forEach(b=>b.classList.toggle("active",b.dataset.cltab===name));
+  document.getElementById("clPaneClasses").style.display=name==="classes"?"":"none";
+  document.getElementById("clPaneGroups").style.display=name==="groups"?"":"none";
+  // une seule sélection à la fois : on repart d'un panneau vide pour la liste affichée
+  clearCommonSel("class"); clearCommonSel("group"); syncCommonButtons();
+  const c=document.getElementById("classContent"), p=document.getElementById("classPlaceholder");
+  if(c){ c.style.display="none"; c.innerHTML=""; }
+  if(p){ p.style.display="block"; p.textContent=name==="groups"?"Sélectionne un groupe pour voir ses matières et évaluations.":"Sélectionne une classe pour voir ses matières et évaluations."; }
+ }
+ window.clShowTab=showTab;
+ document.querySelectorAll("#clTabs .cl-tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.cltab)));
 })();
 
 /* — popup salles — */
@@ -14196,6 +14367,94 @@ document.getElementById("schDelete").onclick=()=>{
  if(schSerieCount(e)>1) schScopeOpen("del",e,sc=>{ const ids=new Set(schScopeSet(e,sc).map(x=>x.id)); const s=schEns(); s.events=s.events.filter(x=>!ids.has(x.id)); schPurgeAppels(ids); schCommit(); });
  else openConfirmModal({message:"Supprimer définitivement ce cours ?",onConfirm:()=>{ const id=SCH.editId, s=schEns(); s.events=s.events.filter(x=>x.id!==id); schPurgeAppels(new Set([id])); schCommit(); }});
 };
+
+/* ═══════════════ Menu mobile « appli » : bouton ☰ + volet latéral ═══════════════ */
+(function(){
+ const mq=window.matchMedia("(max-width:900px)");
+ const ICONS={scheduleView:"📅",appelView:"✅",homeworkView:"📝",elevesView:"🎓",classesView:"👥",appreciationsView:"💬",vieView:"🏫",onlineTestsView:"💻",manageSubjectsBtnTop:"📚",manageCompetenciesBtn:"🧩"};
+ const tabsEl=document.getElementById("mainTabs"), header=document.querySelector("header");
+ if(!tabsEl||!header) return;
+ const css=document.createElement("style");
+ css.textContent="body.student-mode .dr-locks{display:none!important}.dr-locks-t{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin:0 0 6px}";
+ document.head.appendChild(css);
+
+ // bouton ☰ + libellé de l'onglet courant (dans l'en-tête)
+ const burger=document.createElement("button");
+ burger.id="navBurger"; burger.type="button"; burger.setAttribute("aria-label","Ouvrir le menu"); burger.setAttribute("aria-expanded","false");
+ burger.innerHTML='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>';
+ header.insertBefore(burger,header.firstChild);
+ const cur=document.createElement("span"); cur.id="navCurrent";
+ const hl=header.querySelector(".hdr-left"); if(hl) hl.insertBefore(cur,hl.querySelector(".save-status-banner")||null);
+
+ // volet + fond
+ const overlay=document.createElement("div"); overlay.id="navOverlay";
+ const drawer=document.createElement("nav"); drawer.id="navDrawer"; drawer.setAttribute("aria-label","Menu principal");
+ drawer.innerHTML='<div class="dr-head"><b>Menu</b><button type="button" class="dr-close" aria-label="Fermer le menu">×</button></div>'
+  +'<div class="dr-body" id="drBody"></div>'
+  +'<div class="dr-foot"><div class="dr-locks" id="drLocks"><div class="dr-locks-t">Verrouillage des trimestres</div></div><div id="drUser"></div></div>';
+ document.body.appendChild(overlay); document.body.appendChild(drawer);
+ const body=drawer.querySelector("#drBody");
+
+ const visible=b=>getComputedStyle(b).display!=="none";
+ const labelOf=b=>b.textContent.trim();
+ function buildItems(){
+  body.innerHTML=""; let sepDone=false;
+  tabsEl.querySelectorAll(".tab-btn").forEach(b=>{
+   if(!visible(b)) return;
+   const key=b.dataset.target||b.id;
+   if(!b.dataset.target && !sepDone){ const sp=document.createElement("div"); sp.className="dr-sep"; body.appendChild(sp); sepDone=true; }
+   const it=document.createElement("button"); it.type="button";
+   it.className="dr-item"+(b.classList.contains("active")?" active":"");
+   const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
+   const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
+   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg" title="À traiter">⚠️</span>':"")+(hid?'<span class="dr-bdg" title="Évaluations masquées">👁️</span>':"");
+   it.querySelector(".dr-lbl").textContent=labelOf(b);
+   it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
+   body.appendChild(it);
+  });
+ }
+ function open(){ buildItems(); document.body.classList.add("nav-open"); burger.setAttribute("aria-expanded","true"); }
+ function close(){ document.body.classList.remove("nav-open"); burger.setAttribute("aria-expanded","false"); }
+ burger.addEventListener("click",()=>document.body.classList.contains("nav-open")?close():open());
+ overlay.addEventListener("click",close);
+ drawer.querySelector(".dr-close").addEventListener("click",close);
+ document.addEventListener("keydown",e=>{ if(e.key==="Escape") close(); });
+
+ // libellé de l'onglet actif + pastille d'alerte sur le ☰
+ function refreshHeader(){
+  const a=tabsEl.querySelector(".tab-btn.active[data-target]");
+  cur.textContent=a?labelOf(a):"";
+  const alert=!document.body.classList.contains("student-mode") && !!tabsEl.querySelector(".tab-btn.has-miss-call, .tab-btn.has-empty-eval");
+  burger.classList.toggle("has-alert",alert);
+ }
+ new MutationObserver(refreshHeader).observe(tabsEl,{subtree:true,attributes:true,attributeFilter:["class"]});
+ new MutationObserver(refreshHeader).observe(document.body,{attributes:true,attributeFilter:["class"]});
+ refreshHeader();
+
+ // sur mobile, les verrous / identité / déconnexion vont dans le volet (les vrais éléments sont déplacés : leurs actions restent actives)
+ const locks=document.getElementById("locksBar"), lab=document.getElementById("userLabel"), out=document.getElementById("logoutBtn");
+ const headerActions=header.querySelector(".header-actions");
+ function place(){
+  if(mq.matches){
+   if(locks) drawer.querySelector("#drLocks").appendChild(locks);
+   const u=drawer.querySelector("#drUser");
+   if(lab) u.appendChild(lab);
+   if(out) u.appendChild(out);
+  }else{
+   close();
+   if(locks) header.insertBefore(locks,headerActions);
+   if(lab) headerActions.insertBefore(lab,headerActions.firstChild);
+   if(out) headerActions.appendChild(out);
+  }
+ }
+ (mq.addEventListener?mq.addEventListener("change",place):mq.addListener(place));
+ place();
+
+ // téléphone : l'emploi du temps s'ouvre en vue « Jour » (la semaine est illisible sur 360 px)
+ if(window.matchMedia("(max-width:700px)").matches && typeof SCH!=="undefined" && SCH.view==="week"){
+  SCH.view="day"; try{ renderSchedule(); }catch(e){}
+ }
+})();
 </script>
 </body>
 </html>
