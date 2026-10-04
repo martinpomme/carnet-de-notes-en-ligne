@@ -1325,7 +1325,7 @@ body.student-mode .tab-btn[data-target="vieView"]{order:5}
  </section>
 <section id="scheduleView" class="view active">
  <div class="card"><div class="card-body" style="padding:14px">
-  <div class="sch-bar sch-prof-only"><button class="btn btn-primary" id="schAdd">Ajouter un cours</button><button class="btn" id="schHol">Ajouter congés</button><button class="btn" id="schRooms">Salles</button></div>
+  <div class="sch-bar sch-prof-only"><button class="btn btn-primary" id="schAdd">Ajouter un cours</button><button class="btn" id="schHol">Ajouter congés</button><button class="btn" id="schRooms">Salles</button><button class="btn" id="schGroups">Groupes</button></div>
   <div class="sch-nav"><button class="btn" id="schToday">Aujourd'hui</button><button class="btn" id="schPrev">‹</button><button class="btn" id="schNext">›</button><span class="sch-title" id="schTitle"></span>
    <div class="sch-views"><button class="btn" data-v="day">Jour</button><button class="btn" data-v="week">Semaine</button><button class="btn" data-v="month">Mois</button></div></div>
   <div class="sch-wrap" id="scheduleBody"></div>
@@ -3960,6 +3960,7 @@ function buildCSVText(){
   Object.keys(V.just).forEach(k=>rows.push(["vsJust",escapeCsv(k),V.just[k].j?1:0,escapeCsv(V.just[k].motif||"")].join(";")));
   V.sanctions.forEach(x=>rows.push(["sanction",x.id,x.sid,x.level,x.date,x.time||"",escapeCsv(x.motif||""),escapeCsv(JSON.stringify(x.d||{})),escapeCsv(x.prof||""),x.createdAt||""].join(";")));}
  holEns().forEach(x=>rows.push(["holiday",x.id,escapeCsv(x.name),x.from,x.to].join(";")));
+ (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[]))].join(";")));
  schEns().rooms.forEach(r=>rows.push(["room","",escapeCsv(r)].join(";")));
  schEns().events.forEach(e=>rows.push(["scheduleEvent",e.id,escapeCsv(e.subject),escapeCsv(JSON.stringify(e.classIds||[])),escapeCsv(e.room||""),e.date,e.start,e.end,e.cancelled?1:0,e.changed?1:0,e.serie||"",e.hors?1:0,e.holCancel?1:0,e.created||""].join(";")));
  const h = DATA.competenciesHierarchy || COMPETENCIES_HIERARCHY;
@@ -3988,7 +3989,7 @@ function exportCSV(){
 }
 
 function importCSV(text){
- DATA={schedule:{events:[],rooms:[]},students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},appreciationOff:{},onlineTests:[],competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
+ DATA={schedule:{events:[],rooms:[]},groups:[],students:[],classes:[],notes:{},competencies:[],appreciations:[],generalAppreciations:{},appreciationOff:{},onlineTests:[],competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY))};
  SUBJECT_REGISTRY=[]; LOCKED_PERIODS={T1:false,T2:false,T3:false,T4:false};
  const lines=[]; let currentLine="",inQuotes=false;
  for(let i=0;i<text.length;i++){
@@ -4083,6 +4084,7 @@ function importCSV(text){
   else if(type==="sanction"){ let d={}; try{d=JSON.parse(unescapeCsv(cols[7]||"{}"))||{};}catch(e){}
    vsEns().sanctions.push({id:cols[1],sid:cols[2],level:cols[3],date:cols[4],time:cols[5],motif:unescapeCsv(cols[6]||""),d,prof:unescapeCsv(cols[8]||""),createdAt:cols[9]||""}); }
   else if(type==="holiday"){ holEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),from:cols[3],to:cols[4]}); }
+  else if(type==="group"){ let mi=[]; try{mi=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} if(cols[1]) grpEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),memberIds:mi}); }
   else if(type==="room"){ const r=unescapeCsv(cols[2]||""); if(r) schEns().rooms.push(r); }
   else if(type==="scheduleEvent"){ let ci=[]; try{ci=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} schEns().events.push({id:cols[1],subject:unescapeCsv(cols[2]||""),classIds:ci,room:unescapeCsv(cols[4]||""),date:cols[5],start:cols[6],end:cols[7],cancelled:cols[8]==="1",changed:cols[9]==="1",serie:cols[10]||"",hors:cols[11]==="1",holCancel:cols[12]==="1",created:cols[13]||""}); }
   else if(type==="compHierarchy"){
@@ -11745,10 +11747,21 @@ function initApp(){
   };
  }
  function homeworkClassName(classId){
-  return DATA.classes.find(c=>c.id===classId)?.name || "Classe inconnue";
+  return homeworkClassById(classId)?.name || "Classe inconnue";
  }
  function homeworkClassById(classId){
-  return DATA.classes.find(c=>c.id===classId) || null;
+  const cl=DATA.classes.find(c=>c.id===classId);
+  if(cl) return cl;
+  const g=grpById(classId);
+  if(!g) return null;
+  const studs=targetStudents(g.id), subs=[];
+  studs.forEach(s=>{ ((DATA.classes.find(x=>x.id===s.classId)||{}).subjects||[]).forEach(x=>{ const n=typeof x==="object"?x.name:x; if(n && !subs.includes(n)) subs.push(n); }); });
+  return {id:g.id,name:g.name,subjects:subs,memberIds:studs.map(s=>s.id),isGroup:true};
+ }
+ function homeworkTargetOptionsHtml(sel){
+  const gl=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  return homeworkSortedClasses().map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===sel?"selected":""}>${escHtml(cls.name)}</option>`).join("")
+   +(gl.length?`<optgroup label="Groupes">${gl.map(g=>`<option value="${escHtml(g.id)}" ${g.id===sel?"selected":""}>${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
  }
  function homeworkStudentById(studentId){
   return DATA.students.find(s=>s.id===studentId) || null;
@@ -11805,6 +11818,7 @@ function initApp(){
  function homeworkMatchesStudentClass(item){
   const student=homeworkStudentById(homeworkStudentId());
   if(!student || !item) return false;
+  { const g=grpById(item.classId); if(g) return (g.memberIds||[]).includes(student.id); }
   if(item.classId && item.classId===student.classId) return true;
   const studentClass=homeworkClassById(student.classId);
   const homeworkClass=homeworkClassById(item.classId);
@@ -11855,6 +11869,18 @@ function syncStudentHomeworkDate(force=false){
  const d=new Date(`${target}T12:00:00`);
  HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
 }
+ function syncTeacherHomeworkDate(force=false){
+ if(AUTH.role!=="prof" || HOMEWORK_STATE.draft) return;
+ if(!force && HOMEWORK_STATE.studentDatePinned) return;
+ const dates=[...new Set((DATA.homework||[]).map(h=>h.dateISO).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ if(!dates.length) return;
+ if(!force && dates.includes(HOMEWORK_STATE.selectedDate)) return;
+ const today=todayISO();
+ const target=dates.find(d=>d>=today) || dates[dates.length-1];
+ HOMEWORK_STATE.selectedDate=target;
+ const d=new Date(`${target}T12:00:00`);
+ HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
+}
  function saveHomeworkDraftFromDom(){
   if(!HOMEWORK_STATE.draft) return;
   const editor=document.getElementById("homeworkEditorInput");
@@ -11873,7 +11899,7 @@ function syncStudentHomeworkDate(force=false){
    if(!existing) return;
    HOMEWORK_STATE.draft=normalizeHomeworkEntry({...existing, locked:false});
   }else{
-   const classId=document.getElementById("homeworkClassSelect")?.value || homeworkSortedClasses()[0]?.id || "";
+   const classId=document.getElementById("homeworkGroupSelect")?.value || document.getElementById("homeworkClassSelect")?.value || homeworkSortedClasses()[0]?.id || "";
    const subject=document.getElementById("homeworkSubjectSelect")?.value || homeworkClassSubjects(classId)[0] || "";
    if(!classId){ alert("Ajoute d’abord au moins une classe."); return; }
    if(!subject){ alert("Ajoute d’abord au moins une matière pour cette classe."); return; }
@@ -11983,15 +12009,28 @@ function syncStudentHomeworkDate(force=false){
  }
  function renderHomeworkTeacherToolbar(){
   const classes=homeworkSortedClasses();
-  const selectedClass=HOMEWORK_STATE.draft?.classId || document.getElementById("homeworkClassSelect")?.value || classes[0]?.id || "";
-  const subjects=homeworkClassSubjects(selectedClass);
-  const selectedSubject=HOMEWORK_STATE.draft?.subject || document.getElementById("homeworkSubjectSelect")?.value || subjects[0] || "";
+  const groups=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  const dt=HOMEWORK_STATE.draft?.classId || "";
+  let selectedGroup=groups.some(g=>g.id===dt) ? dt : (document.getElementById("homeworkGroupSelect")?.value || "");
+  if(!groups.some(g=>g.id===selectedGroup)) selectedGroup="";
+  const selectedClass=classes.some(c=>c.id===dt) ? dt : (document.getElementById("homeworkClassSelect")?.value || classes[0]?.id || "");
+  const subjects=homeworkClassSubjects(selectedGroup || selectedClass);
+  const wanted=HOMEWORK_STATE.draft?.subject || document.getElementById("homeworkSubjectSelect")?.value || "";
+  const selectedSubject=subjects.includes(wanted) ? wanted : (subjects[0] || "");
   return `
    <div class="homework-toolbar ${HOMEWORK_STATE.draft ? "is-hidden" : ""}">
     <div class="homework-toolbar-left">
      <div class="modal-form">
       <label>Classe</label>
-      <select id="homeworkClassSelect">${classes.map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===selectedClass?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+      <select id="homeworkClassSelect" ${selectedGroup?'style="opacity:.55"':""}>${classes.map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===selectedClass?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+     </div>
+     <div class="modal-form">
+      <label>&nbsp;</label>
+      <span style="padding:9px 2px;font-weight:700;color:#64748b">OU</span>
+     </div>
+     <div class="modal-form">
+      <label>Groupes</label>
+      <select id="homeworkGroupSelect"><option value="">—</option>${groups.map(g=>`<option value="${escHtml(g.id)}" ${g.id===selectedGroup?"selected":""}>${escHtml(g.name)}</option>`).join("")}</select>
      </div>
      <div class="modal-form">
       <label>Matière</label>
@@ -12028,7 +12067,7 @@ function syncStudentHomeworkDate(force=false){
   const className=homeworkClassName(draft.classId);
   const titleHtml = HOMEWORK_STATE.editTitle ? `
       <div class="homework-title-edit">
-       <select id="homeworkDraftClassSelect" aria-label="Classe">${homeworkSortedClasses().map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===draft.classId?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+       <select id="homeworkDraftClassSelect" aria-label="Classe">${homeworkTargetOptionsHtml(draft.classId)}</select>
        <select id="homeworkDraftSubjectSelect" aria-label="Matière">${(()=>{ const subs=homeworkClassSubjects(draft.classId); if(draft.subject && !subs.includes(draft.subject)) subs.unshift(draft.subject); return subs.map(sub=>`<option value="${escHtml(sub)}" ${sub===draft.subject?"selected":""}>${escHtml(sub)}</option>`).join(""); })()}</select>
        <button type="button" class="homework-title-ok" data-hw-action="confirm-title" title="Valider la classe et la matière" aria-label="Valider la classe et la matière"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
       </div>` : `
@@ -12144,7 +12183,7 @@ function syncStudentHomeworkDate(force=false){
   const main=document.getElementById("homeworkMainContent");
   if(!main) return;
   const isStudent=AUTH.role==="eleve";
- if(isStudent) syncStudentHomeworkDate();
+ if(isStudent) syncStudentHomeworkDate(); else syncTeacherHomeworkDate();
  renderHomeworkCalendar();
   const dayItems=isStudent ? getHomeworkForStudentDate(HOMEWORK_STATE.selectedDate) : getHomeworkOnDate(HOMEWORK_STATE.selectedDate);
   const cards=isStudent
@@ -12851,6 +12890,11 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  document.getElementById("homeworkView")?.addEventListener("change",e=>{
   const target=e.target;
   if(target.id==="homeworkClassSelect"){
+   const gs=document.getElementById("homeworkGroupSelect"); if(gs) gs.value="";
+   renderHomeworkView();
+   return;
+  }
+  if(target.id==="homeworkGroupSelect"){
    renderHomeworkView();
    return;
   }
@@ -12900,7 +12944,7 @@ function handleHomeworkActionClick(btn){
  const action=btn.dataset.hwAction;
   if(action==="select-date"){
    HOMEWORK_STATE.selectedDate=btn.dataset.date;
-  if(AUTH.role==="eleve") HOMEWORK_STATE.studentDatePinned=true;
+  HOMEWORK_STATE.studentDatePinned=true;
    const d=new Date(`${btn.dataset.date}T12:00:00`);
    HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
    HOMEWORK_STATE.draft=null;
@@ -12928,7 +12972,7 @@ function handleHomeworkActionClick(btn){
    if(!HOMEWORK_STATE.draft) return;
    const classId=document.getElementById("homeworkDraftClassSelect")?.value || HOMEWORK_STATE.draft.classId;
    const subject=document.getElementById("homeworkDraftSubjectSelect")?.value || HOMEWORK_STATE.draft.subject;
-   if(!subject){ alert("Cette classe n’a aucune matière : ajoute-en une d’abord."); return; }
+   if(!subject){ alert("Cette classe (ou ce groupe) n’a aucune matière : ajoute-en une d’abord."); return; }
    saveHomeworkDraftFromDom();
    const test={...HOMEWORK_STATE.draft, classId, subject};
    if(hasHomeworkCollision(test)){
@@ -13082,7 +13126,7 @@ function handleHomeworkActionClick(btn){
  const originalActivateMainView=activateMainView;
  activateMainView=function(targetId){
   originalActivateMainView(targetId);
-  if(targetId==="homeworkView") renderHomeworkView();
+  if(targetId==="homeworkView"){ if(AUTH.role==="prof" && !HOMEWORK_STATE.draft){ HOMEWORK_STATE.studentDatePinned=false; syncTeacherHomeworkDate(true); } renderHomeworkView(); }
  };
 
  const originalRenderOnlineTestsView=renderOnlineTestsView;
@@ -13229,6 +13273,12 @@ var PROF_INFO={civ:"",first:"",last:""};
 var SCH={view:"week",cur:new Date(),editId:null,pending:null};
 const SCH_PAL=["#2563eb","#16a34a","#f59e0b","#dc2626","#7c3aed","#0891b2","#db2777","#65a30d","#ea580c","#4f46e5","#0d9488","#ca8a04"];
 function schEns(){ if(!DATA.schedule) DATA.schedule={events:[],rooms:[]}; return DATA.schedule; }
+function grpEns(){ if(!Array.isArray(DATA.groups)) DATA.groups=[]; return DATA.groups; }
+function grpById(id){ return grpEns().find(g=>g.id===id)||null; }
+function targetName(id){ const c=DATA.classes.find(x=>x.id===id); if(c) return c.name; const g=grpById(id); return g?g.name:""; }
+function targetStudents(id){ const g=grpById(id); if(g){ const m=new Set(g.memberIds||[]); return DATA.students.filter(s=>m.has(s.id)); } return DATA.students.filter(s=>s.classId===id); }
+function studentInTargets(st,ids){ if(!st||!Array.isArray(ids)) return false; return ids.some(id=>{ if(id===st.classId) return true; const g=grpById(id); return !!g&&(g.memberIds||[]).includes(st.id); }); }
+
 function subjColor(n){ const s=SUBJECT_REGISTRY.find(x=>x&&typeof x==="object"&&x.name===n); if(s&&s.color) return s.color; let h=0; for(const ch of String(n||"")) h=(h*31+ch.charCodeAt(0))>>>0; return SCH_PAL[h%SCH_PAL.length]; }
 function inkFor(c){ const m=/^#?([0-9a-f]{6})$/i.exec(c||""); if(!m) return "#000"; const v=parseInt(m[1],16); return (0.299*(v>>16)+0.587*(v>>8&255)+0.114*(v&255))>150?"#000":"#fff"; }
 function profCiv(){ return PROF_INFO.civ==="Madame"?"Mme":PROF_INFO.civ==="Monsieur"?"M.":""; }
@@ -13241,12 +13291,12 @@ const tmin=t=>{const a=String(t).split(":");return +a[0]*60+ +a[1];};
 const frD=(d,o)=>d.toLocaleDateString("fr-FR",o);
 function schEvents(){
  const ev=schEns().events;
- if(AUTH.role==="eleve"){ const st=DATA.students.find(s=>s.id===AUTH.studentId); return ev.filter(e=>st&&(e.classIds||[]).includes(st.classId)); }
+ if(AUTH.role==="eleve"){ const st=DATA.students.find(s=>s.id===AUTH.studentId); return ev.filter(e=>st&&studentInTargets(st,e.classIds||[])); }
  return ev;
 }
 function schBlock(e,pos,chip){
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
- const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>(DATA.classes.find(c=>c.id===id)||{}).name).filter(Boolean).join(", ");
+ const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
  const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?12:15}" height="${chip?12:15}" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.5"/></svg>`:"";
  const subj=`<b${e.cancelled?' style="text-decoration:line-through"':""}>${escHtml(String(e.subject).toUpperCase())}</b>`;
  const edit=" edit";
@@ -13313,7 +13363,7 @@ const schDet=document.getElementById("schDetailModal"); let schDetId=null;
 function schDetClose(){ schDet.classList.remove("open"); schDet.setAttribute("aria-hidden","true"); schDetId=null; }
 function schDetFill(){
  const e=schEns().events.find(x=>x.id===schDetId); if(!e){ schDetClose(); return; }
- const cl=(e.classIds||[]).map(id=>(DATA.classes.find(c=>c.id===id)||{}).name).filter(Boolean).join(", ");
+ const cl=(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
  const dt=new Date(e.date+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
  const row=(k,v)=>`<div style="display:flex;gap:10px;margin:6px 0"><span style="width:90px;color:#64748b">${k}</span><span style="flex:1">${v}</span></div>`;
@@ -13336,7 +13386,10 @@ function schOpen(id){
  const e=id?schEns().events.find(x=>x.id===id):null; SCH.editId=e?e.id:null;
  const names=SUBJECT_REGISTRY.map(s=>typeof s==="object"?s.name:s); if(e&&!names.includes(e.subject)) names.push(e.subject);
  document.getElementById("schSubject").innerHTML=names.map(n=>`<option>${escHtml(n)}</option>`).join("");
- document.getElementById("schClasses").innerHTML=DATA.classes.length?DATA.classes.map(c=>`<label><input type="checkbox" value="${c.id}"${e&&(e.classIds||[]).includes(c.id)?" checked":""}>${escHtml(c.name)}</label>`).join(""):"<span class='hint'>Aucune classe créée.</span>";
+ { const chk=(id,n)=>`<label><input type="checkbox" value="${id}"${e&&(e.classIds||[]).includes(id)?" checked":""}>${escHtml(n)}</label>`;
+  const gl=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  document.getElementById("schClasses").innerHTML=(DATA.classes.length?DATA.classes.map(c=>chk(c.id,c.name)).join(""):"<span class='hint'>Aucune classe créée.</span>")
+   +(gl.length?'<div style="flex-basis:100%;font-weight:600;color:#475569;margin-top:6px">Groupes</div>'+gl.map(g=>chk(g.id,g.name)).join(""):""); }
  document.getElementById("schProf").innerHTML=`<option>${escHtml(profShort())}</option>`;
  const rooms=[...schEns().rooms]; if(e&&e.room&&!rooms.includes(e.room)) rooms.push(e.room);
  document.getElementById("schRoom").innerHTML='<option value="">—</option>'+rooms.sort((a,b)=>a.localeCompare(b,"fr",{numeric:true})).map(r=>`<option>${escHtml(r)}</option>`).join("");
@@ -13367,7 +13420,7 @@ document.getElementById("schEventForm").addEventListener("submit",ev=>{
   start:document.getElementById("schStart").value, end:document.getElementById("schEnd").value};
  const msg=t=>{const m=document.getElementById("schMsg");m.textContent=t;m.style.display="block";};
  if(!v.subject) return msg("Choisissez une matière.");
- if(!v.classIds.length) return msg("Choisissez au moins une classe.");
+ if(!v.classIds.length) return msg("Choisissez au moins une classe ou un groupe.");
  if(!v.date||!v.start||!v.end) return msg("Renseignez le jour et les horaires.");
  if(tmin(v.end)<=tmin(v.start)) return msg("L'heure de fin doit être après l'heure de début.");
  const s=schEns();
@@ -13385,6 +13438,93 @@ function schSignal(flag){
 }
 document.getElementById("schSigYes").onclick=()=>schSignal(true);
 document.getElementById("schSigNo").onclick=()=>schSignal(false);
+
+/* — Groupes d'élèves — */
+(function(){
+ const st=document.createElement("style");
+ st.textContent=".grp-row,.grp-stu{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff}.grp-row:hover,.grp-stu:hover{border-color:#60a5fa;background:#eff6ff}.grp-stu.on{background:#dbeafe;border-color:#2563eb}.grp-chk{width:20px;height:20px;border:2px solid #94a3b8;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex:none}.grp-stu.on .grp-chk{background:#2563eb;border-color:#2563eb}.grp-stu small,.grp-row small{color:#64748b}.grp-f{display:flex;gap:8px;margin:8px 0}.grp-f select,.grp-f input,#grpName{padding:8px;border:1px solid var(--border);border-radius:8px;font-size:14px}.grp-f input{flex:1}#grpName{width:100%;box-sizing:border-box}";
+ document.head.appendChild(st);
+ const GRP={sel:new Set(),editId:null,viewId:null};
+ const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+ const cname=id=>(DATA.classes.find(c=>c.id===id)||{}).name||"";
+ const mk=(id,z)=>{ let m=document.getElementById(id); if(!m){ m=document.createElement("div"); m.id=id; m.className="modal"; m.style.zIndex=z; m.setAttribute("aria-hidden","true"); document.body.appendChild(m); } return m; };
+ const show=m=>{ m.classList.add("open"); m.setAttribute("aria-hidden","false"); };
+ const hide=m=>{ m.classList.remove("open"); m.setAttribute("aria-hidden","true"); };
+ const members=g=>targetStudents(g.id).sort(cmpStu);
+ const refresh=()=>{ if(typeof rebuildUI==="function") rebuildUI(); };
+
+ /* liste des groupes */
+ function listRender(){
+  const m=mk("grpListModal",41);
+  const gs=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  m.innerHTML='<div class="modal-card" style="width:460px"><div class="modal-header"><h3>Groupes</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
+   +'<div style="margin-bottom:12px"><button type="button" class="btn btn-primary" id="grpNew">Créer un groupe</button></div>'
+   +(gs.length?gs.map(g=>{ const n=members(g).length; return '<div class="grp-row" data-g="'+escHtml(g.id)+'"><b style="flex:1">'+escHtml(g.name)+'</b><small>'+n+' élève'+(n>1?"s":"")+'</small></div>'; }).join(""):"<div class='hint'>Aucun groupe créé.</div>")
+   +'</div></div>';
+  m.querySelector(".modal-close").onclick=()=>hide(m);
+  m.querySelector("#grpNew").onclick=()=>editOpen(null);
+  m.querySelectorAll(".grp-row").forEach(r=>r.onclick=()=>viewOpen(r.dataset.g));
+ }
+ function listOpen(){ listRender(); show(mk("grpListModal",41)); }
+
+ /* liste des élèves d'un groupe */
+ function viewOpen(id){
+  const g=grpById(id); if(!g) return; GRP.viewId=id;
+  const m=mk("grpViewModal",42), l=members(g);
+  m.innerHTML='<div class="modal-card" style="width:440px"><div class="modal-header"><h3>'+escHtml(g.name)+'</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
+   +'<div style="color:#64748b;margin-bottom:8px">'+l.length+' élève'+(l.length>1?"s":"")+'</div>'
+   +(l.length?l.map(s=>'<div class="sch-room" style="justify-content:flex-start;gap:10px"><b>'+escHtml(s.last)+'</b><span style="flex:1">'+escHtml(s.first)+'</span><small style="color:#64748b">'+escHtml(cname(s.classId))+'</small></div>').join(""):"<div class='hint'>Aucun élève dans ce groupe.</div>")
+   +'<div class="modal-actions" style="justify-content:space-between;margin-top:12px"><button type="button" class="btn btn-danger" id="grpDel">Supprimer le groupe</button><div style="display:flex;gap:8px"><button type="button" class="btn" id="grpViewClose">Fermer</button><button type="button" class="btn btn-primary" id="grpEdit">Modifier</button></div></div></div></div>';
+  m.querySelector(".modal-close").onclick=()=>hide(m);
+  m.querySelector("#grpViewClose").onclick=()=>hide(m);
+  m.querySelector("#grpEdit").onclick=()=>editOpen(id);
+  m.querySelector("#grpDel").onclick=()=>{
+   const nE=schEns().events.filter(e=>(e.classIds||[]).includes(id)).length, nH=(DATA.homework||[]).filter(h=>h.classId===id).length;
+   if(nE||nH){ alert("Ce groupe est utilisé par "+nE+" cours et "+nH+" devoir(s). Supprimez-les ou changez leur destinataire avant de supprimer le groupe."); return; }
+   openConfirmModal({message:"Supprimer le groupe « "+g.name+" » ?",onConfirm:()=>{ DATA.groups=grpEns().filter(x=>x.id!==id); hide(m); listRender(); saveData(); refresh(); }});
+  };
+  show(m);
+ }
+
+ /* création / modification */
+ function editOpen(id){
+  const g=id?grpById(id):null; GRP.editId=id||null; GRP.sel=new Set(g?g.memberIds||[]:[]);
+  const m=mk("grpEditModal",43);
+  m.innerHTML='<div class="modal-card" style="width:520px"><div class="modal-header"><h3>'+(g?"Modifier le groupe":"Créer un groupe")+'</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
+   +'<label style="display:block;font-weight:600;margin-bottom:4px">Nom du groupe</label><input id="grpName" placeholder="Nom du groupe" maxlength="60" value="'+escHtml(g?g.name:"")+'">'
+   +'<div class="grp-f"><select id="grpCls"><option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr",{numeric:true,sensitivity:"base"})).map(c=>'<option value="'+escHtml(c.id)+'">'+escHtml(c.name)+'</option>').join("")+'</select><input id="grpSearch" type="search" placeholder="Rechercher un élève…"></div>'
+   +'<div id="grpCount" style="color:#64748b;margin-bottom:6px"></div>'
+   +'<div id="grpStuList" style="max-height:44vh;overflow:auto"></div>'
+   +'<div class="modal-actions" style="margin-top:12px"><button type="button" class="btn" id="grpEdCancel">Annuler</button><button type="button" class="btn btn-primary" id="grpEdSave">Enregistrer</button></div></div></div>';
+  const close=()=>hide(m);
+  m.querySelector(".modal-close").onclick=close; m.querySelector("#grpEdCancel").onclick=close;
+  const draw=()=>{
+   const c=m.querySelector("#grpCls").value, q=norm(m.querySelector("#grpSearch").value);
+   const l=DATA.students.filter(s=>(!c||s.classId===c)&&(!q||norm(s.last+" "+s.first).includes(q)||norm(s.first+" "+s.last).includes(q))).sort(cmpStu);
+   m.querySelector("#grpStuList").innerHTML=l.length?l.map(s=>{ const on=GRP.sel.has(s.id); return '<div class="grp-stu'+(on?" on":"")+'" data-s="'+escHtml(s.id)+'"><span class="grp-chk">'+(on?"✓":"")+'</span><span style="flex:1"><b>'+escHtml(s.last)+'</b> '+escHtml(s.first)+'</span><small>'+escHtml(cname(s.classId))+'</small></div>'; }).join(""):"<div class='hint'>Aucun élève.</div>";
+   m.querySelector("#grpCount").textContent=GRP.sel.size+" élève"+(GRP.sel.size>1?"s":"")+" sélectionné"+(GRP.sel.size>1?"s":"");
+  };
+  m.querySelector("#grpCls").onchange=draw; m.querySelector("#grpSearch").oninput=draw;
+  m.querySelector("#grpStuList").onclick=ev=>{
+   const r=ev.target.closest(".grp-stu"); if(!r) return;
+   const s=r.dataset.s; if(GRP.sel.has(s)) GRP.sel.delete(s); else GRP.sel.add(s);
+   const on=GRP.sel.has(s); r.classList.toggle("on",on); r.querySelector(".grp-chk").textContent=on?"✓":"";
+   m.querySelector("#grpCount").textContent=GRP.sel.size+" élève"+(GRP.sel.size>1?"s":"")+" sélectionné"+(GRP.sel.size>1?"s":"");
+  };
+  m.querySelector("#grpEdSave").onclick=()=>{
+   const name=m.querySelector("#grpName").value.trim();
+   if(!name){ alert("Donnez un nom au groupe."); m.querySelector("#grpName").focus(); return; }
+   if(grpEns().some(x=>x.id!==GRP.editId&&x.name.toLowerCase()===name.toLowerCase())){ alert("Un groupe porte déjà ce nom."); return; }
+   if(!GRP.sel.size){ alert("Sélectionnez au moins un élève."); return; }
+   const ids=DATA.students.filter(s=>GRP.sel.has(s.id)).map(s=>s.id);
+   if(GRP.editId){ const x=grpById(GRP.editId); if(x){ x.name=name; x.memberIds=ids; } }
+   else grpEns().push({id:"grp_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,memberIds:ids});
+   saveData(); close(); hide(mk("grpViewModal",42)); listRender(); refresh();
+  };
+  draw(); show(m); m.querySelector("#grpName").focus();
+ }
+ document.getElementById("schGroups").onclick=listOpen;
+})();
 
 /* — popup salles — */
 const roomModal=document.getElementById("schRoomsModal");
@@ -13465,7 +13605,7 @@ function apPrevAbsent(ev){
  const prev=new Set(), seen=new Set();
  vsEns().appels.filter(a=>a.date<ev.date||(a.date===ev.date&&a.start<ev.start))
   .sort((a,b)=>(a.date+a.start<b.date+b.start)?1:-1).forEach(a=>{
-   DATA.students.filter(s=>(a.classIds||[]).includes(s.classId)&&!seen.has(s.id)).forEach(s=>{ seen.add(s.id); if((a.absent||[]).includes(s.id)) prev.add(s.id); });
+   DATA.students.filter(s=>studentInTargets(s,a.classIds||[])&&!seen.has(s.id)).forEach(s=>{ seen.add(s.id); if((a.absent||[]).includes(s.id)) prev.add(s.id); });
   });
  return prev;
 }
@@ -13484,15 +13624,15 @@ function renderAppel(){
   const n=nowHM(); const pick=evs.find(e=>e.start<=n&&n<e.end)||evs.find(e=>e.start>n)||evs[evs.length-1]; apLoad(pick);
  }
  const ev=evs.find(e=>e.id===AP.evId);
- const cn=e=>(e.classIds||[]).map(id=>(DATA.classes.find(c=>c.id===id)||{}).name).filter(Boolean).join(", ");
+ const cn=e=>(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
  ctl.innerHTML='<select id="apSel" class="btn">'+evs.map(e=>'<option value="'+e.id+'"'+(e.id===AP.evId?" selected":"")+'>'+hmF(e.start)+' - '+hmF(e.end)+' · '+escHtml(e.subject)+' ('+escHtml(cn(e))+')</option>').join("")+'</select> '
   +(AP.sent?'<span class="ap-sent">✔ Appel envoyé</span> <button class="btn'+(AP.mode==="correct"?" btn-primary":"")+'" id="apCorr">Corriger l\'appel</button> <button class="btn'+(AP.mode==="late"?" btn-primary":"")+'" id="apLate">Déclarer un retard</button>'
    :'<button class="btn btn-primary" id="apSend">Envoyer</button>');
  const prev=apPrevAbsent(ev), multi=(ev.classIds||[]).length>1;
  let html=AP.mode==="late"?'<div class="ap-hint">Cliquez sur un élève absent pour déclarer son retard.</div>':AP.mode==="correct"?'<div class="ap-hint">Cliquez sur un élève pour modifier son statut.</div>':"";
  (ev.classIds||[]).forEach(cid=>{
-  const list=DATA.students.filter(s=>s.classId===cid).sort(cmpStu); if(!list.length) return;
-  if(multi) html+='<h3 class="ap-cls">'+escHtml((DATA.classes.find(c=>c.id===cid)||{}).name||"")+'</h3>';
+  const list=targetStudents(cid).sort(cmpStu); if(!list.length) return;
+  if(multi) html+='<h3 class="ap-cls">'+escHtml(targetName(cid)||"")+'</h3>';
   html+='<div class="ap-grid">'+list.map(s=>{
    const f=sexOf(s)==="F", ab=AP.absent.has(s.id), la=AP.late[s.id];
    return '<div class="ap-card'+(prev.has(s.id)?" ap-prev":"")+'" data-sid="'+s.id+'">'+avatarSvg(sexOf(s))
@@ -13549,7 +13689,7 @@ function vsItems(sid){
 }
 function absDur(it){
  const st=DATA.students.find(s=>s.id===it.sid);
- const day=schEns().events.filter(e=>e.date===it.date&&!e.cancelled&&st&&(e.classIds||[]).includes(st.classId));
+ const day=schEns().events.filter(e=>e.date===it.date&&!e.cancelled&&st&&studentInTargets(st,e.classIds||[]));
  return (day.length&&it.list.length>=day.length)?"1 jour":it.list.length+" cours";
 }
 function retMin(it){ return Math.max(0,tmin(it.time)-tmin(it.a.start)); }
@@ -13726,7 +13866,7 @@ function hEvOpen(id){ HIST.evId=id; hEvFill(); }
 function hEvFill(){
  const e=schEns().events.find(x=>x.id===HIST.evId); if(!e) return;
  const m=hModal("histEv",110), r=apFind(e);
- const cl=(e.classIds||[]).map(id=>(DATA.classes.find(c=>c.id===id)||{}).name).filter(Boolean).join(", ");
+ const cl=(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
  let info;
  if(r){ const na=(r.absent||[]).length, nl=Object.keys(r.late||{}).length;
@@ -13756,8 +13896,8 @@ function hApRender(){
  else tools='<button type="button" class="btn'+(HA.mode==="abs"?" btn-primary":"")+'" id="haAbs">Corriger les absences</button><button type="button" class="btn'+(HA.mode==="late"?" btn-primary":"")+'" id="haLate">Déclarer un retard</button>';
  let grid=!view?'<div class="ap-hint">'+(HA.mode==="late"?"Cliquez sur un élève absent pour déclarer son retard.":"Cliquez sur un élève pour l'ajouter ou le retirer des absents.")+'</div>':"";
  (e.classIds||[]).forEach(cid=>{
-  const list=DATA.students.filter(s=>s.classId===cid).sort(cmpStu); if(!list.length) return;
-  if(multi) grid+='<h3 class="ap-cls">'+escHtml((DATA.classes.find(c=>c.id===cid)||{}).name||"")+'</h3>';
+  const list=targetStudents(cid).sort(cmpStu); if(!list.length) return;
+  if(multi) grid+='<h3 class="ap-cls">'+escHtml(targetName(cid)||"")+'</h3>';
   grid+='<div class="ap-grid ap-grid-s">'+list.map(s=>{ const f=sexOf(s)==="F", ab=HA.absent.has(s.id), la=HA.late[s.id];
    return '<div class="ap-card'+(prev.has(s.id)?" ap-prev":"")+(view?" ap-ro":"")+'" data-sid="'+s.id+'">'+avatarSvg(sexOf(s))+'<div class="ap-n"><b>'+escHtml(s.last)+'</b><br>'+escHtml(s.first)+'</div>'
     +(ab?'<div class="ap-veil">'+(f?"Absente":"Absent")+'</div>':la?'<div class="ap-veil ap-veil-late">Retard<small>'+hmF(la)+'</small></div>':"")+'</div>'; }).join("")+'</div>';
@@ -13905,7 +14045,7 @@ function vsMissing(){
  const out={now:[],past:[]};
  if(AUTH.role!=="prof") return out;
  const today=isoD(new Date()), nm=tmin(nowHM());
- schEns().events.filter(e=>!e.cancelled&&e.date<=today&&!apFind(e)&&DATA.students.some(s=>(e.classIds||[]).includes(s.classId)))
+ schEns().events.filter(e=>!e.cancelled&&e.date<=today&&!apFind(e)&&DATA.students.some(s=>studentInTargets(s,e.classIds||[])))
   .sort((a,b)=>(a.date+a.start)<(b.date+b.start)?-1:1).forEach(e=>{
    if(e.date===today&&nm>=tmin(e.start)+5) out.now.push(e);
    if(e.date<today||nm>=tmin(e.end)) out.past.push(e);
