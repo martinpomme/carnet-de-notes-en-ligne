@@ -14255,18 +14255,31 @@ document.getElementById("schFreq").onchange=schFreqUpdate;
 document.getElementById("schDate").addEventListener("change",()=>{ document.getElementById("schUntil").value=""; schFreqUpdate(); });
 
 function genDates(s,f,o){
- const out=[], d0=new Date(s+"T12:00:00"), end=new Date(o.until+"T12:00:00"); let i=0;
+ const out=[], d0=new Date(s+"T12:00:00"), end=new Date(o.until+"T12:00:00"), hors=!!o.hors; let i=0;
+ /* « hors congés » : les périodes de congés sont retirées du calendrier, donc non comptées dans la fréquence */
+ const isH=d=>hors&&!!holFor(isoD(d));
+ const monOf=d=>{ const m=new Date(d); m.setDate(m.getDate()-((m.getDay()+6)%7)); m.setHours(12,0,0,0); return m; };
+ const weekOk=m=>{ for(let k=0;k<5;k++){ const x=new Date(m); x.setDate(m.getDate()+k); if(!holFor(isoD(x))) return true; } return false; }; /* semaine comptée = au moins un jour ouvré hors congés */
+ const monthOk=(y,mo)=>{ const n=new Date(y,mo+1,0).getDate(); for(let k=1;k<=n;k++){ if(!holFor(isoD(new Date(y,mo,k,12)))) return true; } return false; };
+ let nhDays=0, wk=0, curMon=-1, wkOk=true, mc=0, curMo=-1, moOk=true;
  for(const d=new Date(d0); d<=end&&out.length<1000; d.setDate(d.getDate()+1), i++){
-  let ok=false;
+  if(hors){
+   const mt=monOf(d).getTime();
+   if(mt!==curMon){ if(curMon!==-1&&wkOk) wk++; curMon=mt; wkOk=weekOk(new Date(mt)); }
+   const mk=d.getFullYear()*12+d.getMonth();
+   if(mk!==curMo){ if(curMo!==-1&&moOk) mc++; curMo=mk; moOk=monthOk(d.getFullYear(),d.getMonth()); }
+  }
+  const hol=isH(d); let ok=false;
   switch(f){
    case "daily": ok=true; break;
    case "weekdays": ok=o.days.includes((d.getDay()+6)%7); break;
    case "months": ok=o.months.includes(d.getMonth())&&d.getDay()===d0.getDay(); break;
-   case "xdays": ok=i%o.n===0; break;
-   case "xweeks": ok=d.getDay()===d0.getDay()&&Math.floor(i/7)%o.n===0; break;
-   case "xmonths": ok=d.getDate()===d0.getDate()&&((d.getFullYear()-d0.getFullYear())*12+d.getMonth()-d0.getMonth())%o.n===0; break;
+   case "xdays": ok=hors?(!hol&&nhDays%o.n===0):(i%o.n===0); break;
+   case "xweeks": ok=d.getDay()===d0.getDay()&&(hors?(wkOk&&wk%o.n===0):(Math.floor(i/7)%o.n===0)); break;
+   case "xmonths": ok=d.getDate()===d0.getDate()&&(hors?(moOk&&mc%o.n===0):(((d.getFullYear()-d0.getFullYear())*12+d.getMonth()-d0.getMonth())%o.n===0)); break;
    case "xyears": ok=d.getDate()===d0.getDate()&&d.getMonth()===d0.getMonth()&&(d.getFullYear()-d0.getFullYear())%o.n===0; break;
   }
+  if(!hol) nhDays++;
   if(ok) out.push(isoD(d));
  }
  return out;
@@ -14282,7 +14295,7 @@ function schCreate(v,msg){
  if(!until||until<v.date){ msg("Indiquez une date de fin « Jusqu'au » postérieure au premier cours."); return false; }
  if((new Date(until)-new Date(v.date))/864e5>3660){ msg("La période est limitée à 10 ans."); return false; }
  const o={until,n:Math.max(1,parseInt(document.getElementById("schFreqNum").value)||1),
-  days:[...document.querySelectorAll("#schFreqDays input:checked")].map(i=>+i.value), months:[...document.querySelectorAll("#schFreqMonths input:checked")].map(i=>+i.value)};
+  days:[...document.querySelectorAll("#schFreqDays input:checked")].map(i=>+i.value), months:[...document.querySelectorAll("#schFreqMonths input:checked")].map(i=>+i.value), hors};
  if(f==="weekdays"&&!o.days.length){ msg("Cochez au moins un jour."); return false; }
  if(f==="months"&&!o.months.length){ msg("Cochez au moins un mois."); return false; }
  let dates=genDates(v.date,f,o);
