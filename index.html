@@ -1094,7 +1094,7 @@ body.student-mode .prof-only-tab{display:none!important}
 .vs-row:hover{background:#f8fafc}
 .vs-ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
 .vs-t{flex:1;font-weight:600}
-.vs-ok{color:#16a34a;font-weight:600}.vs-ko{color:#dc2626;font-weight:600}
+
 @media(max-width:700px){.vs-split{flex-direction:column}.vs-side{width:100%}}
 
 .vs-tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #e2e8f0}
@@ -4105,7 +4105,6 @@ function buildCSVText(){
  {const V=vsEns();
   V.appels.forEach(a=>rows.push(["appel",a.id,a.eventId,a.date,a.start,a.end,escapeCsv(a.subject),escapeCsv(JSON.stringify(a.classIds||[])),escapeCsv(JSON.stringify(a.absent||[])),escapeCsv(JSON.stringify(a.late||{})),a.sentAt||""].join(";")));
   if(V.since) rows.push(["appelSince",V.since].join(";"));
-  Object.keys(V.just).forEach(k=>rows.push(["vsJust",escapeCsv(k),V.just[k].j?1:0,escapeCsv(V.just[k].motif||"")].join(";")));
   V.sanctions.forEach(x=>rows.push(["sanction",x.id,x.sid,x.level,x.date,x.time||"",escapeCsv(x.motif||""),escapeCsv(JSON.stringify(x.d||{})),escapeCsv(x.prof||""),x.createdAt||""].join(";")));}
  holEns().forEach(x=>rows.push(["holiday",x.id,escapeCsv(x.name),x.from,x.to].join(";")));
  schEns().rooms.forEach(r=>rows.push(["room","",escapeCsv(r)].join(";")));
@@ -4227,7 +4226,7 @@ function importCSV(text){
   else if(type==="appel"){ let ci=[],ab=[],la={}; try{ci=JSON.parse(unescapeCsv(cols[7]||"[]"))||[];}catch(e){} try{ab=JSON.parse(unescapeCsv(cols[8]||"[]"))||[];}catch(e){} try{la=JSON.parse(unescapeCsv(cols[9]||"{}"))||{};}catch(e){}
    vsEns().appels.push({id:cols[1],eventId:cols[2],date:cols[3],start:cols[4],end:cols[5],subject:unescapeCsv(cols[6]||""),classIds:ci,absent:ab,late:la,sentAt:cols[10]||""}); }
   else if(type==="appelSince"){ vsEns().since=cols[1]||""; }
-  else if(type==="vsJust"){ vsEns().just[unescapeCsv(cols[1]||"")]={j:cols[2]==="1",motif:unescapeCsv(cols[3]||"")}; }
+  else if(type==="vsJust"){ /* ancien système de justification supprimé : ligne ignorée */ }
   else if(type==="sanction"){ let d={}; try{d=JSON.parse(unescapeCsv(cols[7]||"{}"))||{};}catch(e){}
    vsEns().sanctions.push({id:cols[1],sid:cols[2],level:cols[3],date:cols[4],time:cols[5],motif:unescapeCsv(cols[6]||""),d,prof:unescapeCsv(cols[8]||""),createdAt:cols[9]||""}); }
   else if(type==="holiday"){ holEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),from:cols[3],to:cols[4]}); }
@@ -10270,14 +10269,15 @@ function updateTabWarningIndicators(){
     });
   });
   
-  hasAnyMissingA = missingPeriodsA.size > 0;
+  const lockedMissA = periodsToCheck.filter(p => missingPeriodsA.has(p) && periodLocked(p));
+  hasAnyMissingA = lockedMissA.length > 0;
   const tabBtnA = document.querySelector('.tab-btn[data-target="appreciationsView"]');
   if(tabBtnA) tabBtnA.classList.toggle("has-empty-eval", hasAnyMissingA);
 
   const appWarn = document.getElementById("appreciationWarning");
   if(appWarn) {
-    appWarn.style.display = hasAnyMissingA ? "block" : "none";
-    appWarn.textContent = "⚠️ Des appréciations sont manquantes (" + periodsToCheck.filter(p => missingPeriodsA.has(p)).map(p => p === "YEAR" ? "Année" : p).join(", ") + ").";
+    appWarn.style.display = lockedMissA.length ? "block" : "none";
+    appWarn.textContent = "⚠️ Trimestre verrouillé alors que des appréciations sont manquantes (" + lockedMissA.map(p => p === "YEAR" ? "Année" : p).join(", ") + ").";
   }
 
   // Sous-onglets Élève
@@ -13823,7 +13823,7 @@ document.getElementById("manageSubjectsTbody").addEventListener("input",ev=>{
 });
 
 /* ===================== FEUILLE D'APPEL / VIE SCOLAIRE ===================== */
-function vsEns(){ if(!DATA.vs) DATA.vs={appels:[],sanctions:[],just:{}}; return DATA.vs; }
+function vsEns(){ if(!DATA.vs) DATA.vs={appels:[],sanctions:[]}; return DATA.vs; }
 const vsUid=p=>p+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const sexOf=s=>s&&s.sex==="F"?"F":"M";
 const cmpStu=(a,b)=>String(a.last).localeCompare(String(b.last),"fr",{sensitivity:"base"})||String(a.first).localeCompare(String(b.first),"fr",{sensitivity:"base"});
@@ -13947,7 +13947,6 @@ function absDur(it){
  return (day.length&&it.list.length>=day.length)?"1 jour":it.list.length+" cours";
 }
 function retMin(it){ return Math.max(0,tmin(it.time)-tmin(it.a.start)); }
-function vsBadge(it){ const j=vsEns().just[it.key], e=it.kind==="ret"?"":"e"; return j&&j.j?'<span class="vs-ok">Justifié'+e+'</span>':'<span class="vs-ko">⚠ Non justifié'+e+'</span>'; }
 function vsTitle(it){
  if(it.kind==="san") return SAN[it.s.level].n+' — '+dShort(it.date)+(it.s.time?' à '+hmF(it.s.time):"");
  if(it.kind==="abs") return dShort(it.date)+' — '+absDur(it);
@@ -13959,7 +13958,7 @@ function vsContent(sid){
  const col={san:"#dc2626",abs:"#2563eb",ret:"#f97316"};
  let h=(prof?'<div class="vs-head"><h3 style="margin:0">'+escHtml(st.first+" "+st.last)+'</h3><button class="btn btn-danger" id="vsSanBtn">Mettre une sanction</button></div>':"")
   +'<div class="vs-sq"><div style="background:#2563eb"><b>'+n("abs")+'</b>absence'+(n("abs")>1?"s":"")+'</div><div style="background:#f97316"><b>'+n("ret")+'</b>retard'+(n("ret")>1?"s":"")+'</div><div style="background:#dc2626"><b>'+n("san")+'</b>sanction'+(n("san")>1?"s":"")+'</div></div>';
- h+=items.length?items.map(it=>'<div class="vs-row" data-k="'+escHtml(it.key)+'"><span class="vs-ic" style="background:'+col[it.kind]+'">'+VS_ICO[it.kind==="san"?"san":it.kind]+'</span><span class="vs-t">'+escHtml(vsTitle(it))+'</span>'+(it.kind==="san"?"":vsBadge(it))+'</div>').join(""):'<div class="pl-empty">Rien à signaler.</div>';
+ h+=items.length?items.map(it=>'<div class="vs-row" data-k="'+escHtml(it.key)+'"><span class="vs-ic" style="background:'+col[it.kind]+'">'+VS_ICO[it.kind==="san"?"san":it.kind]+'</span><span class="vs-t">'+escHtml(vsTitle(it))+'</span>'+'</div>').join(""):'<div class="pl-empty">Rien à signaler.</div>';
  return h;
 }
 function renderVie(){
@@ -13968,11 +13967,11 @@ function renderVie(){
  const list=DATA.students.filter(s=>!VS.cls||s.classId===VS.cls).sort(cmpStu);
  if(VS.tab==="hist"){ root.innerHTML=vsTabs()+histHtml(); holMark(root); return; }
  root.innerHTML=vsTabs()+'<div class="vs-split"><div class="vs-side"><select id="vsCls" class="btn" style="width:100%"><option value="">Toutes les classes</option>'+DATA.classes.map(c=>'<option value="'+c.id+'"'+(c.id===VS.cls?" selected":"")+'>'+escHtml(c.name)+'</option>').join("")+'</select><div class="vs-list">'
-  +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'">'+escHtml(s.last)+' '+escHtml(s.first)+'</div>').join("")+'</div></div><div class="vs-main">'
+  +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'"'+'>'+escHtml(s.last)+' '+escHtml(s.first)+'</div>').join("")+'</div></div><div class="vs-main">'
   +(VS.sid?vsContent(VS.sid):'<div class="pl-empty">Cliquez sur un élève pour voir sa vie scolaire.</div>')+'</div></div>';
 }
 function vsDetail(sid,key){
- const it=vsItems(sid).find(i=>i.key===key); if(!it) return; const prof=AUTH.role==="prof", V=vsEns(), j=V.just[key];
+ const it=vsItems(sid).find(i=>i.key===key); if(!it) return; const prof=AUTH.role==="prof", V=vsEns();
  let body="", btns=[{label:"Fermer"}];
  if(it.kind==="san"){
   const s=it.s, d=s.d||{}, L=SAN[s.level];
@@ -13984,16 +13983,8 @@ function vsDetail(sid,key){
  } else {
   if(it.kind==="abs") body=vsRow("Date",escHtml(dLong(it.date)))+vsRow("Durée",absDur(it))+vsRow("Cours concernés",it.list.map(a=>hmF(a.start)+" - "+hmF(a.end)+" · "+escHtml(a.subject)).join("<br>"));
   else body=vsRow("Date",escHtml(dLong(it.date)))+vsRow("Cours concerné",escHtml(it.a.subject))+vsRow("Heure demandée",hmF(it.a.start))+vsRow("Heure d'arrivée",hmF(it.time))+vsRow("Durée du retard",retMin(it)+" min");
-  body+=vsRow("Statut",vsBadge(it))+(j&&j.j?vsRow("Motif",escHtml(j.motif||"—")):"");
-  if(prof) btns.unshift({label:j&&j.j?"Modifier la justification":"Justifier",cls:"btn-primary",fn:()=>vsJustify(sid,key)});
  }
  vsPop(it.kind==="san"?"Sanction":it.kind==="abs"?"Absence":"Retard",body,btns);
-}
-function vsJustify(sid,key){
- const V=vsEns(), j=V.just[key]||{};
- vsPop("Justifier",'<label>Motif</label><textarea id="vjM" rows="3">'+escHtml(j.motif||"")+'</textarea>',
-  [{label:"Annuler"},{label:"Retirer la justification",fn:()=>{ delete V.just[key]; saveData(); renderVie(); }},
-   {label:"Justifier",cls:"btn-primary",fn:m=>{ V.just[key]={j:true,motif:m.querySelector("#vjM").value.trim()}; saveData(); renderVie(); }}]);
 }
 function vsSanForm(sid){
  const st=DATA.students.find(s=>s.id===sid); if(!st) return;
