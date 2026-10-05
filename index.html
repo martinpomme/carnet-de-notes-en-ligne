@@ -1335,7 +1335,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
    <div class="card-body split-student">
     <div class="panel">
      <button class="btn btn-primary add-big" id="openAddStudentBtn" type="button">＋ Ajouter élève</button>
-     <select id="newClassSelect" class="modern-select" aria-label="Filtrer par classe"></select>
+     <select id="newClassSelect" class="modern-select" aria-label="Filtrer par classe ou groupe"></select>
      <div class="search-row">
       <input id="studentSearch" class="modern-input" placeholder="Rechercher..." style="flex:1;">
      </div>
@@ -4335,7 +4335,11 @@ document.getElementById("deleteStudentBtn").addEventListener("click",()=>{
   list.innerHTML="";
   DATA.students.slice().sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first))
    .filter(s=>(`${s.last} ${s.first}`).toLowerCase().includes(term))
-   .filter(s=>!classFilter||s.classId===classFilter)
+   .filter(s=>{
+     if(!classFilter) return true;
+     const g=grpById(classFilter);
+     return g ? (g.memberIds||[]).includes(s.id) : s.classId===classFilter;
+   })
    .forEach(s=>{
     const opt=document.createElement("option"); opt.value=s.id;
     opt.textContent=`${s.last} ${s.first}`;
@@ -7757,8 +7761,8 @@ function renderGroupList(){
 function renderClassSelects(){
  ensureSubjectRegistry();
  const _ncs=document.getElementById("newClassSelect"), _ncsPrev=_ncs.value;
- _ncs.innerHTML='<option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
- if(_ncsPrev && DATA.classes.some(c=>c.id===_ncsPrev)) _ncs.value=_ncsPrev;
+ _ncs.innerHTML='<option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("")+(grpEns().length?`<optgroup label="Groupes">${grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
+ if(_ncsPrev && (DATA.classes.some(c=>c.id===_ncsPrev) || grpEns().some(g=>g.id===_ncsPrev))) _ncs.value=_ncsPrev;
  const classSelect=document.getElementById("classSelect");
  if(classSelect) classSelect.innerHTML=DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("")+(grpEns().length?`<optgroup label="Groupes">${grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
  const classSubject=document.getElementById("classSubject");
