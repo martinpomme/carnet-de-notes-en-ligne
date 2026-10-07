@@ -12134,6 +12134,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   DATA.homework=DATA.homework.filter(item=>item.id!==homeworkId);
   DATA.homeworkSubmissions=(DATA.homeworkSubmissions||[]).filter(item=>item.homeworkId!==homeworkId);
   HOMEWORK_STATE.draft=null;
+  syncHomeworkDirectGrades();
   saveData();
   renderHomeworkView();
   renderOnlineTestsView();
@@ -12155,7 +12156,9 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   if(idx>=0) DATA.homework[idx]=draft;
   else DATA.homework.push(draft);
   HOMEWORK_STATE.draft=null;
+  syncHomeworkDirectGrades();
   saveData();
+  rebuildUI();
   renderHomeworkView();
   renderOnlineTestsView();
  }
@@ -12630,6 +12633,8 @@ async function finishHomeworkQuiz(reason){
   alert("Le rendu n'a pas pu etre enregistre : "+(err.message||err));
   return;
  }
+  syncHomeworkDirectGrades();
+  try{ rebuildUI(); }catch(e){}
   renderHomeworkQuizResult(quiz.homework, quiz.test, persisted, result, reason);
   renderHomeworkView();
   renderOnlineTestsView();
@@ -12827,6 +12832,113 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   if(submission.validatedAt) return true;
   return !test.options?.manualReviewRequired && !!submission.autoResult;
  }
+
+ /* ── Évaluation automatique « Afficher directement dans École Directe » ───── */
+ function homeworkDirectTests(homework){
+  return (homework.testIds||[]).map(getHomeworkTest).filter(t=>t && t.options?.showGradeDirect && !t.options?.trainingMode && !t.options?.manualReviewRequired);
+ }
+ function isHomeworkDirectTest(test){
+  return !!(test && test.options?.showGradeDirect && !test.options?.trainingMode && !test.options?.manualReviewRequired);
+ }
+ function applyHomeworkDirectValue(note,grade){
+  const before=JSON.stringify([note.note,note.noteText]);
+  const g=String(grade==null?"":grade).trim();
+  if(g==="" ){ note.noteText="NR"; delete note.note; }
+  else if(SPECIAL_VALUES.has(g)){ note.noteText=g; delete note.note; }
+  else{
+   const n=parseFloat(g.replace(",","."));
+   if(Number.isNaN(n)){ note.noteText="NR"; delete note.note; }
+   else{ note.note=n; delete note.noteText; }
+  }
+  return before!==JSON.stringify([note.note,note.noteText]);
+ }
+ /* Crée (prof) / met à jour (prof + élève localement) une évaluation de classe ou de groupe par assignation
+    d'un test « affiché directement ». Les élèves n'ayant pas rendu le test reçoivent NR. */
+ function syncHomeworkDirectGrades(){
+  ensureHomeworkStore();
+  const isProf=AUTH.role==="prof";
+  const myId=homeworkStudentId();
+  if(!isProf && !myId) return false;
+  let changed=false;
+  const wanted=new Map();
+  (DATA.homework||[]).forEach(hw=>{
+   homeworkDirectTests(hw).forEach(test=>{
+    const key=`${hw.id}::${test.id}`;
+    wanted.set(key,hw.classId);
+    const cls=classLike(hw.classId);
+    if(!cls) return;
+    if(!Array.isArray(cls.evals)) cls.evals=[];
+    const period=homeworkPeriodFromDate(hw.dateISO);
+    const total=getOnlineTestTotalPoints(test);
+    const fields={
+     subject:hw.subject,
+     label:test.title||`Devoir ${hw.subject}`,
+     dateJJMMAA:homeworkDateToFr(hw.dateISO),
+     isoDate:hw.dateISO,
+     outof:total,
+     coef:1,
+     period,
+     defaultImportant:!!hw.isExam
+    };
+    let ev=cls.evals.find(e=>e.hwKey===key);
+    if(!ev){
+     if(!isProf) return;
+     if(LOCKED_PERIODS[period]) return;
+     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,hideFromStudent:false,hwKey:key,hwId:hw.id,hwTestId:test.id};
+     cls.evals.push(ev);
+     changed=true;
+    }else if(isProf && !(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period])){
+     Object.keys(fields).forEach(k=>{ if(ev[k]!==fields[k]){ ev[k]=fields[k]; changed=true; } });
+    }
+    const members=(cls.memberIds||[]).filter(id=>isProf || id===myId);
+    members.forEach(sid=>{
+     const arr=DATA.notes[sid]||(DATA.notes[sid]=[]);
+     const sub=getHomeworkSubmission(hw.id,test.id,sid);
+     const grade=sub?.submittedAt ? getHomeworkResolvedGrade(sub,test) : "";
+     let note=arr.find(m=>m.classCommon && m.classId===cls.id && m.classNoteId===ev.id);
+     if(!note){
+      if(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period]) return;
+      note={
+       id:'n_'+Math.random().toString(36).slice(2,9),
+       subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,
+       outof:ev.outof,coef:ev.coef,classCommon:true,classId:cls.id,classNoteId:ev.id,
+       period:ev.period,important:!!ev.defaultImportant,hideFromStudent:false,hwAuto:true
+      };
+      applyHomeworkDirectValue(note,grade);
+      arr.push(note);
+      changed=true;
+     }else{
+      const meta={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,period:ev.period,important:!!ev.defaultImportant};
+      Object.keys(meta).forEach(k=>{ if(note[k]!==meta[k]){ note[k]=meta[k]; changed=true; } });
+      if(note.hwAuto && applyHomeworkDirectValue(note,grade)) changed=true;
+     }
+    });
+   });
+  });
+  if(isProf){
+   [...DATA.classes,...grpEns()].forEach(cls=>{
+    if(!Array.isArray(cls.evals)) return;
+    cls.evals.filter(e=>e.hwKey).forEach(ev=>{
+     if(wanted.get(ev.hwKey)===cls.id) return;
+     cls.evals=cls.evals.filter(e=>e.id!==ev.id);
+     Object.keys(DATA.notes||{}).forEach(sid=>{
+      DATA.notes[sid]=(DATA.notes[sid]||[]).filter(m=>!(m.classCommon && m.classNoteId===ev.id));
+     });
+     changed=true;
+    });
+   });
+   if(changed) saveData();
+  }
+  return changed;
+ }
+ /* Assignations affichées ensemble dans la fenêtre de résultats : toutes les assignations du même test
+    pour la même classe/groupe (une ligne par élève et par assignation). */
+ function getHomeworkReviewScope(assignments,current){
+  if(!current) return [];
+  const same=assignments.filter(a=>a.test.id===current.test.id && a.homework.classId===current.homework.classId);
+  return (same.length ? same : [current]).slice().sort((a,b)=>String(a.homework.dateISO).localeCompare(String(b.homework.dateISO)));
+ }
+
  function renderHomeworkReviewModal(){
   const assignmentsWrap=document.getElementById("homeworkReviewAssignments");
   const studentsWrap=document.getElementById("homeworkReviewStudents");
@@ -12847,32 +12959,34 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    return;
   }
   const cls=homeworkClassById(current.homework.classId);
+  const scope=getHomeworkReviewScope(assignments,current);
+  const multi=scope.length>1;
   const students=(cls?.memberIds||[]).map(studentId=>homeworkStudentById(studentId)).filter(Boolean).sort((a,b)=>`${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`,"fr",{sensitivity:"base"}));
-  studentsWrap.innerHTML=`
-   <div style="margin-bottom:12px;">
-    <strong>${escHtml(current.className)} - ${escHtml(current.homework.subject)}</strong>
-    <div style="color:#64748b;margin-top:4px;">${escHtml(current.test.title||"Test")} · ${escHtml(homeworkDateToFr(current.homework.dateISO))}</div>
-   </div>
-   ${students.map(stu=>{
-    const submission=getHomeworkSubmission(current.homework.id,current.test.id,stu.id);
+  const lineHtml=(stu,item)=>{
+    const submission=getHomeworkSubmission(item.homework.id,item.test.id,stu.id);
     const done=!!submission?.submittedAt;
-    const grade=getHomeworkResolvedGrade(submission,current.test);
-    const validated=isHomeworkGradeValidated(submission,current.test);
+    const grade=getHomeworkResolvedGrade(submission,item.test);
+    const validated=isHomeworkGradeValidated(submission,item.test);
     return `
      <div class="homework-review-student">
       <span class="homework-status-dot ${done ? "is-done" : ""}"></span>
       <div>
-       <strong>${escHtml(stu.first)} ${escHtml(stu.last)}</strong>
+       <strong>${escHtml(stu.first)} ${escHtml(stu.last)}${multi ? ` <span style="font-weight:500;color:#1d4ed8;">· ${escHtml(homeworkDateToFr(item.homework.dateISO))}</span>` : ""}</strong>
        <div style="color:#64748b;font-size:13px;">${done ? "Test réalisé" : "Pas encore fait"} ${submission?.publishedAt ? "· note publiée" : ""}</div>
       </div>
-      <input class="homework-grade-input" data-hw-action="grade-input" data-homework-id="${escHtml(current.homework.id)}" data-test-id="${escHtml(current.test.id)}" data-student-id="${escHtml(stu.id)}" value="${escHtml(grade)}" placeholder="Note">
+      <input class="homework-grade-input" data-hw-action="grade-input" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" value="${escHtml(grade)}" placeholder="Note">
       <div style="display:flex;align-items:center;gap:8px;">
        ${validated ? "" : '<span class="homework-review-warning" title="Note non validée">⚠</span>'}
-       <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(current.homework.id)}" data-test-id="${escHtml(current.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
+       <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
       </div>
-     </div>
-    `;
-   }).join("")}
+     </div>`;
+  };
+  studentsWrap.innerHTML=`
+   <div style="margin-bottom:12px;">
+    <strong>${escHtml(current.className)} - ${escHtml(current.homework.subject)}</strong>
+    <div style="color:#64748b;margin-top:4px;">${escHtml(current.test.title||"Test")} · ${multi ? `${scope.length} assignations (${scope.map(i=>escHtml(homeworkDateToFr(i.homework.dateISO))).join(", ")})` : escHtml(homeworkDateToFr(current.homework.dateISO))}</div>
+   </div>
+   ${students.map(stu=>scope.map(item=>lineHtml(stu,item)).join("")).join("")}
   `;
  }
  function openHomeworkReviewModal(filterTestId=""){
@@ -12985,26 +13099,33 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const assignments=getHomeworkReviewAssignments(HOMEWORK_STATE.reviewFilterTestId);
   const current=assignments.find(item=>item.key===HOMEWORK_STATE.reviewSelectedKey);
   if(!current){ alert("Sélectionne une assignation."); return; }
-  const cls=homeworkClassById(current.homework.classId);
   let publishedCount=0;
-  (cls?.memberIds||[]).forEach(studentId=>{
-   const submission=getHomeworkSubmission(current.homework.id,current.test.id,studentId);
-   if(!submission) return;
-   const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(current.homework.id)}"][data-test-id="${CSS.escape(current.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
-   const value=(input?.value || getHomeworkResolvedGrade(submission,current.test)).trim();
-   if(!value) return;
-   const note=upsertHomeworkPublishedNote(current.homework,current.test,studentId,value,submission);
-   if(!note) return;
-   submission.publishedAt=new Date().toISOString();
-   submission.validatedAt=submission.validatedAt || submission.publishedAt;
-   upsertHomeworkSubmission(submission);
-   publishedCount += 1;
+  getHomeworkReviewScope(assignments,current).forEach(item=>{
+   const cls=homeworkClassById(item.homework.classId);
+   (cls?.memberIds||[]).forEach(studentId=>{
+    const submission=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
+    if(!submission) return;
+    const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(item.homework.id)}"][data-test-id="${CSS.escape(item.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
+    const value=(input?.value || getHomeworkResolvedGrade(submission,item.test)).trim();
+    if(!value) return;
+    if(isHomeworkDirectTest(item.test)){
+     if(value!==getHomeworkResolvedGrade(submission,item.test)) submission.manualOverride=value;
+    }else{
+     const note=upsertHomeworkPublishedNote(item.homework,item.test,studentId,value,submission);
+     if(!note) return;
+    }
+    submission.publishedAt=new Date().toISOString();
+    submission.validatedAt=submission.validatedAt || submission.publishedAt;
+    upsertHomeworkSubmission(submission);
+    publishedCount += 1;
+   });
   });
+  syncHomeworkDirectGrades();
   saveData();
   rebuildUI();
   renderHomeworkReviewModal();
   renderOnlineTestsView();
-  alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":"e"} dans les moyennes.`);
+  alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":""} dans les moyennes.`);
  }
  function getHomeworkReviewStateForTest(testId){
   const assignments=getHomeworkReviewAssignments(testId);
@@ -13303,6 +13424,7 @@ function handleHomeworkActionClick(btn){
  const originalRebuildUI=rebuildUI;
  rebuildUI=function(){
   ensureHomeworkStore();
+  try{ syncHomeworkDirectGrades(); }catch(e){ console.error("syncHomeworkDirectGrades",e); }
   originalRebuildUI();
   renderHomeworkView();
   enhanceOnlineTestCardsForHomework();
