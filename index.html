@@ -861,6 +861,8 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
 }
 .homework-status-dot.is-done{ background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.14) }
 .homework-review-warning{ color:#b45309; font-size:18px }
+.homework-reset-btn{ width:36px; height:36px; padding:0; border-radius:999px; font-size:19px; line-height:1; display:inline-flex; align-items:center; justify-content:center }
+.homework-reset-btn:disabled{ opacity:.45; cursor:not-allowed }
 .homework-grade-input{
  width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; text-align:center; font-weight:700;
 }
@@ -4070,7 +4072,7 @@ function buildCSVText(){
  });
  (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
  (DATA.groups||[]).forEach(g=>{
-  (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null))].join(";")));
+  (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0].join(";")));
   (g.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0].join(";")));
  });
  DATA.classes.forEach(c=>{
@@ -4081,13 +4083,13 @@ function buildCSVText(){
    else rows.push(["classSubject", c.id, escapeCsv(subName)].join(";"));
   });
   (c.memberIds||[]).forEach(mid=>rows.push(["classMember",c.id,mid].join(";")));
-  (c.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null))].join(";")));
+  (c.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0].join(";")));
   (c.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0].join(";")));
  });
  Object.entries(DATA.notes).forEach(([sid,arr])=>{
   const stu=DATA.students.find(s=>s.id===sid);
   arr.forEach(n=>{
-   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",escapeCsv(DATA.classes.find(c=>c.id===stu?.classId)?.name||""),escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null))].join(";"));
+   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",escapeCsv(DATA.classes.find(c=>c.id===stu?.classId)?.name||""),escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null)),n.hwAuto?1:0].join(";"));
   });
  });
  (DATA.competencies||[]).forEach(c=>{
@@ -4177,7 +4179,7 @@ function importCSV(text){
      const baremeStr = unescapeCsv(cols[13]||"");
      let bareme = undefined;
      try { bareme = baremeStr ? JSON.parse(baremeStr) : undefined; } catch(e) {}
-     (cls.evals||(cls.evals=[])).push({id:cols[1],subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5],isoDate:cols[6],outof:parseFloat(cols[7])||20,coef:cols[8].length?parseFloat(cols[8]):1,period:cols[9]||"",defaultImportant:cols[10]==="1",generalComment:unescapeCsv(cols[11]||"")||undefined,hideFromStudent:cols[12]==="1", bareme});
+     (cls.evals||(cls.evals=[])).push({id:cols[1],subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5],isoDate:cols[6],outof:parseFloat(cols[7])||20,coef:cols[8].length?parseFloat(cols[8]):1,period:cols[9]||"",defaultImportant:cols[10]==="1",generalComment:unescapeCsv(cols[11]||"")||undefined,hideFromStudent:cols[12]==="1", bareme, ...(cols[14]?{hwKey:cols[14],hwId:String(cols[14]).split("::")[0],hwTestId:String(cols[14]).split("::")[1]||"",hwDirect:cols[15]==="1",hwRevealed:cols[16]==="1"}:{})});
    }
   }
   else if(type==="note"){
@@ -4186,7 +4188,7 @@ function importCSV(text){
    const baremeStr = unescapeCsv(cols[22]||"");
    let bareme = undefined;
    try { bareme = baremeStr ? JSON.parse(baremeStr) : undefined; } catch(e) {}
-   DATA.notes[sid].push({subject:unescapeCsv(cols[6]||""),label:unescapeCsv(cols[7]||""),dateJJMMAA:cols[8]||"",isoDate:cols[9]||"",note:note==null?undefined:note,outof:parseFloat(cols[11])||20,coef:cols[12].length?parseFloat(cols[12]):1,noteText:unescapeCsv(cols[16]||"")||undefined,classCommon:cols[13]==="1",classId:cols[14]||"",classNoteId:cols[15]||"",period:cols[17]||undefined,important:cols[18]==="1",id:cols[19]||undefined,comment:unescapeCsv(cols[20]||"")||undefined,hideFromStudent:cols[21]==="1", bareme});
+   DATA.notes[sid].push({subject:unescapeCsv(cols[6]||""),label:unescapeCsv(cols[7]||""),dateJJMMAA:cols[8]||"",isoDate:cols[9]||"",note:note==null?undefined:note,outof:parseFloat(cols[11])||20,coef:cols[12].length?parseFloat(cols[12]):1,noteText:unescapeCsv(cols[16]||"")||undefined,classCommon:cols[13]==="1",classId:cols[14]||"",classNoteId:cols[15]||"",period:cols[17]||undefined,important:cols[18]==="1",id:cols[19]||undefined,comment:unescapeCsv(cols[20]||"")||undefined,hideFromStudent:cols[21]==="1", bareme, ...(cols[23]==="1"?{hwAuto:true}:{})});
   }
   else if(type==="competency"){
    (DATA.competencies||(DATA.competencies=[])).push({id:cols[1]||('cp_'+Math.random().toString(36).slice(2)),studentId:cols[2]||"",domain:unescapeCsv(cols[3]||""),level:unescapeCsv(cols[4]||""),name:unescapeCsv(cols[5]||""),color:cols[6]||"",dateJJMMAA:cols[7]||undefined,date:cols[8]||undefined,label:unescapeCsv(cols[9]||"")||undefined,groupId:cols[10]||undefined,subject:unescapeCsv(cols[11]||"")||undefined,period:cols[12]||undefined,noteId:cols[13]||undefined,comment:unescapeCsv(cols[14]||"")||undefined,hideFromStudent:cols[15]==="1",cycle:unescapeCsv(cols[16]||"")||undefined,subDomain:unescapeCsv(cols[17]||"")||undefined});
@@ -9985,9 +9987,11 @@ async function cloudPush(force){
   const snap=cloudSnapshot();
   const lines=csvToLogicalLines(buildCSVText());
   const accounts=DATA.students.filter(s=>ACCOUNTS[s.id]).map(s=>({id:s.id,login:ACCOUNTS[s.id].login,pwd:ACCOUNTS[s.id].pwd}));
-  const j=await api("save",{lines,accounts,baseRev:CLOUD.rev,force:!!force});
+  const cancelled=[...(window.HW_CANCELLED_SUBS||[])];
+  const j=await api("save",{lines,accounts,cancelled,baseRev:CLOUD.rev,force:!!force});
   if(j.ok){
    CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0;
+   cancelled.forEach(k=>window.HW_CANCELLED_SUBS&&window.HW_CANCELLED_SUBS.delete(k));
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
    IS_MODIFIED=false;
    cloudStatus("ok","Enregistré dans Google Sheets à "+cloudHour());
@@ -12945,10 +12949,22 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
 
  /* ── Évaluation automatique « Afficher directement dans École Directe » ───── */
  function homeworkDirectTests(homework){
-  return (homework.testIds||[]).map(getHomeworkTest).filter(t=>t && t.options?.showGradeDirect && !t.options?.trainingMode && !t.options?.manualReviewRequired);
+  /* Tous les tests notés (hors mode entraînement) : chacun a son évaluation de classe/groupe automatique. */
+  return (homework.testIds||[]).map(getHomeworkTest).filter(t=>t && !t.options?.trainingMode);
  }
  function isHomeworkDirectTest(test){
   return !!(test && test.options?.showGradeDirect && !test.options?.trainingMode && !test.options?.manualReviewRequired);
+ }
+ /* L'évaluation est démasquée : (note directe) dès qu'un élève a rendu ; (sinon) quand le prof a cliqué sur « Saisir les notes ». */
+ function homeworkEvalRevealed(hw,test){
+  const subs=(DATA.homeworkSubmissions||[]).filter(x=>x.homeworkId===hw.id && x.testId===test.id);
+  return isHomeworkDirectTest(test) ? subs.some(x=>x.submittedAt) : subs.some(x=>x.publishedAt);
+ }
+ /* Valeur de la note dans l'évaluation : "" (= NR) tant que la note n'est pas disponible. */
+ function homeworkGradeForEval(sub,test){
+  if(!sub || !sub.submittedAt) return "";
+  if(isHomeworkDirectTest(test)) return getHomeworkResolvedGrade(sub,test);
+  return sub.publishedAt ? getHomeworkResolvedGrade(sub,test) : "";
  }
  function applyHomeworkDirectValue(note,grade){
   const before=JSON.stringify([note.note,note.noteText]);
@@ -12962,8 +12978,9 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   }
   return before!==JSON.stringify([note.note,note.noteText]);
  }
- /* Crée (prof) / met à jour (prof + élève localement) une évaluation de classe ou de groupe par assignation
-    d'un test « affiché directement ». Les élèves n'ayant pas rendu le test reçoivent NR. */
+ /* Crée (prof) / met à jour (prof + élève localement) une évaluation de classe ou de groupe pour CHAQUE assignation
+    de test noté. Tous les élèves reçoivent NR ; l'évaluation reste masquée aux élèves jusqu'à ce que les notes
+    soient disponibles (voir homeworkEvalRevealed). Les élèves n'ayant pas rendu le test gardent NR. */
  function syncHomeworkDirectGrades(){
   ensureHomeworkStore();
   const isProf=AUTH.role==="prof";
@@ -12988,23 +13005,34 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      outof:total,
      coef:1,
      period,
-     defaultImportant:!!hw.isExam
+     defaultImportant:!!hw.isExam,
+     hwDirect:isHomeworkDirectTest(test)
     };
     let ev=cls.evals.find(e=>e.hwKey===key);
+    if(!ev && isProf){
+     /* reprise d'une ancienne évaluation de devoir dont le lien n'avait pas été conservé */
+     ev=cls.evals.find(e=>!e.hwKey && e.subject===fields.subject && e.label===fields.label && e.isoDate===fields.isoDate);
+     if(ev){ ev.hwKey=key; ev.hwId=hw.id; ev.hwTestId=test.id; ev.hwRevealed=!ev.hideFromStudent; changed=true; }
+    }
+    let revealedNow=false;
     if(!ev){
      if(!isProf) return;
      if(LOCKED_PERIODS[period]) return;
-     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,hideFromStudent:false,hwKey:key,hwId:hw.id,hwTestId:test.id};
+     const reveal=homeworkEvalRevealed(hw,test);
+     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,hideFromStudent:!reveal,hwRevealed:reveal,hwKey:key,hwId:hw.id,hwTestId:test.id};
      cls.evals.push(ev);
      changed=true;
     }else if(isProf && !(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period])){
      Object.keys(fields).forEach(k=>{ if(ev[k]!==fields[k]){ ev[k]=fields[k]; changed=true; } });
+     if(!ev.hwRevealed && homeworkEvalRevealed(hw,test)){
+      ev.hwRevealed=true; ev.hideFromStudent=false; revealedNow=true; changed=true;
+     }
     }
     const members=(cls.memberIds||[]).filter(id=>isProf || id===myId);
     members.forEach(sid=>{
      const arr=DATA.notes[sid]||(DATA.notes[sid]=[]);
      const sub=getHomeworkSubmission(hw.id,test.id,sid);
-     const grade=sub?.submittedAt ? getHomeworkResolvedGrade(sub,test) : "";
+     const grade=homeworkGradeForEval(sub,test);
      let note=arr.find(m=>m.classCommon && m.classId===cls.id && m.classNoteId===ev.id);
      if(!note){
       if(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period]) return;
@@ -13012,7 +13040,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
        id:'n_'+Math.random().toString(36).slice(2,9),
        subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,
        outof:ev.outof,coef:ev.coef,classCommon:true,classId:cls.id,classNoteId:ev.id,
-       period:ev.period,important:!!ev.defaultImportant,hideFromStudent:false,hwAuto:true
+       period:ev.period,important:!!ev.defaultImportant,hideFromStudent:!!ev.hideFromStudent,hwAuto:true
       };
       applyHomeworkDirectValue(note,grade);
       arr.push(note);
@@ -13020,6 +13048,9 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      }else{
       const meta={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,period:ev.period,important:!!ev.defaultImportant};
       Object.keys(meta).forEach(k=>{ if(note[k]!==meta[k]){ note[k]=meta[k]; changed=true; } });
+      if(revealedNow && note.hideFromStudent){ note.hideFromStudent=false; changed=true; }
+      /* ancienne note de devoir restée à NR sans le marqueur automatique : on le rétablit */
+      if(!note.hwAuto && typeof note.note!=="number" && (!note.noteText || note.noteText==="NR")){ note.hwAuto=true; changed=true; }
       if(note.hwAuto && applyHomeworkDirectValue(note,grade)) changed=true;
      }
     });
@@ -13045,17 +13076,19 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      changed=true;
     });
    });
-   /* La date affichée sur une note de devoir est TOUJOURS celle de l'assignation (date du devoir),
-      quelle que soit la date à laquelle l'élève fait le test (ou si la date du devoir est modifiée). */
+   /* Anciennes notes « autonomes » créées par la publication d'un test : remplacées par la note de l'évaluation. */
    (DATA.homeworkSubmissions||[]).forEach(sub=>{
     const hw=getHomeworkById(sub.homeworkId);
     const arr=DATA.notes?.[sub.studentId];
     if(!hw || !arr) return;
-    const note=arr.find(n=>n.homeworkSubmissionId===sub.id || (sub.noteId && n.id===sub.noteId));
-    if(!note) return;
-    const meta={dateJJMMAA:homeworkDateToFr(hw.dateISO),isoDate:hw.dateISO,period:homeworkPeriodFromDate(hw.dateISO)};
-    if(note.period && note.period!=="YEAR" && LOCKED_PERIODS[note.period]) return;
-    Object.keys(meta).forEach(k=>{ if(note[k]!==meta[k]){ note[k]=meta[k]; changed=true; } });
+    const evExists=!!classLike(hw.classId)?.evals?.some(e=>e.hwKey===`${hw.id}::${sub.testId}`);
+    if(!evExists) return;
+    const legacy=arr.find(n=>!n.classCommon && n.homeworkSubmissionId===sub.id);
+    if(!legacy) return;
+    DATA.notes[sub.studentId]=arr.filter(n=>n!==legacy);
+    if(Array.isArray(DATA.competencies)) DATA.competencies=DATA.competencies.filter(c=>c.noteId!==legacy.id);
+    sub.noteId="";
+    changed=true;
    });
    if(changed) saveData();
   }
@@ -13064,9 +13097,8 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  /* Assignations affichées ensemble dans la fenêtre de résultats : toutes les assignations du même test
     pour la même classe/groupe (une ligne par élève et par assignation). */
  function getHomeworkReviewScope(assignments,current){
-  if(!current) return [];
-  const same=assignments.filter(a=>a.test.id===current.test.id && a.homework.classId===current.homework.classId);
-  return (same.length ? same : [current]).slice().sort((a,b)=>String(a.homework.dateISO).localeCompare(String(b.homework.dateISO)));
+  /* Seule l'assignation sélectionnée est affichée (et validée) à droite. */
+  return current ? [current] : [];
  }
 
  function renderHomeworkReviewModal(){
@@ -13108,6 +13140,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
       <div style="display:flex;align-items:center;gap:8px;">
        ${validated ? "" : '<span class="homework-review-warning" title="Note non validée">⚠</span>'}
        <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
+       <button type="button" class="btn homework-reset-btn" data-hw-action="reset-submission" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" title="Annuler la soumission (l'élève pourra refaire le test)" aria-label="Annuler la soumission" ${done ? "" : "disabled"}>&#8635;</button>
       </div>
      </div>`;
   };
@@ -13186,8 +13219,40 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   };
   submission.validatedAt=new Date().toISOString();
   upsertHomeworkSubmission(submission);
+  syncHomeworkDirectGrades();
   saveData();
   closeHomeworkCorrectionModal();
+  renderHomeworkReviewModal();
+  renderOnlineTestsView();
+ }
+ function resetHomeworkSubmission(homeworkId,testId,studentId){
+  if(AUTH.role!=="prof") return;
+  const sub=getHomeworkSubmission(homeworkId,testId,studentId);
+  const hw=getHomeworkById(homeworkId);
+  if(!sub || !hw) return;
+  const stu=homeworkStudentById(studentId);
+  const name=stu ? `${stu.first} ${stu.last}` : "cet élève";
+  if(!confirm(`Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`)) return;
+  DATA.homeworkSubmissions=(DATA.homeworkSubmissions||[]).filter(x=>x.id!==sub.id);
+  /* note de l'évaluation associée : retour à NR */
+  const ev=classLike(hw.classId)?.evals?.find(e=>e.hwKey===`${homeworkId}::${testId}`);
+  if(ev){
+   const note=(DATA.notes?.[studentId]||[]).find(m=>m.classCommon && m.classNoteId===ev.id);
+   if(note){ applyHomeworkDirectValue(note,""); note.hwAuto=true; }
+  }
+  /* ancienne note autonome éventuelle */
+  if(DATA.notes?.[studentId]){
+   const legacyIds=new Set(DATA.notes[studentId].filter(n=>!n.classCommon && (n.homeworkSubmissionId===sub.id || (sub.noteId && n.id===sub.noteId))).map(n=>n.id));
+   if(legacyIds.size){
+    DATA.notes[studentId]=DATA.notes[studentId].filter(n=>!legacyIds.has(n.id));
+    if(Array.isArray(DATA.competencies)) DATA.competencies=DATA.competencies.filter(c=>!legacyIds.has(c.noteId));
+   }
+  }
+  /* le serveur doit supprimer le rendu (sinon il serait ré-ajouté par la fusion des rendus d'élèves) */
+  (window.HW_CANCELLED_SUBS||(window.HW_CANCELLED_SUBS=new Set())).add(`${homeworkId}|${testId}|${studentId}`);
+  syncHomeworkDirectGrades();
+  saveData();
+  try{ rebuildUI(); }catch(e){}
   renderHomeworkReviewModal();
   renderOnlineTestsView();
  }
@@ -13234,28 +13299,33 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    const cls=homeworkClassById(item.homework.classId);
    (cls?.memberIds||[]).forEach(studentId=>{
     const submission=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
-    if(!submission) return;
+    if(!submission || !submission.submittedAt) return;
     const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(item.homework.id)}"][data-test-id="${CSS.escape(item.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
-    const value=(input?.value || getHomeworkResolvedGrade(submission,item.test)).trim();
+    const resolved=getHomeworkResolvedGrade(submission,item.test);
+    const value=(input?.value || resolved).trim();
     if(!value) return;
-    if(isHomeworkDirectTest(item.test)){
-     if(value!==getHomeworkResolvedGrade(submission,item.test)) submission.manualOverride=value;
-    }else{
-     const note=upsertHomeworkPublishedNote(item.homework,item.test,studentId,value,submission);
-     if(!note) return;
-    }
+    if(value!==resolved) submission.manualOverride=value;
     submission.publishedAt=new Date().toISOString();
     submission.validatedAt=submission.validatedAt || submission.publishedAt;
     upsertHomeworkSubmission(submission);
     publishedCount += 1;
    });
+   /* démasque l'évaluation aux élèves (les non-rendus gardent NR) */
+   const ev=classLike(item.homework.classId)?.evals?.find(e=>e.hwKey===`${item.homework.id}::${item.test.id}`);
+   if(ev){
+    ev.hideFromStudent=false; ev.hwRevealed=true;
+    (cls?.memberIds||[]).forEach(sid=>{
+     const note=(DATA.notes?.[sid]||[]).find(m=>m.classCommon && m.classNoteId===ev.id);
+     if(note) note.hideFromStudent=false;
+    });
+   }
   });
   syncHomeworkDirectGrades();
   saveData();
   rebuildUI();
   renderHomeworkReviewModal();
   renderOnlineTestsView();
-  alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":""} dans les moyennes.`);
+  alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":""} dans l'évaluation de classe.`);
  }
  function getHomeworkReviewStateForTest(testId){
   const assignments=getHomeworkReviewAssignments(testId);
@@ -13355,6 +13425,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    if(!submission) return;
    submission.manualOverride=target.value.trim();
    upsertHomeworkSubmission(submission);
+   syncHomeworkDirectGrades();
    saveData();
    renderOnlineTestsView();
    return;
@@ -13475,6 +13546,11 @@ function handleHomeworkActionClick(btn){
   }
   if(action==="open-correction"){
    openHomeworkCorrection(btn.dataset.homeworkId,btn.dataset.testId,btn.dataset.studentId);
+   return;
+  }
+  if(action==="reset-submission"){
+   resetHomeworkSubmission(btn.dataset.homeworkId,btn.dataset.testId,btn.dataset.studentId);
+   return;
   }
 }
 [
