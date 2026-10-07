@@ -766,6 +766,9 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
 }
 .homework-calendar-day:hover{ border-color:#60a5fa; background:#eff6ff }
 .homework-calendar-day.is-empty{ visibility:hidden }
+.homework-calendar-day.is-disabled,.homework-calendar-day:disabled{ background:#e5e7eb; border-color:#e5e7eb; color:#9ca3af; cursor:not-allowed; opacity:.65 }
+.homework-calendar-day.is-disabled:hover,.homework-calendar-day:disabled:hover{ background:#e5e7eb; border-color:#e5e7eb }
+.homework-toolbar .btn:disabled{ opacity:.5; cursor:not-allowed }
 .homework-calendar-day.has-homework{ box-shadow:inset 0 0 0 2px #2563eb }
 .homework-calendar-day.student-homework{ background:#dbeafe; border-color:#93c5fd; color:#1e3a8a }
 .homework-calendar-day.is-selected{ background:#2563eb; border-color:#1d4ed8; color:#fff; box-shadow:none }
@@ -2361,7 +2364,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
        </div>
        <label class="online-check-item">
         <input type="checkbox" id="onlineTestTrainingMode">
-        <span><strong>Mode entraînement</strong><small>Le résultat n’est pas transmis au professeur, le test est refaisable plusieurs fois et le corrigé est visible à la fin.</small></span>
+        <span><strong>Mode entraînement</strong><small>Le résultat n’est pas transmis au professeur et le test est refaisable plusieurs fois. L’option « ne pas afficher la correction » est cochée automatiquement.</small></span>
        </label>
        <label class="online-check-item" id="onlineTestManualReviewWrap">
         <input type="checkbox" id="onlineTestManualReview">
@@ -2374,6 +2377,10 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
        <label class="online-check-item" id="onlineTestHideGradeWrap">
         <input type="checkbox" id="onlineTestHideGrade">
         <span><strong>Ne pas afficher la note</strong><small>Le résultat ne s’affiche pas à l’élève en fin de test. Cette option est désactivée en mode entraînement, sauf correction obligatoire par le professeur.</small></span>
+       </label>
+       <label class="online-check-item" id="onlineTestHideCorrectionWrap">
+        <input type="checkbox" id="onlineTestHideCorrection">
+        <span><strong>Ne pas afficher la correction à la fin du test</strong><small>L’élève ne voit pas le corrigé (réponses attendues) une fois le test terminé. Cochée automatiquement en mode entraînement (modifiable).</small></span>
        </label>
       </div>
       <div id="onlineTestSetupHint" class="online-modal-note">Certaines options se désactivent automatiquement selon le mode choisi.</div>
@@ -10342,7 +10349,8 @@ function defaultOnlineTestMeta(){
    trainingMode:false,
    manualReviewRequired:false,
    focusMode:false,
-   hideGrade:false
+   hideGrade:false,
+   hideCorrection:false
   },
   intro:"",
   conclusion:"",
@@ -10399,7 +10407,8 @@ function sanitizeOnlineTest(test){
    trainingMode: !!opts.trainingMode,
    manualReviewRequired,
    focusMode: !!opts.focusMode && !opts.trainingMode,
-   hideGrade: manualReviewRequired || (!!opts.hideGrade && !opts.trainingMode)
+   hideGrade: manualReviewRequired || (!!opts.hideGrade && !opts.trainingMode),
+   hideCorrection: !!opts.hideCorrection
   },
   intro: String(meta.intro||"").trim(),
   conclusion: String(meta.conclusion||"").trim(),
@@ -10617,6 +10626,7 @@ function applyOnlineTestMetaToForm(meta){
  document.getElementById("onlineTestManualReview").checked=!!data.options?.manualReviewRequired;
  document.getElementById("onlineTestFocusMode").checked=!!data.options?.focusMode;
  document.getElementById("onlineTestHideGrade").checked=!!data.options?.hideGrade;
+ document.getElementById("onlineTestHideCorrection").checked=!!data.options?.hideCorrection;
  document.getElementById("onlineTestIntroInput").value=data.intro||"";
  document.getElementById("onlineTestConclusionInput").value=data.conclusion||"";
  document.getElementById("onlineTestDefaultPoints").value=data.defaultPoints||1;
@@ -10635,7 +10645,8 @@ function readOnlineTestMetaFromForm(){
    trainingMode: document.getElementById("onlineTestTrainingMode").checked,
    manualReviewRequired: document.getElementById("onlineTestManualReview").checked,
    focusMode: document.getElementById("onlineTestFocusMode").checked,
-   hideGrade: document.getElementById("onlineTestHideGrade").checked
+   hideGrade: document.getElementById("onlineTestHideGrade").checked,
+   hideCorrection: document.getElementById("onlineTestHideCorrection").checked
   },
   intro: document.getElementById("onlineTestIntroInput").value,
   conclusion: document.getElementById("onlineTestConclusionInput").value,
@@ -10674,12 +10685,19 @@ function syncOnlineTestSetupDependencies(){
  focusWrap?.classList.toggle("is-disabled",focus.disabled);
  hideGradeWrap?.classList.toggle("is-disabled",hideGrade.disabled);
  if(manualReview) hint.textContent="La correction devra être faite par le professeur : la note est masquée et l’envoi automatique vers École Directe est désactivé.";
- else if(training) hint.textContent="Le mode entraînement désactive automatiquement le mode Focus et l’option de note masquée.";
+ else if(training) hint.textContent="Le mode entraînement désactive automatiquement le mode Focus et l’option de note masquée, et coche « ne pas afficher la correction » (modifiable).";
  else if(timed) hint.textContent="Le chronomètre s’appliquera uniquement au test lui-même, pas aux messages d’introduction et de conclusion.";
  else hint.textContent="Certaines options se désactivent automatiquement selon le mode choisi.";
 }
 ["onlineTestTrainingMode","onlineTestTimed","onlineTestManualReview"].forEach(id=>{
  document.getElementById(id)?.addEventListener("change",syncOnlineTestSetupDependencies);
+});
+// Mode entraînement : « ne pas afficher la correction » est cochée automatiquement (reste modifiable ensuite)
+document.getElementById("onlineTestTrainingMode")?.addEventListener("change",e=>{
+ if(e.target.checked){
+  const hc=document.getElementById("onlineTestHideCorrection");
+  if(hc) hc.checked=true;
+ }
 });
 
 function startOnlineTestFlow(existingTest=null){
@@ -11073,7 +11091,7 @@ function renderOnlinePreviewResult(result, reason){
    <p class="online-preview-note">${escHtml(reasonText)} ${escHtml(mainMessage)}</p>
    ${(!result.manualReview && !test.options?.hideGrade) ? `<div class="online-preview-score">Note simulée : ${fmt(result.earned,2).replace(/\.00$/,"")} / ${fmt(result.total,2).replace(/\.00$/,"")}</div>` : ""}
    ${test.conclusion ? `<p class="online-preview-message">${escHtml(test.conclusion).replace(/\n/g,"<br>")}</p>` : ""}
-   ${(test.options?.trainingMode && !result.manualReview) ? buildOnlinePreviewCorrectionHtml(result) : ""}
+   ${(test.options?.trainingMode && !result.manualReview && !test.options?.hideCorrection) ? buildOnlinePreviewCorrectionHtml(result) : ""}
    <div class="online-preview-actions">
     <button type="button" class="btn" id="onlinePreviewRestartBtn">Recommencer</button>
     <button type="button" class="btn btn-primary" id="onlinePreviewDoneBtn">Fermer</button>
@@ -11906,8 +11924,10 @@ function initApp(){
   reviewSelectedKey: "",
   correction: null,
  quiz: null,
- studentDatePinned: false
+ studentDatePinned: false,
+ filter: { cls:"", group:"", subject:"" }
  };
+ const HW_ALL="__ALL__";
 
  function ensureHomeworkStore(){
   if(!Array.isArray(DATA.homework)) DATA.homework=[];
@@ -12084,10 +12104,13 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
    if(!existing) return;
    HOMEWORK_STATE.draft=normalizeHomeworkEntry({...existing, locked:false});
   }else{
-   const classId=document.getElementById("homeworkGroupSelect")?.value || document.getElementById("homeworkClassSelect")?.value || homeworkSortedClasses()[0]?.id || "";
-   const subject=document.getElementById("homeworkSubjectSelect")?.value || homeworkClassSubjects(classId)[0] || "";
-   if(!classId){ alert("Ajoute d’abord au moins une classe."); return; }
-   if(!subject){ alert("Ajoute d’abord au moins une matière pour cette classe."); return; }
+   const info=homeworkTeacherCalendarInfo();
+   if(!info.specT || !info.specS){ alert("Sélectionne une classe (ou un groupe) et une matière précises pour ajouter un devoir."); return; }
+   const classId=info.t, subject=info.s;
+   if(!info.lessonDates.has(HOMEWORK_STATE.selectedDate)){
+    alert("Il n’y a pas de cours de "+subject+" pour "+homeworkClassName(classId)+" à cette date dans l’emploi du temps.");
+    return;
+   }
    const draft=normalizeHomeworkEntry({
     dateISO: HOMEWORK_STATE.selectedDate,
     classId,
@@ -12114,6 +12137,30 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const homeworkId=HOMEWORK_STATE.draft.id;
   const existing=getHomeworkById(homeworkId);
   if(!existing) return;
+  /* Évaluations de classe / de groupe créées par les assignations de ce devoir :
+     supprimées avec leurs notes élèves et leurs compétences liées. */
+  const removedEvalIds=new Set();
+  const removedEvalNoteIds=new Set();
+  [...(DATA.classes||[]),...grpEns()].forEach(cls=>{
+   if(!Array.isArray(cls.evals)) return;
+   cls.evals=cls.evals.filter(ev=>{
+    const linked=ev.hwId===homeworkId || String(ev.hwKey||"").startsWith(homeworkId+"::");
+    if(linked) removedEvalIds.add(ev.id);
+    return !linked;
+   });
+  });
+  if(removedEvalIds.size){
+   Object.keys(DATA.notes||{}).forEach(sid=>{
+    DATA.notes[sid]=(DATA.notes[sid]||[]).filter(m=>{
+     const linked=m.classCommon && removedEvalIds.has(m.classNoteId);
+     if(linked && m.id) removedEvalNoteIds.add(m.id);
+     return !linked;
+    });
+   });
+   if(Array.isArray(DATA.competencies)){
+    DATA.competencies=DATA.competencies.filter(c=>!removedEvalIds.has(c.groupId) && !removedEvalNoteIds.has(c.noteId));
+   }
+  }
   const relatedSubmissions=(DATA.homeworkSubmissions||[]).filter(item=>item.homeworkId===homeworkId);
   const relatedNoteIds=new Set();
   const relatedSubmissionIds=new Set();
@@ -12162,6 +12209,57 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   renderHomeworkView();
   renderOnlineTestsView();
  }
+ function homeworkAllSubjects(){
+  const out=[]; const add=n=>{ if(n && !out.includes(n)) out.push(n); };
+  DATA.classes.forEach(c=>homeworkClassSubjects(c.id).forEach(add));
+  grpEns().forEach(g=>homeworkClassSubjects(g.id).forEach(add));
+  const order=(typeof SUBJECT_REGISTRY!=="undefined"?SUBJECT_REGISTRY:[]).map(x=>typeof x==="object"?x.name:x);
+  return order.filter(n=>out.includes(n)).concat(out.filter(n=>!order.includes(n)));
+ }
+ /* Filtre du professeur : "" = rien (défaut), HW_ALL = « Toutes … », sinon un identifiant / une matière précise. */
+ function normalizeHomeworkFilter(){
+  const f=HOMEWORK_STATE.filter;
+  if(f.group && !grpById(f.group)) f.group="";
+  if(f.cls && f.cls!==HW_ALL && !DATA.classes.some(c=>c.id===f.cls)) f.cls="";
+  if(f.group) f.cls="";
+  const t=f.group||f.cls;
+  const specT=!!t && t!==HW_ALL;
+  if(!specT && f.subject===HW_ALL) f.subject="";                       // « Toutes matières » exige une classe/un groupe
+  if(specT && f.subject && f.subject!==HW_ALL && !homeworkClassSubjects(t).includes(f.subject)) f.subject="";
+  if(t===HW_ALL && (!f.subject || f.subject===HW_ALL)) f.cls="";       // « Toutes classes » exige une matière précise
+  if(f.subject && f.subject!==HW_ALL && !f.group && !specT && !homeworkAllSubjects().includes(f.subject)) f.subject="";
+ }
+ function homeworkFilterMatches(item){
+  const f=HOMEWORK_STATE.filter, t=f.group||f.cls, s=f.subject;
+  if(t && t!==HW_ALL && item.classId!==t) return false;
+  if(s && s!==HW_ALL && item.subject!==s) return false;
+  return true;
+ }
+ /* Dates où la cible t a au moins un cours (non annulé) de la matière s dans l'emploi du temps */
+ function homeworkLessonDates(t,s){
+  const set=new Set();
+  ((DATA.schedule&&DATA.schedule.events)||[]).forEach(e=>{
+   if(!e.cancelled && e.date && (s===null || e.subject===s) && (t===null || (e.classIds||[]).includes(t))) set.add(e.date);
+  });
+  return set;
+ }
+ function homeworkTeacherCalendarInfo(){
+  normalizeHomeworkFilter();
+  const f=HOMEWORK_STATE.filter, t=f.group||f.cls, s=f.subject;
+  const specT=!!t && t!==HW_ALL, specS=!!s && s!==HW_ALL;
+  const hwDates=new Set((DATA.homework||[]).filter(homeworkFilterMatches).map(i=>i.dateISO));
+  let restrict=false, lessonDates=null;
+  if(specT && specS){ restrict=true; lessonDates=homeworkLessonDates(t,s); }
+  else if(specT && s===HW_ALL){          // toutes matières : tout jour où la cible a un cours reste cliquable
+   restrict=true; lessonDates=homeworkLessonDates(t,null);
+  }else if(t===HW_ALL && specS){         // toutes classes : tout jour où la matière est enseignée reste cliquable
+   restrict=true; lessonDates=homeworkLessonDates(null,s);
+  }
+  return { t, s, specT, specS, hwDates, restrict, lessonDates };
+ }
+ function homeworkDateAllowed(info,dateISO){
+  return !info.restrict || info.hwDates.has(dateISO) || !!(info.lessonDates && info.lessonDates.has(dateISO));
+ }
  function renderHomeworkCalendar(){
   const grid=document.getElementById("homeworkCalendarGrid");
   const label=document.getElementById("homeworkMonthLabel");
@@ -12173,7 +12271,9 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const lastDay=new Date(d.getFullYear(), d.getMonth()+1, 0);
   const offset=(firstDay.getDay()+6)%7;
   const days=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
-  const teacherDates=new Set((DATA.homework||[]).map(item=>item.dateISO));
+  const isStudentCal=AUTH.role==="eleve";
+  const tInfo=isStudentCal ? null : homeworkTeacherCalendarInfo();
+  const teacherDates=isStudentCal ? new Set() : tInfo.hwDates;
   const studentDates=new Set((DATA.homework||[]).filter(item=>homeworkMatchesStudentClass(item)).map(item=>item.dateISO));
   const cells=[];
   days.forEach(day=>cells.push(`<div class="homework-calendar-weekday">${day}</div>`));
@@ -12182,11 +12282,12 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
    const dateISO=todayISOFromDate(new Date(d.getFullYear(), d.getMonth(), day));
    const teacherHas=teacherDates.has(dateISO);
    const studentHas=studentDates.has(dateISO);
-   const isSelected=HOMEWORK_STATE.selectedDate===dateISO;
+   const disabled=!isStudentCal && !homeworkDateAllowed(tInfo,dateISO);
+   const isSelected=HOMEWORK_STATE.selectedDate===dateISO && !disabled;
    const isToday=todayISO()===dateISO;
    cells.push(`
-    <button type="button"
-      class="homework-calendar-day ${teacherHas ? "has-homework" : ""} ${studentHas ? "student-homework" : ""} ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""}"
+    <button type="button" ${disabled ? "disabled aria-disabled=\"true\"" : ""}
+      class="homework-calendar-day ${teacherHas ? "has-homework" : ""} ${studentHas ? "student-homework" : ""} ${isSelected ? "is-selected" : ""} ${isToday ? "is-today" : ""} ${disabled ? "is-disabled" : ""}"
       data-hw-action="select-date"
       data-date="${dateISO}">
       ${day}
@@ -12196,21 +12297,26 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   grid.innerHTML=cells.join("");
  }
  function renderHomeworkTeacherToolbar(){
+  const info=homeworkTeacherCalendarInfo();
+  const f=HOMEWORK_STATE.filter;
   const classes=homeworkSortedClasses();
   const groups=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
-  const dt=HOMEWORK_STATE.draft?.classId || "";
-  let selectedGroup=groups.some(g=>g.id===dt) ? dt : (document.getElementById("homeworkGroupSelect")?.value || "");
-  if(!groups.some(g=>g.id===selectedGroup)) selectedGroup="";
-  const selectedClass=classes.some(c=>c.id===dt) ? dt : (document.getElementById("homeworkClassSelect")?.value || classes[0]?.id || "");
-  const subjects=homeworkClassSubjects(selectedGroup || selectedClass);
-  const wanted=HOMEWORK_STATE.draft?.subject || document.getElementById("homeworkSubjectSelect")?.value || "";
-  const selectedSubject=subjects.includes(wanted) ? wanted : (subjects[0] || "");
+  const subjects=info.specT ? homeworkClassSubjects(info.t) : homeworkAllSubjects();
+  const date=HOMEWORK_STATE.selectedDate;
+  let addReason="";
+  if(!info.specT || !info.specS) addReason="Sélectionne une classe (ou un groupe) et une matière précises.";
+  else if(!info.lessonDates.has(date)) addReason="Aucun cours de cette matière pour cette classe à cette date dans l’emploi du temps.";
+  else if(hasHomeworkCollision({id:"",dateISO:date,classId:info.t,subject:info.s})) addReason="Un devoir existe déjà pour cette classe, cette matière et cette date.";
   return `
    <div class="homework-toolbar ${HOMEWORK_STATE.draft ? "is-hidden" : ""}">
     <div class="homework-toolbar-left">
      <div class="modal-form">
       <label>Classe</label>
-      <select id="homeworkClassSelect" ${selectedGroup?'style="opacity:.55"':""}>${classes.map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===selectedClass?"selected":""}>${escHtml(cls.name)}</option>`).join("")}</select>
+      <select id="homeworkClassSelect">
+       <option value="" ${!f.cls?"selected":""}>—</option>
+       <option value="${HW_ALL}" ${f.cls===HW_ALL?"selected":""} ${info.specS?"":"disabled"}>Toutes classes et tous groupes</option>
+       ${classes.map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===f.cls?"selected":""}>${escHtml(cls.name)}</option>`).join("")}
+      </select>
      </div>
      <div class="modal-form">
       <label>&nbsp;</label>
@@ -12218,14 +12324,18 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
      </div>
      <div class="modal-form">
       <label>Groupes</label>
-      <select id="homeworkGroupSelect"><option value="">—</option>${groups.map(g=>`<option value="${escHtml(g.id)}" ${g.id===selectedGroup?"selected":""}>${escHtml(g.name)}</option>`).join("")}</select>
+      <select id="homeworkGroupSelect"><option value="">—</option>${groups.map(g=>`<option value="${escHtml(g.id)}" ${g.id===f.group?"selected":""}>${escHtml(g.name)}</option>`).join("")}</select>
      </div>
      <div class="modal-form">
       <label>Matière</label>
-      <select id="homeworkSubjectSelect">${subjects.map(subject=>`<option value="${escHtml(subject)}" ${subject===selectedSubject?"selected":""}>${escHtml(subject)}</option>`).join("")}</select>
+      <select id="homeworkSubjectSelect">
+       <option value="" ${!f.subject?"selected":""}>—</option>
+       <option value="${HW_ALL}" ${f.subject===HW_ALL?"selected":""} ${info.specT?"":"disabled"}>Toutes matières</option>
+       ${subjects.map(subject=>`<option value="${escHtml(subject)}" ${subject===f.subject?"selected":""}>${escHtml(subject)}</option>`).join("")}
+      </select>
      </div>
     </div>
-    <button type="button" class="btn btn-primary" data-hw-action="add-homework">Ajouter un devoir</button>
+    <button type="button" class="btn btn-primary" data-hw-action="add-homework" ${addReason?`disabled title="${escHtml(addReason)}"`:""}>Ajouter un devoir</button>
    </div>
   `;
  }
@@ -12373,7 +12483,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const isStudent=AUTH.role==="eleve";
  if(isStudent) syncStudentHomeworkDate(); else syncTeacherHomeworkDate();
  renderHomeworkCalendar();
-  const dayItems=isStudent ? getHomeworkForStudentDate(HOMEWORK_STATE.selectedDate) : getHomeworkOnDate(HOMEWORK_STATE.selectedDate);
+  const dayItems=isStudent ? getHomeworkForStudentDate(HOMEWORK_STATE.selectedDate) : getHomeworkOnDate(HOMEWORK_STATE.selectedDate).filter(item=>homeworkFilterMatches(item) || item.id===HOMEWORK_STATE.draft?.id);
   const cards=isStudent
    ? dayItems.map(renderStudentHomeworkCard).join("")
    : [HOMEWORK_STATE.draft ? renderHomeworkEditorCard() : "", ...dayItems.filter(item=>item.id!==HOMEWORK_STATE.draft?.id).map(renderTeacherHomeworkCard)].join("");
@@ -12503,7 +12613,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
      </div>
     </div>
     ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
-    ${submission && !test.options?.trainingMode ? `<p class="online-preview-note">Ce test a déjà été rendu. La correction sera disponible ici dès validation par l’enseignant.</p>` : ""}
+    ${submission && !test.options?.trainingMode ? `<p class="online-preview-note">Ce test a déjà été rendu. ${test.options?.hideCorrection ? "La note" : "La correction"} sera disponible ici dès validation par l’enseignant.</p>` : ""}
     <div class="homework-quiz-actions" style="justify-content:flex-end;">
      ${submission && !test.options?.trainingMode
       ? `<button type="button" class="btn" data-hw-action="close-quiz">Fermer</button>`
@@ -12720,7 +12830,7 @@ async function finishHomeworkQuiz(reason){
     <p class="online-preview-note">${escHtml(reasonText)} ${result.manualReview ? "La correction et l’attribution des points seront faites par le professeur." : (test.options?.hideGrade ? "La note reste masquée jusqu’à validation par l’enseignant." : "Le devoir a bien été enregistré.")}</p>
     ${showScore ? `<div class="online-preview-score">Résultat : ${escHtml(String(noteValue))} / ${total}</div>` : ""}
     ${test.conclusion ? `<p class="online-preview-message">${escHtml(test.conclusion).replace(/\n/g,"<br>")}</p>` : ""}
-    ${test.options?.trainingMode && !result.manualReview ? buildOnlinePreviewCorrectionHtml(result) : ""}
+    ${test.options?.trainingMode && !result.manualReview && !test.options?.hideCorrection ? buildOnlinePreviewCorrectionHtml(result) : ""}
     <div class="homework-quiz-actions">
      <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
     </div>
@@ -12741,9 +12851,9 @@ async function finishHomeworkQuiz(reason){
       <div class="homework-quiz-badges"><span>Correction publiée</span></div>
      </div>
     </div>
-    <p class="online-preview-note">La correction validée par l’enseignant est disponible.</p>
+    <p class="online-preview-note">${test.options?.hideCorrection ? "La note validée par l’enseignant est disponible." : "La correction validée par l’enseignant est disponible."}</p>
     ${finalValue!=="" ? `<div class="online-preview-score">Note : ${escHtml(String(finalValue))} / ${total}</div>` : ""}
-    ${renderHomeworkPublishedCorrection(submission)}
+    ${test.options?.hideCorrection ? "" : renderHomeworkPublishedCorrection(submission)}
     <div class="homework-quiz-actions">
      <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
     </div>
@@ -12921,11 +13031,31 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     cls.evals.filter(e=>e.hwKey).forEach(ev=>{
      if(wanted.get(ev.hwKey)===cls.id) return;
      cls.evals=cls.evals.filter(e=>e.id!==ev.id);
+     const goneNoteIds=new Set();
      Object.keys(DATA.notes||{}).forEach(sid=>{
-      DATA.notes[sid]=(DATA.notes[sid]||[]).filter(m=>!(m.classCommon && m.classNoteId===ev.id));
+      DATA.notes[sid]=(DATA.notes[sid]||[]).filter(m=>{
+       const linked=m.classCommon && m.classNoteId===ev.id;
+       if(linked && m.id) goneNoteIds.add(m.id);
+       return !linked;
+      });
      });
+     if(Array.isArray(DATA.competencies)){
+      DATA.competencies=DATA.competencies.filter(c=>c.groupId!==ev.id && !goneNoteIds.has(c.noteId));
+     }
      changed=true;
     });
+   });
+   /* La date affichée sur une note de devoir est TOUJOURS celle de l'assignation (date du devoir),
+      quelle que soit la date à laquelle l'élève fait le test (ou si la date du devoir est modifiée). */
+   (DATA.homeworkSubmissions||[]).forEach(sub=>{
+    const hw=getHomeworkById(sub.homeworkId);
+    const arr=DATA.notes?.[sub.studentId];
+    if(!hw || !arr) return;
+    const note=arr.find(n=>n.homeworkSubmissionId===sub.id || (sub.noteId && n.id===sub.noteId));
+    if(!note) return;
+    const meta={dateJJMMAA:homeworkDateToFr(hw.dateISO),isoDate:hw.dateISO,period:homeworkPeriodFromDate(hw.dateISO)};
+    if(note.period && note.period!=="YEAR" && LOCKED_PERIODS[note.period]) return;
+    Object.keys(meta).forEach(k=>{ if(note[k]!==meta[k]){ note[k]=meta[k]; changed=true; } });
    });
    if(changed) saveData();
   }
@@ -13196,11 +13326,19 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  document.getElementById("homeworkView")?.addEventListener("change",e=>{
   const target=e.target;
   if(target.id==="homeworkClassSelect"){
-   const gs=document.getElementById("homeworkGroupSelect"); if(gs) gs.value="";
+   HOMEWORK_STATE.filter.cls=target.value;
+   if(target.value) HOMEWORK_STATE.filter.group="";
    renderHomeworkView();
    return;
   }
   if(target.id==="homeworkGroupSelect"){
+   HOMEWORK_STATE.filter.group=target.value;
+   if(target.value) HOMEWORK_STATE.filter.cls="";
+   renderHomeworkView();
+   return;
+  }
+  if(target.id==="homeworkSubjectSelect"){
+   HOMEWORK_STATE.filter.subject=target.value;
    renderHomeworkView();
    return;
   }
