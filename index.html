@@ -97,9 +97,9 @@ tbody tr:hover{ background:#f9fafb }
  background:#fff; border-radius:0; margin-bottom:16px;
 }
 #classesView .matiere-line { padding: 8px 16px; margin-bottom: 8px; }
-#classesView .notes-list { gap: 6px 16px; }
+#classesView .notes-list { gap: 6px 24px; }
 .matiere-name{ font-weight:700; font-family:Georgia,"Times New Roman",serif }
-.notes-list{ display:flex; flex-wrap:wrap; gap:15px 16px; align-items:flex-end; }
+.notes-list{ display:flex; flex-wrap:wrap; gap:15px 24px; align-items:flex-end; }
 .note-pill{
  display:inline-flex; align-items:baseline; gap:2px;
  padding:0 0 1px 0; border-radius:0; background:transparent; cursor:pointer;
@@ -676,8 +676,10 @@ body.student-mode .container .card{ border-top-left-radius:0 }
 .subtabs .subtab-btn.active{ background:var(--grad); color:#fff; box-shadow:0 2px 6px rgba(37,99,235,.35) }
 
 /* ── Soulignement des nouvelles notes (cadre invisible élargi) ── */
-.note-pill.today{ padding:0 3px 4px !important; margin:0 -3px -3px !important; border-bottom:2px solid #1d4ed8 !important }
-.note-pill.today.important{ margin:0 -3px -3px !important }
+.note-pill.today{ position:relative; padding:0 0 4px !important; margin:0 0 -3px !important; border-bottom:none !important }
+.note-pill.today.important{ margin:0 0 -3px !important }
+/* Soulignement : tracé depuis la zone réellement visible (encre) du texte, débord identique à gauche et à droite (variables posées par le script ci-dessous) */
+.note-pill.today::after{ content:""; position:absolute; bottom:0; height:2px; background:#1d4ed8; left:var(--ul-l,-6px); right:var(--ul-r,-6px); pointer-events:none }
 
 
 /* ── Icônes de coin des gros onglets (⚠️ / 👁️) : légèrement plus grandes ── */
@@ -1050,8 +1052,30 @@ body.student-mode .sch-prof-only{display:none!important}
 .sch-ev{position:absolute;box-sizing:border-box;padding:3px 6px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:11px;line-height:1.25;overflow:hidden;text-align:left}
 .sch-ev.edit,.sch-chip.edit{cursor:pointer}
 .sch-ev .sch-s{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:12px}
+/* Blocs adaptatifs : matière en grand, heure + salle en petit */
+.sch-ev.sz .sch-m{font-weight:700;line-height:1.15;min-width:0}
+.sch-ev.sz .sch-t{font-size:9.5px;font-weight:400;line-height:1.15;opacity:.92;white-space:nowrap}
+.sch-ev.sz .sch-who{font-size:10px;font-style:italic;line-height:1.15;opacity:.92;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sch-ev.sz .sch-hd2{display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.sch-ev.sz .sch-sub{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.sch-ev.sz-l{padding:4px 6px}.sch-ev.sz-l .sch-m{font-size:14px}
+.sch-ev.sz-m{padding:2px 5px}.sch-ev.sz-m .sch-m{font-size:12.5px}
+.sch-ev.sz-s{padding:1px 5px}.sch-ev.sz-s .sch-m{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-ev.sz-xs{padding:0 4px;display:flex;align-items:center;gap:4px;line-height:1}
+.sch-ev.sz-xs .sch-m{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.sch-ev.sz-xs .sch-t{font-size:9px;flex:0 0 auto}
+/* plusieurs blocs côte à côte : tout se réduit et peut passer à la ligne */
+.sch-ev.sz.nar{padding-left:3px;padding-right:3px}
+.sch-ev.sz.nar .sch-m{font-size:10.5px;overflow-wrap:anywhere;white-space:normal}
+.sch-ev.sz-l.nar .sch-m,.sch-ev.sz-m.nar .sch-m{font-size:11px}
+.sch-ev.sz.nar .sch-t{font-size:8.5px;white-space:normal}
+.sch-ev.sz-xs.nar,.sch-ev.sz-s.nar{flex-wrap:nowrap}
+.sch-ev.sz-xs.nar .sch-m,.sch-ev.sz-s.nar .sch-m{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+.sch-ev.sz-xs.nar .sch-t{display:none}
+.sch-ev.sz .hist-ok,.sch-ev.sz .hist-no{font-size:9px}
+.sch-ev.sz-xs .hist-ok,.sch-ev.sz-xs .hist-no,.sch-ev.sz-s .hist-ok,.sch-ev.sz-s .hist-no{bottom:1px;right:3px;background:rgba(255,255,255,.75);color:#111;border-radius:3px;padding:0 2px}
 .sch-ev i{display:block}
-.sch-warn{flex:none}
+.sch-warn{flex:none;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)}
 .sch-month{display:grid;grid-template-columns:repeat(7,1fr);min-width:640px}
 .sch-month>div{border-left:1px solid var(--border);border-top:1px solid var(--border);min-height:96px;padding:3px}
 .sch-month .mh{min-height:0;text-align:center;font-size:12px;color:#475569;padding:6px}
@@ -1262,7 +1286,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
 
  .student-header-section > div{ flex-wrap:wrap }
  .student-header-section .btn{ flex:1 1 auto; min-height:42px }
- .notes-list{ gap:6px 8px }
+ .notes-list{ gap:6px 15px }
  .note-pill{ min-height:34px; display:inline-flex; align-items:center }
  .period-tabs .period-btn, .subtabs .subtab-btn{ flex:1 1 auto; text-align:center }
 
@@ -1369,6 +1393,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
      <div class="lg"><span class="sample"><span class="note-pill">Disp</span></span><span>Dispensé(e)</span></div>
      <div class="lg"><span class="sample"><span class="note-pill">NE</span></span><span>Non évalué(e)</span></div>
      <div class="lg"><span class="sample"><span class="note-pill">NR</span></span><span>Non rendu</span></div>
+     <div class="lg"><span class="sample"><span class="note-pill red">EA</span></span><span>En attente (note et moyenne en rouge)</span></div>
      <h5>Compétences</h5>
      <div class="lg"><span class="sample"><span class="color-dot blue"></span></span><span><b>D</b> – Dépassé</span></div>
      <div class="lg"><span class="sample"><span class="color-dot green"></span></span><span><b>A</b> – Acquis</span></div>
@@ -1590,7 +1615,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
     <label>Date (JJ/MM/AA)</label><input name="date" id="noteDate" placeholder="JJ/MM/AA">
     <div style="display:flex;gap:8px;align-items:center;">
      <div style="flex:1;">
-      <label>Note (nombre ou Abs, Disp, NE, NR)</label>
+      <label>Note (nombre ou Abs, Disp, NE, NR, EA)</label>
       <input name="note" id="noteValue" placeholder="Ex: 15.75 ou Abs">
      </div>
      <div style="flex:0;">
@@ -3887,7 +3912,10 @@ const COMPETENCIES_HIERARCHY = {
     }
 };
 
-const SPECIAL_VALUES = new Set(["Abs","Disp","NE","NR"]);
+const SPECIAL_VALUES = new Set(["Abs","Disp","NE","NR","EA"]);
+// X = "pas de note pour cet élève" (évals de classe uniquement) : compte comme saisi mais n'apparaît jamais côté élève
+const CLASS_SPECIAL_VALUES = new Set(["Abs","Disp","NE","NR","EA","X"]);
+function normSpecialInput(v){const t=String(v==null?"":v).trim(); if(/^x$/i.test(t)) return "X"; if(/^ea$/i.test(t)) return "EA"; return t;}
 let DATA = { students:[], classes:[], notes:{}, competencies:[], appreciations:[], generalAppreciations: {}, appreciationOff: {}, onlineTests: [], competenciesHierarchy: JSON.parse(JSON.stringify(COMPETENCIES_HIERARCHY)) };
 let LOCKED_PERIODS = { T1:false, T2:false, T3:false, T4:false };
 let COMP_TARGET_STUDENT = null;
@@ -4017,8 +4045,8 @@ function fmt(x,decimals=2){
  return parseFloat(x.toFixed(decimals)).toString().replace('.',',');
 }
 function escHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function specialMeaning(txt){return {Abs:"Absent(e)",Disp:"Dispensé(e)",NE:"Non évalué(e)",NR:"Non rendu"}[txt]||"";}
-function isSpecial(n){return n&&typeof n.noteText==="string"&&SPECIAL_VALUES.has(n.noteText);}
+function specialMeaning(txt){return {Abs:"Absent(e)",Disp:"Dispensé(e)",NE:"Non évalué(e)",NR:"Non rendu",EA:"En attente",X:"Pas de note pour cet élève"}[txt]||"";}
+function isSpecial(n){return n&&typeof n.noteText==="string"&&(SPECIAL_VALUES.has(n.noteText)||n.noteText==="X");}
 function dateKey(n){if(n.isoDate) return new Date(n.isoDate).getTime();const d=parseDateJJMMAA(n.dateJJMMAA||"");return d?d.getTime():0;}
 function getSubjectCoef(subjectName){const sub=SUBJECT_REGISTRY.find(s=>(typeof s==='object'?s.name:s)===subjectName);return(typeof sub==='object'&&sub.coef!==undefined)?sub.coef:1;}
 
@@ -4557,7 +4585,7 @@ function renderClassPreviewContent(){
     const notesWrap = document.createElement("div");
     notesWrap.className = "notes-list";
     
-    let evalSum = 0, evalCount = 0;
+    let evalSum = 0, evalCount = 0, evalHasEA = false;
     students.forEach(stu => {
       const allNotes = DATA.notes[stu.id] || [];
       const note = allNotes.find(n => n.classCommon && n.classNoteId === ev.id);
@@ -4567,6 +4595,7 @@ function renderClassPreviewContent(){
       btn.className = "note-pill";
       const empty = !note || isSpecial(note);
       if(empty) btn.classList.add("empty-eval");
+      if(note && note.noteText==="EA"){ btn.classList.add("red"); evalHasEA=true; }
       
       if(note && note.dateJJMMAA === todayJJMMAA()) btn.classList.add("today");
       if(note && !!note.important) btn.classList.add("important");
@@ -4579,15 +4608,17 @@ function renderClassPreviewContent(){
         btn.textContent = note ? note.noteText : "NE";
       } else {
         let base = fmt(note.note);
-        btn.innerHTML = base;
+        const zeroCoef = note.coef === 0;
+        btn.textContent = zeroCoef ? `(${base}` : base;
         if(note.outof !== 20){
           const sub = document.createElement("sub");
           sub.textContent = `/${fmt(note.outof)}`;
           btn.appendChild(sub);
         }
+        if(zeroCoef) btn.appendChild(document.createTextNode(")"));
         
-        // Afficher le coefficient en exposant noir si != 1
-        if(note.coef !== 1) {
+        // Afficher le coefficient en exposant noir si != 1 (et != 0 : déjà entre parenthèses)
+        if(note.coef !== 1 && !zeroCoef) {
           const sup = document.createElement("sup");
           sup.style.color = "#000";
           sup.style.fontWeight = "400";
@@ -4632,7 +4663,7 @@ function renderClassPreviewContent(){
     
     if(evalCount > 0){
       const avgVal = evalSum / evalCount;
-      avgBox.innerHTML = `<div class="avg-value">${fmt(avgVal, 2)}/20</div><div class="avg-coef">Moy. Classe</div>`;
+      avgBox.innerHTML = `<div class="avg-value"${evalHasEA?' style="color:var(--danger)"':""}>${fmt(avgVal, 2)}/20</div><div class="avg-coef">Moy. Classe</div>`;
       totalSum += avgVal;
       totalCount++;
       
@@ -5044,6 +5075,7 @@ function renderProfViewForPeriod(studentId,periodKey){
 
  let notes=DATA.notes[studentId]||[];
  let filteredNotes=periodKey==="YEAR"?notes.slice():notes.filter(n=>(n.period||"YEAR")===periodKey);
+ filteredNotes=filteredNotes.filter(n=>n.noteText!=="X");
  
  if(showHidden) {
    // Si "Evals masquées" est coché, on ne montre QUE les masquées
@@ -5143,7 +5175,7 @@ function renderProfViewForPeriod(studentId,periodKey){
     const base=fmt(n.note);
     tdNote.textContent=n.coef===0?(n.outof!==20?`(${base}/${fmt(n.outof)})`:`(${base})`):base;
    }
-   if(isRedVal) tdNote.style.color="var(--danger)";
+   if(isRedVal||n.noteText==="EA") tdNote.style.color="var(--danger)";
    const tdOutof=document.createElement("td"); tdOutof.textContent=fmt(n.outof);
    const tdCoef=document.createElement("td"); tdCoef.textContent=n.coef===0?"":fmt(n.coef,2);
    const tdImportant=document.createElement("td");
@@ -5293,7 +5325,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
  if(!container||!generalBox) return;
  container.innerHTML=""; generalBox.style.display="none";
  const allNotes=DATA.notes[studentId]||[];
- let notes=periodKey==="YEAR"?allNotes.filter(n=>!n.hideFromStudent):allNotes.filter(n=>(n.period||"YEAR")===periodKey&&!n.hideFromStudent);
+ let notes=(periodKey==="YEAR"?allNotes.filter(n=>!n.hideFromStudent):allNotes.filter(n=>(n.period||"YEAR")===periodKey&&!n.hideFromStudent)).filter(n=>n.noteText!=="X");
  const allComps=DATA.competencies||[];
  const studentComps=allComps.filter(c=>c.studentId===studentId&&!c.noteId&&(periodKey==="YEAR"||(c.period||"YEAR")===periodKey)&&!c.hideFromStudent);
  const compGroups={};
@@ -5312,7 +5344,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
  }else sortedSubjectNames=globalOrder;
  if(!sortedSubjectNames.includes("Compétences")&&bySubject.has("Compétences")) sortedSubjectNames.push("Compétences");
  for(const s of bySubject.keys()){if(!sortedSubjectNames.includes(s)) sortedSubjectNames.push(s);}
- let globalSum=0,globalCoef=0;
+ let globalSum=0,globalCoef=0,globalEA=false;
  for(const subject of sortedSubjectNames){
   const items=bySubject.get(subject); if(!items||!items.length) continue;
   items.sort((a,b)=>dateKey(a)-dateKey(b));
@@ -5323,7 +5355,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
   const notesWrap=document.createElement("div"); notesWrap.className="notes-list";
   const avg=document.createElement("div"); avg.className="avg-box";
   if(isCompRub) avg.style.visibility="hidden";
-  let sum=0,coefSum=0,hasNotes=false;
+  let sum=0,coefSum=0,hasNotes=false,hasEA=false;
   items.forEach(item=>{
    if(item.type==='competency_group'){
     const group=item;
@@ -5388,7 +5420,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
     if(isToday) btn.classList.add("today");
     btn.style.cssText="background:#fff;";
     if(!isSpecial(n)&&(n.note/n.outof*20)<10) btn.classList.add("red");
-    if(isSpecial(n)){btn.textContent=n.noteText;}
+    if(isSpecial(n)){btn.textContent=n.noteText; if(n.noteText==="EA"){btn.classList.add("red"); hasEA=true;}}
     else{
      let base=fmt(n.note);
      const zero=n.coef===0;
@@ -5422,10 +5454,10 @@ function renderEleveViewForPeriod(studentId,periodKey){
   const subjectCoef=getSubjectCoef(subject);
   if(!isCompRub&&hasNotes&&coefSum>0){
    const avgVal=sum/coefSum;
-   avg.innerHTML=`<div class="avg-value">${fmt(avgVal,2)}/20</div>`;
+   avg.innerHTML=`<div class="avg-value"${hasEA?' style="color:var(--danger)"':""}>${fmt(avgVal,2)}/20</div>`;
    avg.style.cursor="pointer"; avg.title="Voir les statistiques de la classe";
    avg.addEventListener("click",(e)=>{e.stopPropagation();openSubjectStats(studentId,subject,periodKey);});
-   globalSum+=avgVal*subjectCoef; globalCoef+=subjectCoef;
+   globalSum+=avgVal*subjectCoef; globalCoef+=subjectCoef; if(hasEA) globalEA=true;
   }else if(!isCompRub){
    avg.innerHTML=`<div class="avg-value">--</div>`;
   }
@@ -5438,7 +5470,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
  if(globalCoef>0){
   const gAvg=globalSum/globalCoef;
   generalBox.style.display="flex";
-  generalBox.innerHTML=`<div class="avg-label">Moyenne générale</div><div class="avg-value">${fmt(gAvg,2)}/20</div>`;
+  generalBox.innerHTML=`<div class="avg-label">Moyenne générale</div><div class="avg-value"${globalEA?' style="color:var(--danger)"':""}>${fmt(gAvg,2)}/20</div>`;
   generalBox.style.cursor="pointer"; generalBox.title="Voir le classement général";
   generalBox.addEventListener("click",(e)=>{e.stopPropagation();openGeneralStats(studentId,periodKey);});
  }
@@ -6521,7 +6553,7 @@ noteForm.addEventListener("submit", e => {
   const subject = document.getElementById("noteSubject").value;
   const label = document.getElementById("noteLabel").value.trim();
   const dateStr = document.getElementById("noteDate").value.trim();
-  const noteRaw = document.getElementById("noteValue").value.trim();
+  const noteRaw = normSpecialInput(document.getElementById("noteValue").value).replace(/^X$/,"X");
   const outof = parseFloat(document.getElementById("noteOutof").value);
   const coef = parseFloat(document.getElementById("noteCoef").value);
   const period = document.getElementById("notePeriod").value||"T1";
@@ -6925,7 +6957,7 @@ function applyGroupBaremeMatrixInputValue(inputEl){
  if(!row) return;
  if(!row.bareme) row.bareme=cloneGroupNoteBareme(GROUP_NOTE_STATE.commonBareme, row.outof||20);
  let val=inputEl.value.trim();
- const aliases={a:"Abs",d:"Disp"};
+ const aliases={a:"Abs",d:"Disp",ea:"EA"};
  if(aliases[val.toLowerCase?.()]) {
   val=aliases[val.toLowerCase()];
   inputEl.value=val;
@@ -8284,7 +8316,7 @@ function openEvalTableModal(classId, ev){
    headerRow+=`<th style="font-weight:normal;font-size:11px;min-width:60px;background:#f0f9ff;">${escHtml(c.name)}<br><span style="color:#3b82f6;">(/${fmt(c.points)})</span></th>`;
   });
  } else {
-  headerRow+=`<th>Note <span style="font-weight:normal;font-size:11px;color:#64748b;">(nombre ou Abs, Disp, NE, NR)</span></th>`;
+  headerRow+=`<th>Note <span style="font-weight:normal;font-size:11px;color:#64748b;">(nombre ou Abs, Disp, NE, NR, EA, X)</span></th>`;
  }
  headerRow+=`<th>Commentaire</th>`;
 
@@ -8375,12 +8407,12 @@ function openEvalTableModal(classId, ev){
 
    const calcTotal = () => {
     const firstScore = studentBareme.criteria[0]?.score;
-    if(SPECIAL_VALUES.has(firstScore)) return firstScore;
+    if(CLASS_SPECIAL_VALUES.has(firstScore)) return firstScore;
     return studentBareme.criteria.reduce((s,c)=>s+(parseFloat(c.score)||0),0);
    };
 
    const totalInit = calcTotal();
-   const isSpecTot = SPECIAL_VALUES.has(totalInit);
+   const isSpecTot = CLASS_SPECIAL_VALUES.has(totalInit);
    rowHtml+=`<td style="background:#e0f2fe;font-weight:700;" data-total-cell="${stu.id}">${isSpecTot?totalInit:fmt(totalInit)}</td>`;
 
    studentBareme.criteria.forEach((c,cidx)=>{
@@ -8394,13 +8426,13 @@ function openEvalTableModal(classId, ev){
     const save=()=>{
      if(isLocked) return;
      const cidx=parseInt(inp.dataset.cidx,10);
-     const val=inp.value.trim();
-     if(SPECIAL_VALUES.has(val)){
+     const val=normSpecialInput(inp.value);
+     if(CLASS_SPECIAL_VALUES.has(val)){
       // Propage à tous les critères
       studentBareme.criteria.forEach((cr,j)=>{
        cr.score=val;
        const otherInp=tr.querySelector(`.bareme-score-input[data-cidx="${j}"]`);
-       if(otherInp&&j!==cidx) otherInp.value=val;
+       if(otherInp) otherInp.value=val;
       });
      } else {
       const num=parseFloat(val.replace(',','.'));
@@ -8409,16 +8441,16 @@ function openEvalTableModal(classId, ev){
      // Met à jour la cellule total
      const newTotal=calcTotal();
      const totalCell=tr.querySelector(`[data-total-cell="${stu.id}"]`);
-     if(totalCell) totalCell.textContent=SPECIAL_VALUES.has(newTotal)?newTotal:fmt(newTotal);
+     if(totalCell) totalCell.textContent=CLASS_SPECIAL_VALUES.has(newTotal)?newTotal:fmt(newTotal);
      // Autosave avec le score calculé
-     const rawVal=SPECIAL_VALUES.has(newTotal)?newTotal:String(typeof newTotal==='number'?newTotal:"");
+     const rawVal=CLASS_SPECIAL_VALUES.has(newTotal)?newTotal:String(typeof newTotal==='number'?newTotal:"");
      autosaveClassNote(stu.id,classId,ev,rawVal,!!ev.defaultImportant,JSON.parse(JSON.stringify(studentBareme)));
      updateClassStats(classId,ev.id);
     };
     inp.addEventListener("input",save);
     inp.addEventListener("keydown",e=>{
      if(e.key==="Enter"){
-      const aliases={a:"Abs",d:"Disp"};
+      const aliases={a:"Abs",d:"Disp",ea:"EA",x:"X"};
       if(aliases[inp.value.trim().toLowerCase()]) inp.value=aliases[inp.value.trim().toLowerCase()];
       save(); e.preventDefault();
       const allInputs=Array.from(tbody.querySelectorAll(".bareme-score-input, input[type='text']"));
@@ -8439,7 +8471,7 @@ function openEvalTableModal(classId, ev){
    inp.addEventListener("input",save);
    inp.addEventListener("keydown",e=>{
     if(e.key==="Enter"){
-     const aliases={a:"Abs",d:"Disp"};
+     const aliases={a:"Abs",d:"Disp",ea:"EA",x:"X"};
      if(aliases[inp.value.trim().toLowerCase()]) inp.value=aliases[inp.value.trim().toLowerCase()];
      save();e.preventDefault();
      const allInputs=Array.from(tbody.querySelectorAll("input[type='text']"));
@@ -8473,12 +8505,12 @@ classEvalTableModal.addEventListener("click",e=>{});
  */
 function autosaveClassNote(stuId,classId,ev,rawVal,importantFlag,baremeData=null){
  if(ev.period!=="YEAR"&&LOCKED_PERIODS[ev.period]) return;
- const trimmed=(rawVal||"").trim();
+ const trimmed=normSpecialInput(rawVal);
  if(!DATA.notes[stuId]) DATA.notes[stuId]=[];
  const base={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,classCommon:true,classId,classNoteId:ev.id,period:ev.period||"YEAR",important:!!importantFlag,hideFromStudent:!!ev.hideFromStudent};
  if(baremeData) base.bareme=baremeData;
  let noteObj;
- if(SPECIAL_VALUES.has(trimmed)) noteObj={...base,noteText:trimmed};
+ if(CLASS_SPECIAL_VALUES.has(trimmed)) noteObj={...base,noteText:trimmed};
  else if(trimmed.length){const n=parseFloat(trimmed.replace(',','.'));if(isNaN(n)) return;noteObj={...base,note:n};}
  else{DATA.notes[stuId]=(DATA.notes[stuId]||[]).filter(m=>!(m.classCommon&&m.classId===classId&&m.classNoteId===ev.id));return;}
  const existing=(DATA.notes[stuId]||[]).find(m=>m.classCommon&&m.classId===classId&&m.classNoteId===ev.id);
@@ -11505,7 +11537,8 @@ window.downloadStudentBulletin = function(studentId, period) {
     const studentNotes = (DATA.notes[studentId] || []).filter(n => 
       n.subject === subName && 
       (period === "YEAR" || n.period === period) &&
-      (typeof n.note === 'number' || isSpecial(n))
+      (typeof n.note === 'number' || isSpecial(n)) &&
+      n.noteText !== "X"
     );
     if (studentNotes.length === 0) return;
 
@@ -11652,7 +11685,7 @@ window.downloadStudentReleve = function(studentId, period) {
       { content: subName.toUpperCase(), colSpan: 7, styles: { fillColor: [241, 245, 249], fontStyle: 'bold', textColor: [30, 58, 138], halign: 'left' } }
     ]);
 
-    const subNotes = notesBySubject[subName].sort((a,b) => dateKey(a) - dateKey(b));
+    const subNotes = notesBySubject[subName].filter(n => n.noteText !== "X").sort((a,b) => dateKey(a) - dateKey(b));
     
     subNotes.forEach(n => {
       let noteVal = "";
@@ -11662,6 +11695,7 @@ window.downloadStudentReleve = function(studentId, period) {
       else if (n.dispensed || n.noteText === "Disp") noteVal = "Disp";
       else if (n.notRated || n.noteText === "NE") noteVal = "NE";
       else if (n.notReturned || n.noteText === "NR") noteVal = "NR";
+      else if (n.noteText === "EA") noteVal = "EA";
       else if (typeof n.note === 'number') {
         noteVal = fmt(n.note);
         if (n.outof !== 20) {
@@ -13854,12 +13888,26 @@ function schEvents(){
 function schBlock(e,pos,chip){
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
  const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
- const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?12:15}" height="${chip?12:15}" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.5"/></svg>`:"";
+ const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="Cours modifié"><path d="M12 2.8 1.8 21h20.4z" fill="#fbbf24" stroke="#111827" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.2v5.3" stroke="#111827" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.8" r="1.7" fill="#111827"/></svg>`:"";
  const subj=`<b${e.cancelled?' style="text-decoration:line-through"':""}>${escHtml(String(e.subject).toUpperCase())}</b>`;
  const edit=" edit";
  const st=`background:${bg};color:${ink}${e.cancelled?";border-color:#cbd5e1":""}`;
  if(chip) return `<div class="sch-chip${edit}" data-id="${e.id}" style="${st}"><span>${hmF(e.start)} ${subj}${e.cancelled?" (annulé)":""}</span>${warn}</div>`;
- return `<div class="sch-ev${edit}" data-id="${e.id}" style="${st};${pos}"><div class="sch-s"><span>${hmF(e.start)} - ${hmF(e.end)}</span><span>${e.room?escHtml(e.room):""}</span></div>${e.cancelled?"<div><b>Annulé</b></div>":""}<div class="sch-s">${subj}${warn}</div><i>${escHtml(who)}</i></div>`;
+ /* taille de police selon la hauteur du bloc (durée) et le nombre de blocs côte à côte */
+ const mh=/height:([\d.]+)px/.exec(pos||""), mw=/width:calc\(([\d.]+)%/.exec(pos||"");
+ const ht=mh?+mh[1]:60, nn=mw&&+mw[1]>0?Math.round(100/+mw[1]):1;
+ const sz=ht<30?"xs":ht<46?"s":ht<72?"m":"l", nar=nn>=2?" nar":"";
+ const room=e.room?escHtml(e.room):"";
+ const tm=nn>=2&&ht<72?hmF(e.start)+"-"+hmF(e.end):hmF(e.start)+" - "+hmF(e.end);
+ const meta=tm+(room?" · "+room:"");
+ const tip=`${hmF(e.start)} - ${hmF(e.end)} · ${e.subject}${e.room?" · "+e.room:""}${who?" · "+who:""}`;
+ const cls=`sch-ev sz sz-${sz}${nar}${edit}`;
+ const head=`<div class="${cls}" data-id="${e.id}" title="${escHtml(tip)}" style="${st};${pos}">`;
+ const canc=e.cancelled?`<div class="sch-t"><b>Annulé</b></div>`:"";
+ if(sz==="xs") return head+`<span class="sch-t">${meta}</span><span class="sch-m">${subj}</span>${warn}</div>`;
+ if(sz==="s") return head+`<div class="sch-t">${meta}</div><div class="sch-sub"><span class="sch-m">${subj}</span>${warn}</div></div>`;
+ if(sz==="m") return head+`<div class="sch-t">${meta}</div><div class="sch-sub"><span class="sch-m">${subj}</span>${warn}</div>${canc}${nn>=2?"":`<div class="sch-who">${escHtml(who)}</div>`}</div>`;
+ return head+`<div class="sch-hd2"><span class="sch-t">${hmF(e.start)} - ${hmF(e.end)}</span><span class="sch-t">${room}</span></div>${canc}<div class="sch-sub"><span class="sch-m">${subj}</span>${warn}</div><div class="sch-who">${escHtml(who)}</div></div>`;
 }
 function schLay(list){
  list=[...list].sort((a,b)=>tmin(a.start)-tmin(b.start)||tmin(b.end)-tmin(a.end));
@@ -14798,6 +14846,46 @@ document.getElementById("schDelete").onclick=()=>{
  if(window.matchMedia("(max-width:700px)").matches && typeof SCH!=="undefined" && SCH.view==="week"){
   SCH.view="day"; try{ renderSchedule(); }catch(e){}
  }
+})();
+</script>
+<script>
+/* Soulignement des notes du jour : débord identique à gauche et à droite, mesuré sur l'encre réelle (note + /x + coef) */
+(function(){
+ var cv=document.createElement("canvas").getContext("2d"), pend=false;
+ function fontOf(el){ var c=getComputedStyle(el); return (c.fontStyle||"normal")+" "+(c.fontWeight||"400")+" "+c.fontSize+" "+c.fontFamily; }
+ function ink(el){
+  var tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null), n, L=1e9, R=-1e9, nl=null, nr=null;
+  while((n=tw.nextNode())){
+   if(!n.nodeValue.trim()) continue;
+   var rg=document.createRange(); rg.selectNodeContents(n); var r=rg.getBoundingClientRect(); if(!r.width) continue;
+   if(r.left<L){L=r.left; nl=n;} if(r.right>R){R=r.right; nr=n;}
+  }
+  if(!nl) return null;
+  var tl=nl.nodeValue.replace(/^\s+/,""), tr=nr.nodeValue.replace(/\s+$/,"");
+  cv.font=fontOf(nl.parentElement); var m1=cv.measureText(tl.charAt(0));
+  cv.font=fontOf(nr.parentElement); var ch=tr.charAt(tr.length-1), m2=cv.measureText(ch);
+  var lsb=-(m1.actualBoundingBoxLeft||0), rsb=m2.width-(m2.actualBoundingBoxRight||m2.width);
+  var il=L+Math.max(0,lsb), ir=R-Math.max(0,rsb);
+  el.querySelectorAll(".color-dot").forEach(function(d){ var q=d.getBoundingClientRect(); if(q.width){ if(q.left<il) il=q.left; if(q.right>ir) ir=q.right; } });
+  return {l:il, r:ir};
+ }
+ function apply(){
+  pend=false;
+  var D=window.innerWidth<=900?3.5:7;
+  document.querySelectorAll(".note-pill.today").forEach(function(p){
+   var b=p.getBoundingClientRect(); if(!b.width) return;
+   var key=p.textContent+"|"+Math.round(b.width)+"|"+D; if(p.dataset.ulKey===key) return;
+   var k=ink(p); if(!k) return;
+   p.style.setProperty("--ul-l",(k.l-b.left-D)+"px");
+   p.style.setProperty("--ul-r",(b.right-k.r-D)+"px");
+   p.dataset.ulKey=key;
+  });
+ }
+ function sched(){ if(!pend){pend=true; requestAnimationFrame(apply);} }
+ new MutationObserver(sched).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class","style","hidden"]});
+ window.addEventListener("resize",sched);
+ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(sched);
+ sched();
 })();
 </script>
 </body>
