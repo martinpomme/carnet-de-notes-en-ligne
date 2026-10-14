@@ -1112,8 +1112,8 @@ body.student-mode .prof-only-tab{display:none!important}
 .vs-split{display:flex;gap:16px;align-items:flex-start}
 .vs-side{width:250px;flex:none}
 .vs-list{margin-top:8px;max-height:65vh;overflow:auto;border:1px solid var(--border);border-radius:8px}
-.vs-stu{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;align-items:center}
-.vs-bands{display:inline-flex;gap:2px;margin-right:8px;flex:none}.vs-bands i{display:block;width:4px;height:1.25em;border-radius:2px}
+.vs-stu{position:relative;padding:8px 10px 8px 18px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;align-items:center}
+.vs-bands{position:absolute;left:0;top:0;bottom:0;display:flex;gap:0}.vs-bands i{display:block;width:4px;height:auto;border-radius:0}
 .vs-stu:hover{background:#f1f5f9}.vs-stu.on{background:#dbeafe;font-weight:600}
 .vs-main{flex:1;min-width:0}
 .vs-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -14468,9 +14468,12 @@ function renderVie(){
  if(AUTH.role==="eleve"){ root.innerHTML=vsContent(AUTH.studentId); return; }
  const list=DATA.students.filter(s=>!VS.cls||s.classId===VS.cls).sort(cmpStu);
  if(VS.tab==="hist"){ root.innerHTML=vsTabs()+histHtml(); holMark(root); return; }
+ const prevList=root.querySelector(".vs-list"), keepTop=prevList?prevList.scrollTop:0, keepY=window.scrollY;
  root.innerHTML=vsTabs()+'<div class="vs-split"><div class="vs-side"><select id="vsCls" class="btn" style="width:100%"><option value="">Toutes les classes</option>'+DATA.classes.map(c=>'<option value="'+c.id+'"'+(c.id===VS.cls?" selected":"")+'>'+escHtml(c.name)+'</option>').join("")+'</select><div class="vs-list">'
   +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'"'+'>'+vsBands(s.id)+'<span>'+escHtml(s.last)+' '+escHtml(s.first)+'</span></div>').join("")+'</div></div><div class="vs-main">'
   +(VS.sid?vsContent(VS.sid):'<div class="pl-empty">Cliquez sur un élève pour voir sa vie scolaire.</div>')+'</div></div>';
+ const newList=root.querySelector(".vs-list"); if(newList) newList.scrollTop=keepTop;
+ if(window.scrollY!==keepY) window.scrollTo(window.scrollX,keepY);
 }
 function vsDetail(sid,key){
  const it=vsItems(sid).find(i=>i.key===key); if(!it) return; const prof=AUTH.role==="prof", V=vsEns();
