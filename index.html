@@ -1112,7 +1112,8 @@ body.student-mode .prof-only-tab{display:none!important}
 .vs-split{display:flex;gap:16px;align-items:flex-start}
 .vs-side{width:250px;flex:none}
 .vs-list{margin-top:8px;max-height:65vh;overflow:auto;border:1px solid var(--border);border-radius:8px}
-.vs-stu{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f1f5f9}
+.vs-stu{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;align-items:center}
+.vs-bands{display:inline-flex;gap:2px;margin-right:8px;flex:none}.vs-bands i{display:block;width:4px;height:1.25em;border-radius:2px}
 .vs-stu:hover{background:#f1f5f9}.vs-stu.on{background:#dbeafe;font-weight:600}
 .vs-main{flex:1;min-width:0}
 .vs-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -1637,6 +1638,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
     </select>
     <label><input type="checkbox" id="noteImportant"> Note importante</label>
     <label><input type="checkbox" id="noteHideFromStudent"> Masquer vision élève</label>
+    <div id="noteHideUntilWrap" style="display:none;margin:2px 0 8px 24px;font-size:13px;"><label style="font-weight:500;">Visible à partir du : <input type="date" id="noteHideUntil" style="width:auto;display:inline-block;"></label> <span style="color:#64748b;">(vide = reste masquée tant que tu ne la rends pas visible ; sinon elle apparaît à 00h00 ce jour-là)</span></div>
     <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
      <label>Compétences associées</label>
      <div id="noteCompetenciesContainer" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
@@ -1785,6 +1787,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
     </select>
     <label><input type="checkbox" id="classEvalDefaultImportant"> Note importante (par défaut)</label>
     <label><input type="checkbox" id="classEvalHideFromStudent"> Masquer vision élève</label>
+    <div id="classEvalHideUntilWrap" style="display:none;margin:2px 0 8px 24px;font-size:13px;"><label style="font-weight:500;">Visible à partir du : <input type="date" id="classEvalHideUntil" style="width:auto;display:inline-block;"></label> <span style="color:#64748b;">(vide = reste masquée tant que tu ne la rends pas visible ; sinon elle apparaît à 00h00 ce jour-là)</span></div>
     <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
      <button type="button" class="btn" id="classEvalAddCompBtn" style="background:#f1f5f9;border:1px solid #ccc;font-size:0.9em;">Associer des compétences</button>
      <div id="classEvalCompsList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
@@ -2164,7 +2167,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
  </div>
 </div>
 
-<div id="confirmModal" class="modal" aria-hidden="true">
+<div id="confirmModal" class="modal" aria-hidden="true" style="z-index:300;">
  <div class="modal-card" role="dialog" aria-modal="true">
   <div class="modal-header">
    <h3>Confirmation</h3>
@@ -2260,6 +2263,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
     </select>
    </div>
    <div class="form-row"><label><input type="checkbox" id="studentCompHideFromStudent"> Masquer vision élève</label></div>
+    <div id="studentCompHideUntilWrap" style="display:none;margin:2px 0 8px 24px;font-size:13px;"><label style="font-weight:500;">Visible à partir du : <input type="date" id="studentCompHideUntil" style="width:auto;display:inline-block;"></label> <span style="color:#64748b;">(vide = reste masquée tant que tu ne la rends pas visible ; sinon elle apparaît à 00h00 ce jour-là)</span></div>
    <div style="margin:10px 0;border-top:1px solid #e5e7eb;padding-top:10px;">
     <button class="btn" id="studentCompAddCommentBtn" style="background:#f1f5f9;border:1px solid #ccc;font-size:0.9em;">+ Ajouter un commentaire</button>
     <div id="studentCompCommentWrap" style="display:none;margin-top:8px;">
@@ -2290,6 +2294,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
    <div class="form-row"><label>Nom de l'évaluation</label><input id="classCompSetupLabel" placeholder="Ex: Comportement T1"></div>
    <div class="form-row"><label>Date</label><input id="classCompSetupDate" placeholder="JJ/MM/AA"></div>
    <div class="form-row"><label><input type="checkbox" id="classCompSetupHideFromStudent"> Masquer vision élève</label></div>
+    <div id="classCompSetupHideUntilWrap" style="display:none;margin:2px 0 8px 24px;font-size:13px;"><label style="font-weight:500;">Visible à partir du : <input type="date" id="classCompSetupHideUntil" style="width:auto;display:inline-block;"></label> <span style="color:#64748b;">(vide = reste masquée tant que tu ne la rends pas visible ; sinon elle apparaît à 00h00 ce jour-là)</span></div>
    <div style="margin:10px 0;border-top:1px solid #e5e7eb;padding-top:10px;">
     <button class="btn" id="classCompSetupAddCommentBtn" style="background:#f1f5f9;border:1px solid #ccc;font-size:0.9em;">+ Commentaire général</button>
     <div id="classCompSetupCommentWrap" style="display:none;margin-top:8px;">
@@ -2316,9 +2321,9 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
    <button class="modal-close" id="classCompGradingClose">×</button>
   </div>
   <div class="modal-body">
-   <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:10px;">
-    <div style="flex:1;"><label>Nom de l'évaluation de compétences</label><input id="classCompGradingMetaLabel" readonly style="background:#f3f4f6; cursor:not-allowed;"></div>
-    <div style="flex:0 0 200px;"><label>Date (JJ/MM/AA)</label><input id="classCompGradingMetaDate" readonly style="background:#f3f4f6; cursor:not-allowed;"></div>
+   <div style="display:flex;gap:12px;align-items:flex-end;justify-content:flex-end;margin-bottom:10px;">
+    <div style="display:none;"><label>Nom de l'évaluation de compétences</label><input id="classCompGradingMetaLabel" readonly style="background:#f3f4f6; cursor:not-allowed;"></div>
+    <div style="display:none;"><label>Date (JJ/MM/AA)</label><input id="classCompGradingMetaDate" readonly style="background:#f3f4f6; cursor:not-allowed;"></div>
     <div style="align-self:flex-end;"><button class="btn" id="classCompGradingAddCompBtn" style="display:none;">+ Ajouter une compétence</button></div>
    </div>
    <div id="classCompGradingGrid" style="overflow:auto;max-height:75vh;"></div>
@@ -4100,8 +4105,8 @@ function buildCSVText(){
  });
  (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
  (DATA.groups||[]).forEach(g=>{
-  (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0].join(";")));
-  (g.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0].join(";")));
+  (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0,ev.hideUntil||""].join(";")));
+  (g.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0,ev.hideUntil||""].join(";")));
  });
  DATA.classes.forEach(c=>{
   rows.push(["class",c.id,escapeCsv(c.name)].join(";"));
@@ -4111,17 +4116,17 @@ function buildCSVText(){
    else rows.push(["classSubject", c.id, escapeCsv(subName)].join(";"));
   });
   (c.memberIds||[]).forEach(mid=>rows.push(["classMember",c.id,mid].join(";")));
-  (c.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0].join(";")));
-  (c.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0].join(";")));
+  (c.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0,ev.hideUntil||""].join(";")));
+  (c.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0,ev.hideUntil||""].join(";")));
  });
  Object.entries(DATA.notes).forEach(([sid,arr])=>{
   const stu=DATA.students.find(s=>s.id===sid);
   arr.forEach(n=>{
-   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",escapeCsv(DATA.classes.find(c=>c.id===stu?.classId)?.name||""),escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null)),n.hwAuto?1:0].join(";"));
+   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",escapeCsv(DATA.classes.find(c=>c.id===stu?.classId)?.name||""),escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null)),n.hwAuto?1:0,n.hideUntil||""].join(";"));
   });
  });
  (DATA.competencies||[]).forEach(c=>{
-  rows.push(["competency",c.id||"",c.studentId||"",escapeCsv(c.domain||""),escapeCsv(c.level||""),escapeCsv(c.name||""),c.color||"",c.dateJJMMAA||"",c.date||"",escapeCsv(c.label||""),c.groupId||"",escapeCsv(c.subject||""),c.period||"",c.noteId||"",escapeCsv(c.comment||""),c.hideFromStudent?1:0,escapeCsv(c.cycle||""),escapeCsv(c.subDomain||"")].join(";"));
+  rows.push(["competency",c.id||"",c.studentId||"",escapeCsv(c.domain||""),escapeCsv(c.level||""),escapeCsv(c.name||""),c.color||"",c.dateJJMMAA||"",c.date||"",escapeCsv(c.label||""),c.groupId||"",escapeCsv(c.subject||""),c.period||"",c.noteId||"",escapeCsv(c.comment||""),c.hideFromStudent?1:0,escapeCsv(c.cycle||""),escapeCsv(c.subDomain||""),c.hideUntil||""].join(";"));
  });
  (DATA.appreciations||[]).forEach(a=>{rows.push(["appreciation",a.id||"",a.studentId||"",a.period||"",escapeCsv(a.subject||""),escapeCsv(a.text||"")].join(";"));});
  if (DATA.generalAppreciations) {
@@ -4207,7 +4212,7 @@ function importCSV(text){
      const baremeStr = unescapeCsv(cols[13]||"");
      let bareme = undefined;
      try { bareme = baremeStr ? JSON.parse(baremeStr) : undefined; } catch(e) {}
-     (cls.evals||(cls.evals=[])).push({id:cols[1],subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5],isoDate:cols[6],outof:parseFloat(cols[7])||20,coef:cols[8].length?parseFloat(cols[8]):1,period:cols[9]||"",defaultImportant:cols[10]==="1",generalComment:unescapeCsv(cols[11]||"")||undefined,hideFromStudent:cols[12]==="1", bareme, ...(cols[14]?{hwKey:cols[14],hwId:String(cols[14]).split("::")[0],hwTestId:String(cols[14]).split("::")[1]||"",hwDirect:cols[15]==="1",hwRevealed:cols[16]==="1"}:{})});
+     (cls.evals||(cls.evals=[])).push({id:cols[1],subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5],isoDate:cols[6],outof:parseFloat(cols[7])||20,coef:cols[8].length?parseFloat(cols[8]):1,period:cols[9]||"",defaultImportant:cols[10]==="1",generalComment:unescapeCsv(cols[11]||"")||undefined,hideFromStudent:cols[12]==="1", bareme, ...(cols[14]?{hwKey:cols[14],hwId:String(cols[14]).split("::")[0],hwTestId:String(cols[14]).split("::")[1]||"",hwDirect:cols[15]==="1",hwRevealed:cols[16]==="1"}:{}), ...(cols[17]?{hideUntil:cols[17]}:{})});
    }
   }
   else if(type==="note"){
@@ -4216,14 +4221,14 @@ function importCSV(text){
    const baremeStr = unescapeCsv(cols[22]||"");
    let bareme = undefined;
    try { bareme = baremeStr ? JSON.parse(baremeStr) : undefined; } catch(e) {}
-   DATA.notes[sid].push({subject:unescapeCsv(cols[6]||""),label:unescapeCsv(cols[7]||""),dateJJMMAA:cols[8]||"",isoDate:cols[9]||"",note:note==null?undefined:note,outof:parseFloat(cols[11])||20,coef:cols[12].length?parseFloat(cols[12]):1,noteText:unescapeCsv(cols[16]||"")||undefined,classCommon:cols[13]==="1",classId:cols[14]||"",classNoteId:cols[15]||"",period:cols[17]||undefined,important:cols[18]==="1",id:cols[19]||undefined,comment:unescapeCsv(cols[20]||"")||undefined,hideFromStudent:cols[21]==="1", bareme, ...(cols[23]==="1"?{hwAuto:true}:{})});
+   DATA.notes[sid].push({subject:unescapeCsv(cols[6]||""),label:unescapeCsv(cols[7]||""),dateJJMMAA:cols[8]||"",isoDate:cols[9]||"",note:note==null?undefined:note,outof:parseFloat(cols[11])||20,coef:cols[12].length?parseFloat(cols[12]):1,noteText:unescapeCsv(cols[16]||"")||undefined,classCommon:cols[13]==="1",classId:cols[14]||"",classNoteId:cols[15]||"",period:cols[17]||undefined,important:cols[18]==="1",id:cols[19]||undefined,comment:unescapeCsv(cols[20]||"")||undefined,hideFromStudent:cols[21]==="1", bareme, ...(cols[23]==="1"?{hwAuto:true}:{}), ...(cols[24]?{hideUntil:cols[24]}:{})});
   }
   else if(type==="competency"){
-   (DATA.competencies||(DATA.competencies=[])).push({id:cols[1]||('cp_'+Math.random().toString(36).slice(2)),studentId:cols[2]||"",domain:unescapeCsv(cols[3]||""),level:unescapeCsv(cols[4]||""),name:unescapeCsv(cols[5]||""),color:cols[6]||"",dateJJMMAA:cols[7]||undefined,date:cols[8]||undefined,label:unescapeCsv(cols[9]||"")||undefined,groupId:cols[10]||undefined,subject:unescapeCsv(cols[11]||"")||undefined,period:cols[12]||undefined,noteId:cols[13]||undefined,comment:unescapeCsv(cols[14]||"")||undefined,hideFromStudent:cols[15]==="1",cycle:unescapeCsv(cols[16]||"")||undefined,subDomain:unescapeCsv(cols[17]||"")||undefined});
+   (DATA.competencies||(DATA.competencies=[])).push({id:cols[1]||('cp_'+Math.random().toString(36).slice(2)),studentId:cols[2]||"",domain:unescapeCsv(cols[3]||""),level:unescapeCsv(cols[4]||""),name:unescapeCsv(cols[5]||""),color:cols[6]||"",dateJJMMAA:cols[7]||undefined,date:cols[8]||undefined,label:unescapeCsv(cols[9]||"")||undefined,groupId:cols[10]||undefined,subject:unescapeCsv(cols[11]||"")||undefined,period:cols[12]||undefined,noteId:cols[13]||undefined,comment:unescapeCsv(cols[14]||"")||undefined,hideFromStudent:cols[15]==="1",cycle:unescapeCsv(cols[16]||"")||undefined,subDomain:unescapeCsv(cols[17]||"")||undefined,hideUntil:cols[18]||undefined});
   }
   else if(type==="classCompEval"){
    const cls=classLike(cols[2]);
-   if(cls){if(!Array.isArray(cls.compEvals)) cls.compEvals=[];let template=[];try{const tplStr=unescapeCsv(cols[7]||"");template=tplStr?JSON.parse(tplStr):[];}catch(e){template=[];}cls.compEvals.push({id:cols[1]||"",subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5]||"",period:cols[6]||"",template,hideFromStudent:cols[8]==="1"});}
+   if(cls){if(!Array.isArray(cls.compEvals)) cls.compEvals=[];let template=[];try{const tplStr=unescapeCsv(cols[7]||"");template=tplStr?JSON.parse(tplStr):[];}catch(e){template=[];}cls.compEvals.push({id:cols[1]||"",subject:unescapeCsv(cols[3]||""),label:unescapeCsv(cols[4]||""),dateJJMMAA:cols[5]||"",period:cols[6]||"",template,hideFromStudent:cols[8]==="1",...(cols[9]?{hideUntil:cols[9]}:{})});}
   }
   else if(type==="appreciation"){
    if(!DATA.appreciations) DATA.appreciations=[];
@@ -5483,7 +5488,7 @@ function getOrCreateClassNoteIdForStudent(classId,classNoteId,studentId){
  if(found) return found.id;
  const cls=classLike(classId); const ev=(cls?.evals||[]).find(e=>e.id===classNoteId); if(!ev) return null;
  const newId='n_'+Math.random().toString(36).slice(2,9);
- const newNote={id:newId,classCommon:true,classId,classNoteId,subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,period:ev.period,hideFromStudent:ev.hideFromStudent,note:undefined};
+ const newNote={id:newId,classCommon:true,classId,classNoteId,subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,period:ev.period,hideFromStudent:ev.hideFromStudent,hideUntil:ev.hideUntil||undefined,note:undefined};
  if(!DATA.notes[studentId]) DATA.notes[studentId]=[]; DATA.notes[studentId].push(newNote); return newId;
 }
 
@@ -5495,6 +5500,7 @@ function openStudentCompModal(studentId){
  CURRENT_STUDENT_ID_FOR_COMP=studentId; CURRENT_COMP_LIST=[]; EDITING_COMP_GROUP_ID=null;
  document.getElementById("studentCompLabel").value="";
  document.getElementById("studentCompDate").value=todayJJMMAA();
+ setHideUntilUI("studentCompHideFromStudent","studentCompHideUntilWrap","studentCompHideUntil",false,"");
  const subSel=document.getElementById("studentCompSubject");
  if(subSel){
   const stu=DATA.students.find(s=>s.id===studentId);
@@ -5568,6 +5574,7 @@ document.getElementById("studentCompSave").addEventListener("click",()=>{
  const subject=document.getElementById("studentCompSubject").value;
  const compComment=(document.getElementById("studentCompComment")?.value||"").trim();
  const hideFromStudent=!!document.getElementById("studentCompHideFromStudent")?.checked;
+ const hideUntil=getHideUntilValue("studentCompHideFromStudent","studentCompHideUntil");
  if(!dateJJMMAA){alert("Date requise");return;}
  if(CURRENT_COMP_LIST.length===0){alert("Ajoutez au moins une compétence");return;}
  const saveAction=()=>{
@@ -5577,7 +5584,7 @@ document.getElementById("studentCompSave").addEventListener("click",()=>{
   const isoDate=todayISOFromDate(dObj||new Date());
   if(EDITING_COMP_GROUP_ID) DATA.competencies=DATA.competencies.filter(c=>c.groupId!==EDITING_COMP_GROUP_ID);
   CURRENT_COMP_LIST.forEach(c=>{
-   DATA.competencies.push({id:'cp_'+Math.random().toString(36).slice(2),studentId:CURRENT_STUDENT_ID_FOR_COMP,cycle:c.cycle,domain:c.domain,subDomain:c.subDomain,level:c.level,name:c.name,color:c.color,date:isoDate,dateJJMMAA,label:label||"Évaluation de compétences",groupId:grpId,period,subject,comment:compComment||undefined,hideFromStudent});
+   DATA.competencies.push({id:'cp_'+Math.random().toString(36).slice(2),studentId:CURRENT_STUDENT_ID_FOR_COMP,cycle:c.cycle,domain:c.domain,subDomain:c.subDomain,level:c.level,name:c.name,color:c.color,date:isoDate,dateJJMMAA,label:label||"Évaluation de compétences",groupId:grpId,period,subject,comment:compComment||undefined,hideFromStudent,hideUntil:hideUntil||undefined});
   });
   closeStudentCompModal();
   if(document.getElementById("elevesView").classList.contains("active")&&document.getElementById("studentContent").style.display==="block"){
@@ -5617,8 +5624,7 @@ function openEditStudentComp(studentId,groupId){
  }
  const pSel=document.getElementById("studentCompPeriod");
  if(pSel&&comps[0]?.period) pSel.value=comps[0].period;
- const hChk=document.getElementById("studentCompHideFromStudent");
- if(hChk) hChk.checked=comps[0]?.hideFromStudent||false;
+ setHideUntilUI("studentCompHideFromStudent","studentCompHideUntilWrap","studentCompHideUntil",!!comps[0]?.hideFromStudent,comps[0]?.hideUntil);
  const cWrap=document.getElementById("studentCompCommentWrap"),cInp=document.getElementById("studentCompComment");
  if(cWrap&&cInp){cInp.value=comps[0]?.comment||"";cWrap.style.display=cInp.value?"block":"none";}
  CURRENT_COMP_LIST=comps.map(x=>({cycle:x.cycle,domain:x.domain,subDomain:x.subDomain,level:x.level,name:x.name,color:x.color}));
@@ -5646,6 +5652,7 @@ function openClassCompSetupModal(classId,prefillSubject=null,periodKey=null,exis
  CURRENT_CLASS_COMP_PERIOD=periodKey||CURRENT_CLASS_COMP_PERIOD||"T1";
  CURRENT_COMP_LIST=[]; EDITING_CLASS_COMP_GROUP_ID=null;
  CLASS_COMP_LINK_TO_EVAL_ID = linkEvalId; // Use the passed ID
+ setHideUntilUI("classCompSetupHideFromStudent","classCompSetupHideUntilWrap","classCompSetupHideUntil",!!existingCompEval?.hideFromStudent,existingCompEval?.hideUntil);
  
  const titleEl=document.getElementById("classCompSetupTitle");
  if(titleEl) titleEl.textContent=CLASS_COMP_LINK_TO_EVAL_ID?"Associer des compétences à l'évaluation":"Évaluation de compétences (Classe)";
@@ -5695,7 +5702,23 @@ function renderClassCompSetupListUI(){
  CURRENT_COMP_LIST.forEach((item,idx)=>{
   const div=document.createElement("div"); div.className="comp-item";
   div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><span><strong>${item.domain}</strong> - ${item.name}</span><button class="btn btn-danger" style="padding:2px 6px;">&times;</button></div>`;
-  div.querySelector("button").addEventListener("click",()=>{CURRENT_COMP_LIST.splice(idx,1);renderClassCompSetupListUI();});
+  div.querySelector("button").addEventListener("click",()=>{
+   /* supprime la compétence ET décale les résultats saisis des compétences suivantes (ils sont rangés par position) */
+   const doRemove=()=>{
+    CURRENT_COMP_LIST.splice(idx,1);
+    Object.keys(CLASS_COMP_GRADES||{}).forEach(sid=>{
+     const g=CLASS_COMP_GRADES[sid]; if(!g) return;
+     const ng={};
+     Object.keys(g).forEach(k=>{ const n=Number(k); if(n<idx) ng[n]=g[k]; else if(n>idx) ng[n-1]=g[k]; });
+     CLASS_COMP_GRADES[sid]=ng;
+    });
+    renderClassCompSetupListUI();
+   };
+   const withResult=Object.values(CLASS_COMP_GRADES||{}).filter(g=>g && g[idx]).length;
+   if(withResult>0){
+    openConfirmModal({message:`${withResult} élève${withResult>1?"s ont":" a"} déjà un résultat pour « ${item.name} ». Supprimer cette compétence effacera ${withResult>1?"ces résultats":"ce résultat"}. Supprimer quand même ?`,okLabel:"Supprimer",cancelLabel:"Annuler",onConfirm:doRemove});
+   }else doRemove();
+  });
   list.appendChild(div);
  });
 }
@@ -5890,6 +5913,7 @@ document.getElementById("classCompGradingFinish").addEventListener("click",()=>{
  let grpId=EDITING_CLASS_COMP_GROUP_ID||('grp_'+Math.random().toString(36).slice(2));
  let subject=document.getElementById("classCompSetupSubject").value||EDITING_CLASS_COMP_SUBJECT||"";
  const hideFromStudent=!!document.getElementById("classCompSetupHideFromStudent")?.checked;
+ const hideUntil=getHideUntilValue("classCompSetupHideFromStudent","classCompSetupHideUntil");
  const linkEvalId=CLASS_COMP_LINK_TO_EVAL_ID;
  if(!DATA.competencies) DATA.competencies=[];
  if(EDITING_CLASS_COMP_GROUP_ID) DATA.competencies=DATA.competencies.filter(c=>c.groupId!==EDITING_CLASS_COMP_GROUP_ID);
@@ -5905,7 +5929,7 @@ document.getElementById("classCompGradingFinish").addEventListener("click",()=>{
       const ev=(clsObj?.evals||[]).find(e=>e.id===CLASS_COMP_LINK_TO_EVAL_ID);
       if(ev){label=ev.label||label;dateJJMMAA=ev.dateJJMMAA||dateJJMMAA;isoDate=ev.isoDate||isoDate;subject=ev.subject||subject;grpId=ev.id;linkNoteId=getOrCreateClassNoteIdForStudent(CURRENT_CLASS_ID_FOR_COMP,CLASS_COMP_LINK_TO_EVAL_ID,stu.id);}
      }
-     DATA.competencies.push({id:'cp_'+Math.random().toString(36).slice(2),studentId:stu.id,cycle:c.cycle,domain:c.domain,subDomain:c.subDomain,level:c.level,name:c.name,color:grades[cIdx],date:isoDate,dateJJMMAA,label,groupId:grpId,subject,period:CURRENT_CLASS_COMP_PERIOD,noteId:linkNoteId||null,comment:CLASS_COMP_STUDENT_COMMENTS[stu.id]||undefined,hideFromStudent});
+     DATA.competencies.push({id:'cp_'+Math.random().toString(36).slice(2),studentId:stu.id,cycle:c.cycle,domain:c.domain,subDomain:c.subDomain,level:c.level,name:c.name,color:grades[cIdx],date:isoDate,dateJJMMAA,label,groupId:grpId,subject,period:CURRENT_CLASS_COMP_PERIOD,noteId:linkNoteId||null,comment:CLASS_COMP_STUDENT_COMMENTS[stu.id]||undefined,hideFromStudent,hideUntil:hideUntil||undefined});
     }
    });
   }
@@ -5920,7 +5944,7 @@ document.getElementById("classCompGradingFinish").addEventListener("click",()=>{
  if(cls&&!linkEvalId){
   if(!Array.isArray(cls.compEvals)) cls.compEvals=[];
   const idx=cls.compEvals.findIndex(e=>e.id===grpId);
-  const entry={id:grpId,subject,label,dateJJMMAA,period:CURRENT_CLASS_COMP_PERIOD,hideFromStudent,template:CURRENT_COMP_LIST.map(x=>({cycle:x.cycle,domain:x.domain,subDomain:x.subDomain,level:x.level,name:x.name}))};
+  const entry={id:grpId,subject,label,dateJJMMAA,period:CURRENT_CLASS_COMP_PERIOD,hideFromStudent,hideUntil:hideUntil||undefined,template:CURRENT_COMP_LIST.map(x=>({cycle:x.cycle,domain:x.domain,subDomain:x.subDomain,level:x.level,name:x.name}))};
   const saveAndClose=()=>{
    if(idx>=0) cls.compEvals[idx]=entry; else cls.compEvals.push(entry);
    closeClassCompGradingModal(); if(cls) openClass(cls.id);
@@ -6382,7 +6406,7 @@ function openNoteFormModal(studentId=null, noteToEdit=null, editIndex=null){
   document.getElementById("noteOutof").value = 20;
   document.getElementById("noteCoef").value = 1;
   document.getElementById("noteImportant").checked = false;
-  document.getElementById("noteHideFromStudent").checked = false;
+  setHideUntilUI("noteHideFromStudent","noteHideUntilWrap","noteHideUntil",false,"");
 
   // Pré-remplit si modification
   if(noteToEdit){
@@ -6394,7 +6418,7 @@ function openNoteFormModal(studentId=null, noteToEdit=null, editIndex=null){
     document.getElementById("noteCoef").value = noteToEdit.coef;
     document.getElementById("notePeriod").value = noteToEdit.period||"T1";
     document.getElementById("noteImportant").checked = !!noteToEdit.important;
-    document.getElementById("noteHideFromStudent").checked = !!noteToEdit.hideFromStudent;
+    setHideUntilUI("noteHideFromStudent","noteHideUntilWrap","noteHideUntil",!!noteToEdit.hideFromStudent,noteToEdit.hideUntil);
     document.getElementById("noteFormTitle").textContent = "Modifier une note individuelle";
   } else {
     document.getElementById("noteFormTitle").textContent = "Ajouter une note individuelle";
@@ -6559,6 +6583,7 @@ noteForm.addEventListener("submit", e => {
   const period = document.getElementById("notePeriod").value||"T1";
   const important = !!document.getElementById("noteImportant").checked;
   const hideFromStudent = !!document.getElementById("noteHideFromStudent")?.checked;
+  const hideUntil = getHideUntilValue("noteHideFromStudent","noteHideUntil");
 
   if(!studentId||!subject||isNaN(outof)||isNaN(coef)){alert("Élève, matière, sur et coef sont requis.");return;}
   if(period!=="YEAR"&&LOCKED_PERIODS[period]){alert("Ce trimestre est verrouillé.");return;}
@@ -6569,7 +6594,7 @@ noteForm.addEventListener("submit", e => {
   else{dObj=parseDateJJMMAA(dateJJMMAA);if(!dObj){alert("Date invalide (JJ/MM/AA).");return;}}
   const isoDate = todayISOFromDate(dObj);
 
-  const noteObj = {subject,label,dateJJMMAA,isoDate,outof,coef,classCommon:false,period,important,hideFromStudent};
+  const noteObj = {subject,label,dateJJMMAA,isoDate,outof,coef,classCommon:false,period,important,hideFromStudent,hideUntil:hideUntil||undefined};
 
   // Barème
   if(NOTE_FORM_STATE.currentBareme?.criteria?.length){
@@ -8054,8 +8079,14 @@ function renderClassEvalComps(){
     div.innerHTML = `<span>${c.name} (${c.domain})</span><span style="color:#ef4444;font-weight:bold;cursor:pointer;padding-left:4px;">&times;</span>`;
     div.querySelector("span:last-child").addEventListener("click", (e)=>{
       e.stopPropagation();
-      CURRENT_CLASS_EVAL_COMPS.splice(idx, 1);
-      renderClassEvalComps();
+      const doRemove=()=>{ CURRENT_CLASS_EVAL_COMPS.splice(idx, 1); renderClassEvalComps(); };
+      /* élèves ayant déjà un résultat saisi pour cette compétence dans cette évaluation */
+      const withResult = EDITING_CLASS_EVAL
+        ? new Set((DATA.competencies||[]).filter(x=>x.groupId===EDITING_CLASS_EVAL.id && x.domain===c.domain && x.name===c.name && x.color).map(x=>x.studentId)).size
+        : 0;
+      if(withResult>0){
+        openConfirmModal({message:`${withResult} élève${withResult>1?"s ont":" a"} déjà un résultat pour « ${c.name} ». Supprimer cette compétence effacera ${withResult>1?"ces résultats":"ce résultat"} à l'enregistrement. Supprimer quand même ?`,okLabel:"Supprimer",cancelLabel:"Annuler",onConfirm:doRemove});
+      }else doRemove();
     });
     container.appendChild(div);
   });
@@ -8081,7 +8112,7 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
  document.getElementById("classSubject").innerHTML=SUBJECT_REGISTRY.map(s=>`<option>${typeof s==='object'?s.name:s}</option>`).join("");
  if(prefillSubject) document.getElementById("classSubject").value=prefillSubject;
  document.getElementById("classEvalDefaultImportant").checked=false;
- document.getElementById("classEvalHideFromStudent").checked=false;
+ setHideUntilUI("classEvalHideFromStudent","classEvalHideUntilWrap","classEvalHideUntil",false,"");
  CURRENT_CLASS_EVAL_COMPS = [];
  renderClassEvalComps();
  const wrap=document.getElementById("classEvalCommentWrap"),ta=document.getElementById("classEvalGeneralComment");
@@ -8096,7 +8127,7 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
   document.getElementById("classCoef").value=(evaluation.coef !== undefined && evaluation.coef !== null) ? evaluation.coef : 1;
   document.getElementById("classEvalPeriod").value=evaluation.period||"T1";
   document.getElementById("classEvalDefaultImportant").checked=!!evaluation.defaultImportant;
-  document.getElementById("classEvalHideFromStudent").checked=!!evaluation.hideFromStudent;
+  setHideUntilUI("classEvalHideFromStudent","classEvalHideUntilWrap","classEvalHideUntil",!!evaluation.hideFromStudent,evaluation.hideUntil);
   if(evaluation.generalComment){if(wrap)wrap.style.display="block";if(ta)ta.value=evaluation.generalComment;}
   TEMP_BAREME_FOR_CLASS_CREATE=evaluation.bareme||null;
   
@@ -8171,6 +8202,7 @@ classEvalForm.addEventListener("submit",e=>{
  const period=document.getElementById("classEvalPeriod").value||"T1";
  const defaultImportant=!!document.getElementById("classEvalDefaultImportant").checked;
  const hideFromStudent=!!document.getElementById("classEvalHideFromStudent")?.checked;
+ const hideUntil=getHideUntilValue("classEvalHideFromStudent","classEvalHideUntil");
  let dateJJMMAA=(document.getElementById("classDate").value||"").trim(),dObj;
  if(!clsId||!subject||isNaN(outof)||isNaN(coef)){alert("Classe, matière, sur et coef requis.");return;}
  if(period!=="YEAR"&&LOCKED_PERIODS[period]){alert("Ce trimestre est verrouillé.");return;}
@@ -8188,6 +8220,7 @@ classEvalForm.addEventListener("submit",e=>{
   const currentBareme = targetEval.bareme;
   
   Object.assign(targetEval, {subject,label,dateJJMMAA,isoDate,outof,coef,period,defaultImportant,hideFromStudent});
+  if(hideUntil) targetEval.hideUntil=hideUntil; else delete targetEval.hideUntil;
   
   if(BAREME_WAS_CHANGED_FOR_CLASS) {
     targetEval.bareme = TEMP_BAREME_FOR_CLASS_CREATE;
@@ -8204,6 +8237,7 @@ classEvalForm.addEventListener("submit",e=>{
     if(nIdx>=0){
       const noteObj = arr[nIdx];
       Object.assign(noteObj, {subject,label,dateJJMMAA,isoDate,outof:targetEval.outof,coef,period,important:defaultImportant,hideFromStudent});
+      if(hideUntil) noteObj.hideUntil=hideUntil; else delete noteObj.hideUntil;
       
       // Si le barème a été CHANGÉ (nouveau template), on l'applique aux élèves (perte des scores car structure différente)
       // Sinon on ne touche pas au bareme de l'élève (conserve ses scores)
@@ -8221,6 +8255,7 @@ classEvalForm.addEventListener("submit",e=>{
  } else {
   const id='ev_'+Math.random().toString(36).slice(2,10);
   targetEval={id,subject,label,dateJJMMAA,isoDate,outof,coef,period,defaultImportant,hideFromStudent};
+  if(hideUntil) targetEval.hideUntil=hideUntil;
   if(TEMP_BAREME_FOR_CLASS_CREATE) targetEval.bareme=TEMP_BAREME_FOR_CLASS_CREATE;
   (cls.evals||(cls.evals=[])).push(targetEval);
  }
@@ -8229,7 +8264,7 @@ classEvalForm.addEventListener("submit",e=>{
  if(generalComment) targetEval.generalComment=generalComment; else delete targetEval.generalComment;
 
  // Sauvegarde des compétences associées
- if(CURRENT_CLASS_EVAL_COMPS.length > 0){
+ if(CURRENT_CLASS_EVAL_COMPS.length > 0 || EDITING_CLASS_EVAL){
   (cls.memberIds||[]).forEach(sid=>{
    if(!DATA.competencies) DATA.competencies=[];
    
@@ -8255,6 +8290,7 @@ classEvalForm.addEventListener("submit",e=>{
       subject: subject,
       period: period,
       hideFromStudent: hideFromStudent,
+      hideUntil: hideUntil||undefined,
       noteId: getOrCreateClassNoteIdForStudent(clsId, targetEval.id, sid)
      });
      newStudentComps.push(found);
@@ -8276,7 +8312,8 @@ classEvalForm.addEventListener("submit",e=>{
       label: label || "Évaluation de compétences",
       subject: subject,
       period: period,
-      hideFromStudent: hideFromStudent
+      hideFromStudent: hideFromStudent,
+      hideUntil: hideUntil||undefined
      });
     }
    });
@@ -8507,7 +8544,7 @@ function autosaveClassNote(stuId,classId,ev,rawVal,importantFlag,baremeData=null
  if(ev.period!=="YEAR"&&LOCKED_PERIODS[ev.period]) return;
  const trimmed=normSpecialInput(rawVal);
  if(!DATA.notes[stuId]) DATA.notes[stuId]=[];
- const base={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,classCommon:true,classId,classNoteId:ev.id,period:ev.period||"YEAR",important:!!importantFlag,hideFromStudent:!!ev.hideFromStudent};
+ const base={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,classCommon:true,classId,classNoteId:ev.id,period:ev.period||"YEAR",important:!!importantFlag,hideFromStudent:!!ev.hideFromStudent,hideUntil:ev.hideUntil||undefined};
  if(baremeData) base.bareme=baremeData;
  let noteObj;
  if(CLASS_SPECIAL_VALUES.has(trimmed)) noteObj={...base,noteText:trimmed};
@@ -8525,7 +8562,7 @@ function getOrCreateClassNoteIdForStudent(classId,evalId,stuId){
  let note=arr.find(m=>m.classCommon&&m.classId===classId&&m.classNoteId===evalId);
  if(!note){
   const cls=classLike(classId);const ev=(cls?.evals||[]).find(e=>e.id===evalId);
-  if(ev){note={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,classCommon:true,classId,classNoteId:evalId,period:ev.period||"YEAR",important:!!ev.defaultImportant,hideFromStudent:!!ev.hideFromStudent};note.id='n_'+Math.random().toString(36).slice(2,9);arr.push(note);}else return null;
+  if(ev){note={subject:ev.subject,label:ev.label,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,classCommon:true,classId,classNoteId:evalId,period:ev.period||"YEAR",important:!!ev.defaultImportant,hideFromStudent:!!ev.hideFromStudent,hideUntil:ev.hideUntil||undefined};note.id='n_'+Math.random().toString(36).slice(2,9);arr.push(note);}else return null;
  }
  if(!note.id) note.id='n_'+Math.random().toString(36).slice(2,9);
  return note.id;
@@ -11478,7 +11515,51 @@ document.getElementById("onlineAnswersSave")?.addEventListener("click",()=>{
  closeOnlineTestAnswersModal();
 });
 
+/* ── Visibilité différée : « Visible à partir du » ───────────────────────────── */
+function setHideUntilUI(chkId,wrapId,inpId,hide,until){
+ const chk=document.getElementById(chkId), wrap=document.getElementById(wrapId), inp=document.getElementById(inpId);
+ if(chk) chk.checked=!!hide;
+ if(inp) inp.value=hide ? (until||"") : "";
+ if(wrap) wrap.style.display=hide ? "block" : "none";
+}
+function getHideUntilValue(chkId,inpId){
+ return document.getElementById(chkId)?.checked ? (document.getElementById(inpId)?.value||"") : "";
+}
+[["noteHideFromStudent","noteHideUntilWrap","noteHideUntil"],
+ ["classEvalHideFromStudent","classEvalHideUntilWrap","classEvalHideUntil"],
+ ["studentCompHideFromStudent","studentCompHideUntilWrap","studentCompHideUntil"],
+ ["classCompSetupHideFromStudent","classCompSetupHideUntilWrap","classCompSetupHideUntil"]
+].forEach(([c,w,i])=>{
+ document.getElementById(c)?.addEventListener("change",()=>setHideUntilUI(c,w,i,document.getElementById(c).checked,document.getElementById(i)?.value||""));
+});
+/* Fait apparaître (00h00 locale) les évaluations / notes / compétences dont la date « visible à partir du » est atteinte.
+   Retourne true si quelque chose a changé. */
+function applyScheduledReveals(){
+ const t=new Date(), pad=n=>String(n).padStart(2,"0");
+ const todayIso=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+ let changed=false;
+ const reveal=x=>{
+  if(x && x.hideFromStudent && x.hideUntil && todayIso>=x.hideUntil){ x.hideFromStudent=false; delete x.hideUntil; changed=true; }
+ };
+ [...(DATA.classes||[]),...(typeof grpEns==="function" ? grpEns() : [])].forEach(c=>{
+  (c.evals||[]).forEach(reveal);
+  (c.compEvals||[]).forEach(reveal);
+ });
+ Object.values(DATA.notes||{}).forEach(arr=>(arr||[]).forEach(reveal));
+ (DATA.competencies||[]).forEach(reveal);
+ return changed;
+}
+setInterval(()=>{
+ try{
+  if(applyScheduledReveals()){
+   if(typeof AUTH!=="undefined" && AUTH.role==="prof") saveData();
+   rebuildUI();
+  }
+ }catch(e){}
+},30000);
+
 function rebuildUI(){
+ try{ applyScheduledReveals(); }catch(e){}
  ensureOnlineTestsStore(); ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
  renderClassList(); renderClassSelects(); renderStudentList();
  refreshLocksUI(); applyLocksEffects(); updateTabWarningIndicators();
@@ -14355,6 +14436,13 @@ function vsItems(sid){
  V.sanctions.filter(x=>x.sid===sid).forEach(x=>out.push({kind:"san",key:x.id,sid,s:x,date:x.date,ts:x.date+"T"+(x.time||"00:00")}));
  return out.sort((a,b)=>a.ts<b.ts?1:-1);
 }
+/* fines bandes de couleur à gauche du nom : bleu = absence, orange = retard, rouge = sanction (cumulables) */
+function vsBands(sid){
+ const k=new Set(vsItems(sid).map(i=>i.kind));
+ const col=[["abs","#2563eb","Absence(s)"],["ret","#f97316","Retard(s)"],["san","#dc2626","Sanction(s)"]];
+ const h=col.filter(c=>k.has(c[0])).map(c=>'<i style="background:'+c[1]+'" title="'+c[2]+'"></i>').join("");
+ return h?'<span class="vs-bands">'+h+'</span>':"";
+}
 function absDur(it){
  const st=DATA.students.find(s=>s.id===it.sid);
  const day=schEns().events.filter(e=>e.date===it.date&&!e.cancelled&&st&&studentInTargets(st,e.classIds||[]));
@@ -14381,7 +14469,7 @@ function renderVie(){
  const list=DATA.students.filter(s=>!VS.cls||s.classId===VS.cls).sort(cmpStu);
  if(VS.tab==="hist"){ root.innerHTML=vsTabs()+histHtml(); holMark(root); return; }
  root.innerHTML=vsTabs()+'<div class="vs-split"><div class="vs-side"><select id="vsCls" class="btn" style="width:100%"><option value="">Toutes les classes</option>'+DATA.classes.map(c=>'<option value="'+c.id+'"'+(c.id===VS.cls?" selected":"")+'>'+escHtml(c.name)+'</option>').join("")+'</select><div class="vs-list">'
-  +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'"'+'>'+escHtml(s.last)+' '+escHtml(s.first)+'</div>').join("")+'</div></div><div class="vs-main">'
+  +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'"'+'>'+vsBands(s.id)+'<span>'+escHtml(s.last)+' '+escHtml(s.first)+'</span></div>').join("")+'</div></div><div class="vs-main">'
   +(VS.sid?vsContent(VS.sid):'<div class="pl-empty">Cliquez sur un élève pour voir sa vie scolaire.</div>')+'</div></div>';
 }
 function vsDetail(sid,key){
@@ -14389,21 +14477,25 @@ function vsDetail(sid,key){
  let body="", btns=[{label:"Fermer"}];
  if(it.kind==="san"){
   const s=it.s, d=s.d||{}, L=SAN[s.level];
-  body=vsRow("Sanction",'<b style="color:'+L.c+'">'+L.n+'</b>')+vsRow("Date",escHtml(dLong(s.date))+(s.time?" à "+hmF(s.time):""))+vsRow("Motif",escHtml(s.motif||"—"));
+  const stuSan=DATA.students.find(x=>x.id===s.sid);
+  body=(prof&&stuSan ? vsRow("Élève","<b>"+escHtml(stuSan.first+" "+stuSan.last)+"</b>") : "")+vsRow("Sanction",'<b style="color:'+L.c+'">'+L.n+'</b>')+vsRow("Date",escHtml(dLong(s.date))+(s.time?" à "+hmF(s.time):""))+vsRow("Motif",escHtml(s.motif||"—"));
   if(s.level==="J") body+=vsRow("Sanction appliquée","Travail à rendre pour le <b>"+escHtml(dLong(d.dueDate))+"</b> à "+hmF(d.dueTime))+vsRow("Travail",escHtml(d.work||"").replace(/\n/g,"<br>"));
   else body+=vsRow("Sanction appliquée","Retenue de <b>"+d.h+" h "+d.m+" min</b> le "+escHtml(dLong(d.day))+", de "+hmF(d.start)+" à "+hmF(minToHM(tmin(d.start)+d.h*60+d.m)))+(s.level==="R"?vsRow("Travail",escHtml(d.work||"").replace(/\n/g,"<br>")):"");
   body+=vsRow("Professeur",escHtml(s.prof||"—"));
-  if(prof) btns.unshift({label:"Supprimer la sanction",cls:"btn-danger",fn:()=>{ if(!confirm("Supprimer cette sanction ?")) return false; V.sanctions=V.sanctions.filter(x=>x.id!==key); saveData(); renderVie(); renderSchedule(); }});
+  if(prof){
+   btns.unshift({label:"Supprimer la sanction",cls:"btn-danger",fn:()=>{ if(!confirm("Supprimer cette sanction ?")) return false; V.sanctions=V.sanctions.filter(x=>x.id!==key); saveData(); renderVie(); renderSchedule(); }});
+   btns.unshift({label:"Modifier la sanction",cls:"btn-primary",fn:()=>vsSanForm(s.sid,s)});
+  }
  } else {
   if(it.kind==="abs") body=vsRow("Date",escHtml(dLong(it.date)))+vsRow("Durée",absDur(it))+vsRow("Cours concernés",it.list.map(a=>hmF(a.start)+" - "+hmF(a.end)+" · "+escHtml(a.subject)).join("<br>"));
   else body=vsRow("Date",escHtml(dLong(it.date)))+vsRow("Cours concerné",escHtml(it.a.subject))+vsRow("Heure demandée",hmF(it.a.start))+vsRow("Heure d'arrivée",hmF(it.time))+vsRow("Durée du retard",retMin(it)+" min");
  }
  vsPop(it.kind==="san"?"Sanction":it.kind==="abs"?"Absence":"Retard",body,btns);
 }
-function vsSanForm(sid){
+function vsSanForm(sid,ed){
  const st=DATA.students.find(s=>s.id===sid); if(!st) return;
  const f='';
- const m=vsPop("Sanction — "+escHtml(st.first+" "+st.last),
+ const m=vsPop((ed?"Modifier la sanction — ":"Sanction — ")+escHtml(st.first+" "+st.last),
   '<label>Date</label><input type="date" id="sDate" '+f+' value="'+isoD(new Date())+'"><label>Heure</label><input type="time" id="sTime" '+f+' value="'+nowHM()+'">'
   +'<label>Motif</label><textarea id="sMotif" rows="2" '+f+'></textarea>'
   +'<label>Degré de la sanction</label><div class="dd"><input type="hidden" id="sLvl" value="J"><button type="button" class="dd-btn"><span class="dd-dot" style="background:#eab308"></span><span class="dd-lab">Colle jaune — travail à faire</span><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></button><div class="dd-menu"><div class="dd-it" data-v="J" data-c="#eab308"><span class="dd-dot" style="background:#eab308"></span>Colle jaune — travail à faire</div><div class="dd-it" data-v="V" data-c="#16a34a"><span class="dd-dot" style="background:#16a34a"></span>Colle verte — retenue sans travail</div><div class="dd-it" data-v="R" data-c="#dc2626"><span class="dd-dot" style="background:#dc2626"></span>Colle rouge — retenue avec travail</div></div></div>'
@@ -14418,13 +14510,23 @@ function vsSanForm(sid){
    else { d.h=Math.max(0,parseInt(q("sH"))||0); d.m=Math.max(0,parseInt(q("sMin"))||0); d.day=q("sDay"); d.start=q("sStart");
     if(d.h*60+d.m<=0||!d.day||!d.start){ alert("Indiquez la durée, le jour et l'heure de début."); return false; }
     if(L==="R"){ d.work=q("sW").trim(); if(!d.work){ alert("Indiquez le travail à faire."); return false; } } }
-   vsEns().sanctions.push({id:vsUid("sn"),sid,level:L,date:q("sDate"),time:q("sTime"),motif:q("sMotif").trim(),d,prof:profShort(),createdAt:new Date().toISOString()});
-   saveData(); renderVie(); }}]);
+   if(ed) Object.assign(ed,{level:L,date:q("sDate"),time:q("sTime"),motif:q("sMotif").trim(),d});
+   else vsEns().sanctions.push({id:vsUid("sn"),sid,level:L,date:q("sDate"),time:q("sTime"),motif:q("sMotif").trim(),d,prof:profShort(),createdAt:new Date().toISOString()});
+   saveData(); renderVie(); try{ renderSchedule(); }catch(e){} }}]);
  const upd=()=>{ const L=m.querySelector("#sLvl").value; m.querySelector("#sJ").style.display=L==="J"?"":"none"; m.querySelector("#sVR").style.display=L==="J"?"none":""; m.querySelector("#sWork").style.display=L==="V"?"none":""; };
  const dd=m.querySelector(".dd");
  dd.querySelector(".dd-btn").onclick=ev=>{ ev.stopPropagation(); dd.classList.toggle("open"); };
  dd.querySelectorAll(".dd-it").forEach(it=>it.onclick=ev=>{ ev.stopPropagation(); m.querySelector("#sLvl").value=it.dataset.v; dd.querySelector(".dd-lab").textContent=it.textContent;
   dd.querySelector(".dd-btn .dd-dot").style.background=it.dataset.c; dd.classList.remove("open"); upd(); });
+ if(ed){ /* pré-remplissage pour la modification */
+  const setV=(i,v)=>{ const el=m.querySelector("#"+i); if(el&&v!=null) el.value=v; }, d0=ed.d||{};
+  setV("sDate",ed.date); setV("sTime",ed.time||""); setV("sMotif",ed.motif||"");
+  const opt=dd.querySelector('.dd-it[data-v="'+ed.level+'"]');
+  if(opt){ m.querySelector("#sLvl").value=ed.level; dd.querySelector(".dd-lab").textContent=opt.textContent; dd.querySelector(".dd-btn .dd-dot").style.background=opt.dataset.c; }
+  setV("sW",d0.work||""); setV("sDueD",d0.dueDate||""); setV("sDueT",d0.dueTime||"08:00");
+  setV("sH",d0.h!=null?d0.h:1); setV("sMin",d0.m!=null?d0.m:0); setV("sDay",d0.day||""); setV("sStart",d0.start||"17:00");
+  if(d0.day) m.querySelector("#sDayN").textContent=new Date(d0.day+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long"});
+ }
  m.onclick=()=>dd.classList.remove("open"); upd();
  m.querySelector("#sDay").onchange=e=>{ m.querySelector("#sDayN").textContent=e.target.value?new Date(e.target.value+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long"}):""; };
 }
@@ -14439,7 +14541,7 @@ document.getElementById("vieBody").addEventListener("change",e=>{ if(e.target.id
 function vsSanSlots(){
  let l=vsEns().sanctions; if(AUTH.role==="eleve") l=l.filter(x=>x.sid===AUTH.studentId);
  return l.map(x=>{ const d=x.d||{}, st=DATA.students.find(s=>s.id===x.sid), nm=AUTH.role==="eleve"?"":(st?st.last+" "+st.first:"");
-  if(x.level==="J") return {id:x.id,L:x.level,date:d.dueDate,start:d.dueTime,end:minToHM(tmin(d.dueTime)+30),nm,sub:"Date limite"};
+  if(x.level==="J") return {id:x.id,L:x.level,date:d.dueDate,start:d.dueTime,end:minToHM(tmin(d.dueTime)+60),nm,sub:"Date limite"};
   return {id:x.id,L:x.level,date:d.day,start:d.start,end:minToHM(tmin(d.start)+d.h*60+d.m),nm,sub:"Retenue"}; });
 }
 const _renderSchedule=renderSchedule;
@@ -14459,7 +14561,7 @@ renderSchedule=function(){
   const iso=isoD(d), H=parseFloat(col.style.height)||0;
   const mine=slots.filter(s=>s.date===iso&&(tmin(s.start)-h0*60)*0.9>=0&&(tmin(s.start)-h0*60)*0.9<H); const n=mine.length;
   mine.forEach((s,k)=>{ const top=(tmin(s.start)-h0*60)*0.9, ht=Math.max(34,(tmin(s.end)-tmin(s.start))*0.9-1);
-   col.insertAdjacentHTML("beforeend",blk(s,"top:"+top+"px;height:"+ht+"px;left:calc("+(50+k*(50/n))+"% + 1px);width:calc("+(50/n)+"% - 2px)")); });
+   col.insertAdjacentHTML("beforeend",blk(s,"top:"+top+"px;height:"+ht+"px;left:calc("+(k*(100/n))+"% + 1px);width:calc("+(100/n)+"% - 2px)")); });
  });
 };
 document.getElementById("scheduleBody").addEventListener("click",e=>{
