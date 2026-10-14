@@ -676,8 +676,8 @@ body.student-mode .container .card{ border-top-left-radius:0 }
 .subtabs .subtab-btn.active{ background:var(--grad); color:#fff; box-shadow:0 2px 6px rgba(37,99,235,.35) }
 
 /* ── Soulignement des nouvelles notes (cadre invisible élargi) ── */
-.note-pill.today{ position:relative; padding:0 0 4px !important; margin:0 0 -3px !important; border-bottom:none !important }
-.note-pill.today.important{ margin:0 0 -3px !important }
+.note-pill.today{ position:relative; padding:0 0 6px !important; margin:0 0 -5px !important; border-bottom:none !important }
+.note-pill.today.important{ margin:0 0 -5px !important }
 /* Soulignement : tracé depuis la zone réellement visible (encre) du texte, débord identique à gauche et à droite (variables posées par le script ci-dessous) */
 .note-pill.today::after{ content:""; position:absolute; bottom:0; height:2px; background:#1d4ed8; left:var(--ul-l,-6px); right:var(--ul-r,-6px); pointer-events:none }
 
@@ -13888,7 +13888,7 @@ function schEvents(){
 function schBlock(e,pos,chip){
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
  const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
- const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="Cours modifié"><path fill="currentColor" fill-rule="evenodd" d="M11.29 3.71Q12 2.5 12.71 3.71L21.79 19.29Q22.5 20.5 21.1 20.5L2.9 20.5Q1.5 20.5 2.21 19.29ZM12 9.3a1.2 1.2 0 0 1 1.2 1.2v3.4a1.2 1.2 0 0 1-2.4 0v-3.4A1.2 1.2 0 0 1 12 9.3ZM12 16.2a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2Z"/></svg>`:"";
+ const warn=(e.changed||e.cancelled)?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="${e.cancelled?'Cours annulé':'Cours modifié'}"><path fill="currentColor" fill-rule="evenodd" d="M11.29 3.71Q12 2.5 12.71 3.71L21.79 19.29Q22.5 20.5 21.1 20.5L2.9 20.5Q1.5 20.5 2.21 19.29ZM12 9.3a1.2 1.2 0 0 1 1.2 1.2v3.4a1.2 1.2 0 0 1-2.4 0v-3.4A1.2 1.2 0 0 1 12 9.3ZM12 16.2a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2Z"/></svg>`:"";
  const subj=`<b${e.cancelled?' style="text-decoration:line-through"':""}>${escHtml(String(e.subject).toUpperCase())}</b>`;
  const edit=" edit";
  const st=`background:${bg};color:${ink}${e.cancelled?";border-color:#cbd5e1":""}`;
