@@ -1075,7 +1075,7 @@ body.student-mode .sch-prof-only{display:none!important}
 .sch-ev.sz .hist-ok,.sch-ev.sz .hist-no{font-size:9px}
 .sch-ev.sz-xs .hist-ok,.sch-ev.sz-xs .hist-no,.sch-ev.sz-s .hist-ok,.sch-ev.sz-s .hist-no{bottom:1px;right:3px;background:rgba(255,255,255,.75);color:#111;border-radius:3px;padding:0 2px}
 .sch-ev i{display:block}
-.sch-warn{flex:none;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)}
+.sch-warn{flex:none;color:inherit}
 .sch-month{display:grid;grid-template-columns:repeat(7,1fr);min-width:640px}
 .sch-month>div{border-left:1px solid var(--border);border-top:1px solid var(--border);min-height:96px;padding:3px}
 .sch-month .mh{min-height:0;text-align:center;font-size:12px;color:#475569;padding:6px}
@@ -13888,7 +13888,7 @@ function schEvents(){
 function schBlock(e,pos,chip){
  const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
  const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
- const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="Cours modifié"><path d="M12 2.8 1.8 21h20.4z" fill="#fbbf24" stroke="#111827" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.2v5.3" stroke="#111827" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.8" r="1.7" fill="#111827"/></svg>`:"";
+ const warn=e.changed?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="Cours modifié"><path fill="currentColor" fill-rule="evenodd" d="M11.29 3.71Q12 2.5 12.71 3.71L21.79 19.29Q22.5 20.5 21.1 20.5L2.9 20.5Q1.5 20.5 2.21 19.29ZM12 9.3a1.2 1.2 0 0 1 1.2 1.2v3.4a1.2 1.2 0 0 1-2.4 0v-3.4A1.2 1.2 0 0 1 12 9.3ZM12 16.2a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2Z"/></svg>`:"";
  const subj=`<b${e.cancelled?' style="text-decoration:line-through"':""}>${escHtml(String(e.subject).toUpperCase())}</b>`;
  const edit=" edit";
  const st=`background:${bg};color:${ink}${e.cancelled?";border-color:#cbd5e1":""}`;
