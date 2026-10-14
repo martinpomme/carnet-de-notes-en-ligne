@@ -12238,8 +12238,15 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   }
   ensureHomeworkStore();
   const idx=DATA.homework.findIndex(item=>item.id===draft.id);
-  if(idx>=0) DATA.homework[idx]=draft;
-  else DATA.homework.push(draft);
+  if(idx>=0){
+   /* test retiré de l'assignation : les rendus correspondants sont effacés (il pourra être refait s'il est redonné) */
+   const previous=DATA.homework[idx];
+   const removedTests=(previous.testIds||[]).filter(id=>!(draft.testIds||[]).includes(id));
+   removedTests.forEach(testId=>{
+    (DATA.homeworkSubmissions||[]).filter(x=>x.homeworkId===previous.id && x.testId===testId).forEach(sub=>purgeHomeworkSubmission(previous,sub));
+   });
+   DATA.homework[idx]=draft;
+  }else DATA.homework.push(draft);
   HOMEWORK_STATE.draft=null;
   syncHomeworkDirectGrades();
   saveData();
@@ -12477,6 +12484,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   `;
  }
  function getHomeworkStudentSubmissionState(homework,test){
+  if(test.options?.trainingMode) return { submission:null, label:"Entraînement · refaisable à volonté", status:"todo" };
   const submission=getHomeworkSubmission(homework.id,test.id,homeworkStudentId());
   if(!submission) return { submission:null, label:"À faire", status:"todo" };
   if(submission.publishedAt) return { submission, label:"Correction disponible", status:"published" };
@@ -12754,6 +12762,12 @@ async function finishHomeworkQuiz(reason){
    else answers[question.id]=stored || "";
   });
   const result=evaluateHomeworkAttempt(quiz.test, quiz.questions, answers);
+  if(quiz.test.options?.trainingMode){
+   /* entraînement : résultat affiché mais ni rendu ni note enregistrés, l'élève peut recommencer à l'infini */
+   renderHomeworkQuizResult(quiz.homework, quiz.test, { review:{}, manualOverride:"" }, result, reason);
+   renderHomeworkView();
+   return;
+  }
   const existing=getHomeworkSubmission(quiz.homework.id, quiz.test.id, homeworkStudentId());
  const previous=existing ? JSON.parse(JSON.stringify(existing)) : null;
  let persisted=upsertHomeworkSubmission({
@@ -12865,11 +12879,12 @@ async function finishHomeworkQuiz(reason){
   const showScore=noteValue!=="" && noteValue!=null && !test.options?.hideGrade && !result.manualReview;
   body.innerHTML=`
    <div class="homework-quiz-card">
-    <p class="online-preview-note">${escHtml(reasonText)} ${result.manualReview ? "La correction et l’attribution des points seront faites par le professeur." : (test.options?.hideGrade ? "La note reste masquée jusqu’à validation par l’enseignant." : "Le devoir a bien été enregistré.")}</p>
+    <p class="online-preview-note">${escHtml(reasonText)} ${result.manualReview ? "La correction et l’attribution des points seront faites par le professeur." : (test.options?.hideGrade ? "La note reste masquée jusqu’à validation par l’enseignant." : (test.options?.trainingMode ? "Entraînement terminé : tu peux le refaire autant de fois que tu veux." : "Le devoir a bien été enregistré."))}</p>
     ${showScore ? `<div class="online-preview-score">Résultat : ${escHtml(String(noteValue))} / ${total}</div>` : ""}
     ${test.conclusion ? `<p class="online-preview-message">${escHtml(test.conclusion).replace(/\n/g,"<br>")}</p>` : ""}
     ${test.options?.trainingMode && !result.manualReview && !test.options?.hideCorrection ? buildOnlinePreviewCorrectionHtml(result) : ""}
     <div class="homework-quiz-actions">
+     ${test.options?.trainingMode ? `<button type="button" class="btn" data-hw-action="restart-quiz">Recommencer</button>` : ""}
      <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
     </div>
    </div>
@@ -12909,7 +12924,8 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const test=getHomeworkTest(testId);
   const studentId=homeworkStudentId();
   if(!homework || !test || !studentId) return;
-  const submission=getHomeworkSubmission(homework.id,test.id,studentId);
+  const training=!!test.options?.trainingMode;
+  const submission=training ? null : getHomeworkSubmission(homework.id,test.id,studentId);
   document.getElementById("homeworkQuizTitle").textContent=`${test.title||"Test"} · ${homework.subject}`;
   if(submission?.publishedAt){
    openHomeworkStudentResult(homework,test,submission);
@@ -13259,14 +13275,9 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   renderHomeworkReviewModal();
   renderOnlineTestsView();
  }
- function resetHomeworkSubmission(homeworkId,testId,studentId){
-  if(AUTH.role!=="prof") return;
-  const sub=getHomeworkSubmission(homeworkId,testId,studentId);
-  const hw=getHomeworkById(homeworkId);
-  if(!sub || !hw) return;
-  const stu=homeworkStudentById(studentId);
-  const name=stu ? `${stu.first} ${stu.last}` : "cet élève";
-  if(!confirm(`Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`)) return;
+ /* Efface un rendu (sans confirmation) : réponses supprimées, note de l'évaluation liée remise à NR, rendu supprimé aussi côté serveur. */
+ function purgeHomeworkSubmission(hw,sub){
+  const homeworkId=sub.homeworkId, testId=sub.testId, studentId=sub.studentId;
   DATA.homeworkSubmissions=(DATA.homeworkSubmissions||[]).filter(x=>x.id!==sub.id);
   /* note de l'évaluation associée : retour à NR */
   const ev=classLike(hw.classId)?.evals?.find(e=>e.hwKey===`${homeworkId}::${testId}`);
@@ -13284,6 +13295,16 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   }
   /* le serveur doit supprimer le rendu (sinon il serait ré-ajouté par la fusion des rendus d'élèves) */
   (window.HW_CANCELLED_SUBS||(window.HW_CANCELLED_SUBS=new Set())).add(`${homeworkId}|${testId}|${studentId}`);
+ }
+ function resetHomeworkSubmission(homeworkId,testId,studentId){
+  if(AUTH.role!=="prof") return;
+  const sub=getHomeworkSubmission(homeworkId,testId,studentId);
+  const hw=getHomeworkById(homeworkId);
+  if(!sub || !hw) return;
+  const stu=homeworkStudentById(studentId);
+  const name=stu ? `${stu.first} ${stu.last}` : "cet élève";
+  if(!confirm(`Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`)) return;
+  purgeHomeworkSubmission(hw,sub);
   syncHomeworkDirectGrades();
   saveData();
   try{ rebuildUI(); }catch(e){}
@@ -13555,6 +13576,11 @@ function handleHomeworkActionClick(btn){
   }
   if(action==="open-student-test"){ openHomeworkStudentTest(btn.dataset.homeworkId,btn.dataset.testId); return; }
   if(action==="start-quiz"){ startHomeworkQuiz(); return; }
+  if(action==="restart-quiz"){
+   const q=HOMEWORK_STATE.quiz;
+   if(q){ if(q.timerId) clearInterval(q.timerId); openHomeworkStudentTest(q.homework.id,q.test.id); }
+   return;
+  }
   if(action==="quiz-prev"){
    saveHomeworkCurrentAnswer();
    if(HOMEWORK_STATE.quiz?.currentIndex>0){
