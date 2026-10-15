@@ -2,12 +2,15 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <title>Ecole Directe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1e40af">
@@ -9948,7 +9951,7 @@ async function cloudPull(){
   importCSV(j.lines.join("\n"));
   ensureSubjectRegistry(); backfillClassSubjectsFromRegistry();
  }
- rebuildUI(); updateTabWarningIndicators();
+ rebuildUI();
  CLOUD.lastSnap=cloudSnapshot();
  if(AUTH.role==="eleve") applyStudentMode();
  return j;
@@ -13926,6 +13929,11 @@ function runNonRegressionTests() {
   document.getElementById = originalGetElementById;
 }
 
+/* Réveil du serveur Google (démarrage à froid = plusieurs secondes) pendant la saisie des identifiants */
+function warmUpServer(){
+ try{ if(authLoad()) return; fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ping"})}).catch(()=>{}); }catch(e){}
+}
+warmUpServer();
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initApp();bootAuth();});
 else {initApp();bootAuth();}
 
