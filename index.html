@@ -13,6 +13,7 @@
 <meta name="theme-color" content="#1e40af">
 <style>
 :root{
+ --trait-epaisseur:2px; /* épaisseur UNIQUE de tous les soulignements (entre le fin ~1px et le gros ~3px) */
  --bg:#f6f8fb; --card:#ffffff; --text:#0f172a; --muted:#64748b;
  --primary:#2563eb; --border:#e5e7eb; --danger:#ef4444;
  --blueBox:#e0e7ff; --blueText:#1e3a8a;
@@ -106,7 +107,7 @@ tbody tr:hover{ background:#f9fafb }
  font-size:16px; border:none; line-height:1;
  appearance:none; -webkit-appearance:none;
 }
-.note-pill.today{ border-bottom:2px solid #1d4ed8 !important; margin:0 !important; }
+.note-pill.today{ border-bottom:var(--trait-epaisseur) solid #1d4ed8 !important; margin:0 !important; }
 .note-pill.important{ font-weight:700; margin:0 !important; }
 .note-pill.red{ color:var(--danger) }
 .note-pill.empty-eval { position: relative; }
@@ -544,7 +545,7 @@ body.auth-pending #loginOverlay{ display:flex }
 #userLabel svg{ flex:0 0 auto; fill:#fff }
 #settingsMsg{ margin-top:10px; font-size:14px; color:#b91c1c; display:none }
 .btn-link{ border:none; background:none; padding:0; color:#1e40af; font-weight:600; cursor:pointer; font-size:inherit }
-.btn-link:hover{ text-decoration:underline }
+.btn-link:hover{ text-decoration:underline; text-decoration-thickness:var(--trait-epaisseur) }
 .hint{ font-size:12px; color:var(--muted); margin-top:4px }
 .cl-tabs{ display:flex; gap:4px; background:#eef2f7; padding:4px; border-radius:11px; margin-bottom:12px }
 .cl-tab{ flex:1; border:none; background:transparent; padding:9px 10px; border-radius:8px; font-weight:700; font-size:14px; color:#334155; cursor:pointer }
@@ -679,7 +680,7 @@ body.student-mode .container .card{ border-top-left-radius:0 }
 .note-pill.today{ position:relative; padding:0 0 6px !important; margin:0 0 -5px !important; border-bottom:none !important }
 .note-pill.today.important{ margin:0 0 -5px !important }
 /* Soulignement : tracé depuis la zone réellement visible (encre) du texte, débord identique à gauche et à droite (variables posées par le script ci-dessous) */
-.note-pill.today::after{ content:""; position:absolute; bottom:0; height:2px; background:#1d4ed8; left:var(--ul-l,-6px); right:var(--ul-r,-6px); pointer-events:none }
+.note-pill.today::after{ content:""; position:absolute; bottom:var(--ul-b,0px); height:var(--ul-h,var(--trait-epaisseur)); background:#1d4ed8; left:var(--ul-l,-6px); right:var(--ul-r,-6px); pointer-events:none }
 
 
 /* ── Icônes de coin des gros onglets (⚠️ / 👁️) : légèrement plus grandes ── */
@@ -3976,6 +3977,18 @@ function getActiveStudentId(){
 function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function todayJJMMAA(){const d=new Date();return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
 function todayISOFromDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+/* Comparaison de dates robuste (JJ/MM/AA, JJ/MM/AAAA, AAAA-MM-JJ, ISO avec heure) :
+   les dates qui reviennent de Google Sheets (compte élève) n'ont pas toujours le même format que celles saisies côté prof. */
+function normDateISO(v){
+  if(v==null||v==="") return "";
+  if(v instanceof Date) return isNaN(v.getTime())?"":todayISOFromDate(v);
+  const s=String(v).trim(); let m;
+  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){const d=new Date(s); return isNaN(d.getTime())?"":todayISOFromDate(d);}
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) return m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0");
+  if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/))){let y=parseInt(m[3],10); if(y<100) y+=2000; return y+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");}
+  return "";
+}
+function isTodayDate(){const t=todayISO(); for(let i=0;i<arguments.length;i++){ if(normDateISO(arguments[i])===t) return true; } return false;}
 function getSkillHierarchy(c) {
   let cycle = c.cycle;
   let domain = c.domain;
@@ -4602,7 +4615,7 @@ function renderClassPreviewContent(){
       if(empty) btn.classList.add("empty-eval");
       if(note && note.noteText==="EA"){ btn.classList.add("red"); evalHasEA=true; }
       
-      if(note && note.dateJJMMAA === todayJJMMAA()) btn.classList.add("today");
+      if(note && isTodayDate(note.dateJJMMAA, note.isoDate)) btn.classList.add("today");
       if(note && !!note.important) btn.classList.add("important");
       if(!empty && (note.note/note.outof*20) < 10) btn.classList.add("red");
 
@@ -5367,7 +5380,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
     const empty=!hasAnyResult(group,null,studentId);
     const pill=document.createElement("div");
     pill.className=(isCompRub?"comp-pill":"note-pill")+(empty?" empty-eval":"");
-     if(group.dateJJMMAA===todayJJMMAA()) pill.classList.add("today");
+     if(isTodayDate(group.dateJJMMAA, group.date, group.isoDate)) pill.classList.add("today");
      pill.style.cssText="cursor:pointer;display:flex;align-items:center;background:#fff;";
      if(isCompRub) pill.style.borderRadius="999px";
     pill.innerHTML=`<div style="display:flex;gap:4px;">${group.items.map(c=>{
@@ -5417,10 +5430,10 @@ function renderEleveViewForPeriod(studentId,periodKey){
     notesWrap.appendChild(pill);
    }else{
     hasNotes=true;
-    const n=item; const empty=!hasAnyResult(n,null,studentId);
+    const n=item; const ownRes=(typeof n.note==='number'&&!isNaN(n.note))||isSpecial(n); const empty=!ownRes&&!hasAnyResult(n,null,studentId);
     const btn=document.createElement("button"); btn.type="button";
     btn.className="note-pill"+(empty?" empty-eval":"");
-    const isToday=n.dateJJMMAA===todayJJMMAA();
+    const isToday=isTodayDate(n.dateJJMMAA, n.isoDate);
     if(!!n.important) btn.classList.add("important");
     if(isToday) btn.classList.add("today");
     btn.style.cssText="background:#fff;";
@@ -15005,16 +15018,25 @@ document.getElementById("schDelete").onclick=()=>{
   var D=window.innerWidth<=900?3.5:7;
   document.querySelectorAll(".note-pill.today").forEach(function(p){
    var b=p.getBoundingClientRect(); if(!b.width) return;
-   var key=p.textContent+"|"+Math.round(b.width)+"|"+D; if(p.dataset.ulKey===key) return;
+   var dpr=window.devicePixelRatio||1;
+   var T=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--trait-epaisseur"))||2;
+   var H=Math.max(1,Math.round(T*dpr))/dpr;                       /* épaisseur = nombre ENTIER de pixels physiques */
+   var absBottom=b.bottom+window.scrollY;                          /* bas de la note, en coordonnées de page */
+   var topSnap=Math.round((absBottom-H)*dpr)/dpr;                  /* haut du trait aligné sur un pixel physique */
+   var off=absBottom-(topSnap+H);                                  /* décalage pour que le trait tombe pile sur la grille */
+   var key=p.textContent+"|"+Math.round(b.width)+"|"+D+"|"+dpr+"|"+off.toFixed(3); if(p.dataset.ulKey===key) return;
    var k=ink(p); if(!k) return;
    p.style.setProperty("--ul-l",(k.l-b.left-D)+"px");
    p.style.setProperty("--ul-r",(b.right-k.r-D)+"px");
+   p.style.setProperty("--ul-h",H+"px");
+   p.style.setProperty("--ul-b",off+"px");
    p.dataset.ulKey=key;
   });
  }
  function sched(){ if(!pend){pend=true; requestAnimationFrame(apply);} }
  new MutationObserver(sched).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class","style","hidden"]});
  window.addEventListener("resize",sched);
+ window.addEventListener("scroll",sched,{passive:true,capture:true});
  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(sched);
  sched();
 })();
