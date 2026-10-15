@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#1e40af">
 <style>
 :root{
- --trait-epaisseur:2px; /* épaisseur UNIQUE de tous les soulignements (entre le fin ~1px et le gros ~3px) */
+ --trait-epaisseur:1.5px; /* épaisseur UNIQUE de tous les soulignements */
  --bg:#f6f8fb; --card:#ffffff; --text:#0f172a; --muted:#64748b;
  --primary:#2563eb; --border:#e5e7eb; --danger:#ef4444;
  --blueBox:#e0e7ff; --blueText:#1e3a8a;
@@ -15020,7 +15020,7 @@ document.getElementById("schDelete").onclick=()=>{
    var b=p.getBoundingClientRect(); if(!b.width) return;
    var dpr=window.devicePixelRatio||1;
    var T=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--trait-epaisseur"))||2;
-   var H=Math.max(1,Math.round(T*dpr))/dpr;                       /* épaisseur = nombre ENTIER de pixels physiques */
+   var H=Math.max(1,Math.floor(T*dpr+0.49))/dpr;                       /* épaisseur = nombre ENTIER de pixels physiques */
    var absBottom=b.bottom+window.scrollY;                          /* bas de la note, en coordonnées de page */
    var topSnap=Math.round((absBottom-H)*dpr)/dpr;                  /* haut du trait aligné sur un pixel physique */
    var off=absBottom-(topSnap+H);                                  /* décalage pour que le trait tombe pile sur la grille */
