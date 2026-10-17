@@ -411,6 +411,15 @@ body.student-mode #onlineTestsView{ display:none !important }
 .clickable-row:hover { background: #f1f5f9; }
 .prof-item-select { width: 22px; height: 22px; cursor: pointer; border: 2px solid #cbd5e1; }
 .tab-btn, .subtab-btn, .period-btn { position: relative; }
+/* Pastille : nombre de copies (élève × test) en attente de correction */
+.tab-btn[data-pending-count]::after{
+ content: attr(data-pending-count); position:absolute; top:-8px; right:-8px; z-index:10;
+ min-width:20px; height:20px; padding:0 6px; border-radius:999px; box-sizing:border-box;
+ background:#ef4444; color:#fff; font-size:12px; font-weight:700; line-height:20px; text-align:center;
+ border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.3); pointer-events:none;
+}
+.dr-item .dr-bdg.dr-cnt{ min-width:22px; height:22px; padding:0 7px; border-radius:999px; background:#ef4444; color:#fff; font-size:12px; font-weight:700; line-height:22px; text-align:center }
+body.student-mode .tab-btn[data-pending-count]::after{ display:none !important }
 .tab-btn.has-empty-eval::after, .subtab-btn.has-empty-eval::after, .period-btn.has-empty-eval::after {
  content: "⚠️"; position: absolute; top: -6px; right: -6px; font-size: 11px;
  background: white; border-radius: 50%; padding: 1px; border: 1px solid #ccc;
@@ -4115,8 +4124,11 @@ function buildCSVText(){
   rows.push(["subjectMaster","","","",escapeCsv(name),coef,(typeof sub==='object'&&sub.color)||""].join(";"));
  });
  ensureNoteIds();
+ const STU_BY_ID=Object.create(null), CLS_BY_ID=Object.create(null);   // accès direct (avant : .find() pour chaque note)
+ DATA.students.forEach(s=>{ if(!(s.id in STU_BY_ID)) STU_BY_ID[s.id]=s; });
+ DATA.classes.forEach(c=>{ if(!(c.id in CLS_BY_ID)) CLS_BY_ID[c.id]=c; });
  DATA.students.forEach(s=>{
-  const cls=DATA.classes.find(c=>c.id===s.classId);
+  const cls=CLS_BY_ID[s.classId];
   rows.push(["student",s.id,escapeCsv(s.first),escapeCsv(s.last),s.classId||"",escapeCsv(cls?.name||""),s.sex||""].join(";"));
  });
  (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
@@ -4136,9 +4148,10 @@ function buildCSVText(){
   (c.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,c.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0,ev.hideUntil||""].join(";")));
  });
  Object.entries(DATA.notes).forEach(([sid,arr])=>{
-  const stu=DATA.students.find(s=>s.id===sid);
+  const stu=STU_BY_ID[sid];
+  const stuClsName=escapeCsv((stu&&CLS_BY_ID[stu.classId]?.name)||"");
   arr.forEach(n=>{
-   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",escapeCsv(DATA.classes.find(c=>c.id===stu?.classId)?.name||""),escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null)),n.hwAuto?1:0,n.hideUntil||""].join(";"));
+   rows.push(["note",sid,escapeCsv(stu?.first||""),escapeCsv(stu?.last||""),stu?.classId||"",stuClsName,escapeCsv(n.subject),escapeCsv(n.label||""),n.dateJJMMAA||"",n.isoDate||"",(isSpecial(n)?"":(typeof n.note==='number'?n.note:"")),n.outof,n.coef,n.classCommon?1:0,n.classId||"",n.classNoteId||"",escapeCsv(n.noteText||""),n.period||"",n.important?1:0,n.id||"",escapeCsv(n.comment||""),n.hideFromStudent?1:0,escapeCsv(JSON.stringify(n.bareme||null)),n.hwAuto?1:0,n.hideUntil||""].join(";"));
   });
  });
  (DATA.competencies||[]).forEach(c=>{
@@ -9868,9 +9881,9 @@ window.onbeforeunload = function(e) {
 
 // ── CONNEXION + SYNCHRONISATION GOOGLE SHEETS (via Google Apps Script) ───────
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbziu6cd7ODL18lWRDKQjV5xJ4ch7qGgh9A-dRTERzwUPI63eI5Z-EpKdzMMeyE1YS6N/exec";
-const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, lastSnap:null, retryAt:0, polling:false };
-function cloudSnapshot(){
- try{ return buildCSVText()+"\n#ACCOUNTS#"+JSON.stringify(DATA.students.map(s=>[s.id,ACCOUNTS[s.id]?.login||"",ACCOUNTS[s.id]?.pwd||""])); }
+const CLOUD = { enabled:true, ready:false, timer:null, saving:false, again:false, rev:0, srev:null, stale:false, lastTry:null, lastCheck:0, lastSnap:null, retryAt:0, polling:false };
+function cloudSnapshot(csv){
+ try{ return (csv==null?buildCSVText():csv)+"\n#ACCOUNTS#"+JSON.stringify(DATA.students.map(s=>[s.id,ACCOUNTS[s.id]?.login||"",ACCOUNTS[s.id]?.pwd||""])); }
  catch(e){ return null; }
 }
 const AUTH = { user:"", pass:"", role:"", studentId:"" };   // role : "prof" | "eleve"
@@ -9886,10 +9899,50 @@ function authSave(u,p,remember){
 }
 function authClear(){ try{sessionStorage.removeItem("carnet_auth");localStorage.removeItem("carnet_auth");}catch(e){} }
 
+const cloudSleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Compression gzip (navigateurs récents) : l'envoi d'un gros carnet est 4 à 10 fois plus léger
+async function gzipB64(str){
+ const cs=new CompressionStream("gzip");
+ const w=cs.writable.getWriter();
+ const ecrit=(async()=>{ await w.write(new TextEncoder().encode(str)); await w.close(); })();
+ const buf=await new Response(cs.readable).arrayBuffer();
+ await ecrit;
+ const bytes=new Uint8Array(buf); let bin=""; const CH=0x8000;
+ for(let i=0;i<bytes.length;i+=CH) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));
+ return btoa(bin);
+}
+// Délai maximal + nouvelles tentatives automatiques (serveur occupé, réseau coupé, requête trop longue)
 async function api(action,extra){
- const body=Object.assign({action,user:AUTH.user,pass:AUTH.pass},extra||{});
- const r=await fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
- return r.json();
+ let payload=JSON.stringify(Object.assign({action,user:AUTH.user,pass:AUTH.pass},extra||{}));
+ if(extra && payload.length>30000 && typeof CompressionStream!=="undefined"){
+  try{
+   const z=await gzipB64(JSON.stringify(extra));
+   const small=JSON.stringify({action,user:AUTH.user,pass:AUTH.pass,gz:z});
+   if(small.length<payload.length*0.8) payload=small;
+  }catch(e){ /* on envoie sans compression */ }
+ }
+ // setProf change le mot de passe : on ne le rejoue jamais automatiquement après un échec réseau
+ const rejouable = action!=="setProf";
+ const maxTry = action==="rev" ? 1 : 3;
+ const delai = action==="rev" ? 25000 : 60000;
+ let derniere=null;
+ for(let essai=0;essai<maxTry;essai++){
+  const ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+  const to=ctl?setTimeout(()=>ctl.abort(),delai):null;
+  try{
+   const r=await fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:payload,signal:ctl?ctl.signal:undefined});
+   const j=await r.json();
+   if(to) clearTimeout(to);
+   if(j && j.ok===false && j.error==="busy" && essai<maxTry-1){ await cloudSleep(700*(essai+1)+Math.random()*500); continue; }
+   return j;
+  }catch(e){
+   if(to) clearTimeout(to);
+   derniere=(e&&e.name==="AbortError")?new Error("le serveur met trop de temps à répondre"):e;
+   if(!rejouable || essai>=maxTry-1) throw derniere;
+   await cloudSleep(800*(essai+1)+Math.random()*500);
+  }
+ }
+ throw derniere||new Error("erreur réseau");
 }
 
 async function submitHomeworkSubmissionCloud(submission){
@@ -9945,7 +9998,7 @@ function checkStudentLogin(login,exceptId){
 async function cloudPull(){
  const j=await api("load");
  if(!j.ok) throw new Error(j.error||"erreur");
- CLOUD.rev=j.rev; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
+ CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
   importCSV(j.lines.join("\n"));
@@ -10059,29 +10112,35 @@ document.getElementById("settingsForm")?.addEventListener("submit",async(e)=>{
 });
 
 function cloudSchedule(){
- if(!AUTH.role) return;
+ if(AUTH.role!=="prof") return;
  if(!CLOUD.ready){ cloudStatus("error","Non connecté – modifications NON enregistrées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
  clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},800);
 }
 async function cloudPush(force){
- if(!AUTH.role) return;
+ if(AUTH.role!=="prof"){ IS_MODIFIED=false; return; }   // les élèves n'enregistrent pas le carnet (le serveur refuse)
  if(CLOUD.saving){ CLOUD.again=true; return; }
  CLOUD.saving=true; CLOUD.again=false;
  try{
-  const snap=cloudSnapshot();
-  const lines=csvToLogicalLines(buildCSVText());
+  const csv=buildCSVText();                 // construit une seule fois (avant : 3 fois par enregistrement)
+  const snap=cloudSnapshot(csv);
+  const lines=csvToLogicalLines(csv);
   const accounts=DATA.students.filter(s=>ACCOUNTS[s.id]).map(s=>({id:s.id,login:ACCOUNTS[s.id].login,pwd:ACCOUNTS[s.id].pwd}));
   const cancelled=[...(window.HW_CANCELLED_SUBS||[])];
-  const j=await api("save",{lines,accounts,cancelled,baseRev:CLOUD.rev,force:!!force});
+  // Identifiant de requête : réutilisé UNIQUEMENT pour renvoyer exactement les mêmes données après un échec réseau
+  // (le serveur ne les applique alors pas deux fois)
+  const cle=(snap||"")+"|"+cancelled.join(",")+"|"+(force?1:0);
+  if(!CLOUD.lastTry||CLOUD.lastTry.cle!==cle) CLOUD.lastTry={cle,id:Date.now().toString(36)+Math.random().toString(36).slice(2,8)};
+  const j=await api("save",{lines,accounts,cancelled,baseRev:CLOUD.rev,force:!!force,reqId:CLOUD.lastTry.id});
   if(j.ok){
-   CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0;
+   CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0; CLOUD.lastTry=null;
+   if(j.merged) CLOUD.stale=true;           // le serveur a fusionné des rendus d'élèves : on les recharge au prochain contrôle
    cancelled.forEach(k=>window.HW_CANCELLED_SUBS&&window.HW_CANCELLED_SUBS.delete(k));
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
    IS_MODIFIED=false;
    cloudStatus("ok","Enregistré dans Google Sheets à "+cloudHour());
   }else if(j.error==="conflict"){
-   CLOUD.saving=false;
+   CLOUD.saving=false; CLOUD.lastTry=null;
    if(confirm("Ces données ont été modifiées depuis un autre appareil ou onglet.\n\nOK = écraser avec CETTE version\nAnnuler = recharger la dernière version enregistrée (vos dernières modifications ici seront perdues)")){
     CLOUD.rev=j.rev; return cloudPush(true);
    }else{ IS_MODIFIED=false; location.reload(); return; }
@@ -10097,16 +10156,24 @@ async function cloudPush(force){
  }
  CLOUD.saving=false;
 }
+let CLOUD_POLL_FAILS=0, CLOUD_LAST_ACTIVITY=Date.now();
 async function cloudCheckRemoteUpdates(showStatus=false){
  if(!AUTH.role || IS_MODIFIED || CLOUD.saving || CLOUD.polling) return;
- CLOUD.polling=true;
+ CLOUD.polling=true; CLOUD.lastCheck=Date.now();
  try{
   const j=await api("rev");
-  if(j.ok && j.rev!==CLOUD.rev){
+  CLOUD_POLL_FAILS=0;
+  // Élève : seuls les changements visibles par les élèves comptent (un rendu d'un camarade ne fait plus tout recharger)
+  const eleve=(AUTH.role==="eleve" && j.srev!=null && CLOUD.srev!=null);
+  const distant=eleve?j.srev:j.rev, local=eleve?CLOUD.srev:CLOUD.rev;
+  if(j.ok && (CLOUD.stale || distant!==local)){
    await cloudPull();
    if(showStatus && AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour());
+  }else if(j.ok && AUTH.role==="eleve"){
+   CLOUD.rev=j.rev;   // rien de nouveau pour l'élève : on se contente de suivre la révision
   }
  }catch(e){
+  CLOUD_POLL_FAILS++;
   console.warn("cloud rev:",e);
  }finally{
   CLOUD.polling=false;
@@ -10115,27 +10182,37 @@ async function cloudCheckRemoteUpdates(showStatus=false){
 // Au retour sur l'onglet : récupère les modifications faites ailleurs (si rien n'est en attente)
 document.addEventListener("visibilitychange",()=>{
  if(document.visibilityState!=="visible") return;
+ if(Date.now()-CLOUD.lastCheck<4000) return;   // pas de rafale si on change d'onglet souvent
  cloudCheckRemoteUpdates(true);
 });
-// Synchronisation légère en arrière-plan pour récupérer les nouveaux rendus,
-// devoirs et corrections sans rechargement manuel.
-setInterval(()=>{
- if(AUTH.role && document.visibilityState==="visible") cloudCheckRemoteUpdates(false);
-},5000);
+// Synchronisation légère en arrière-plan (nouveaux rendus, devoirs, corrections) SANS saturer le serveur :
+//  - prof 8 s, élève 20 s (avant : 5 s pour tout le monde) + léger décalage aléatoire entre appareils ;
+//  - 3 fois plus lent après 3 minutes d'inactivité ; ralentit encore en cas d'erreurs ; rien si l'onglet est masqué.
+["pointerdown","keydown","touchstart","wheel"].forEach(ev=>document.addEventListener(ev,()=>{CLOUD_LAST_ACTIVITY=Date.now();},{passive:true,capture:true}));
+function cloudPollDelay(){
+ const base=AUTH.role==="prof"?8000:20000;
+ const calme=(Date.now()-CLOUD_LAST_ACTIVITY)>180000?3:1;
+ const erreurs=Math.min(6,1+CLOUD_POLL_FAILS);
+ return base*calme*erreurs*(0.8+Math.random()*0.4);
+}
+(async function cloudPollLoop(){
+ try{ if(AUTH.role && document.visibilityState==="visible") await cloudCheckRemoteUpdates(false); }catch(e){}
+ setTimeout(cloudPollLoop,cloudPollDelay());
+})();
 
 // Sauvegarde automatique universelle : toute différence entre l'état affiché et le dernier état
 // enregistré (note, appréciation, classe, évaluation de classe, matière, verrou, compte…) déclenche l'envoi.
 function cloudWatch(){
- if(!AUTH.role||!CLOUD.ready||CLOUD.saving||CLOUD.timer&&!CLOUD._fired) return;
+ if(AUTH.role!=="prof"||!CLOUD.ready||CLOUD.saving||CLOUD.timer&&!CLOUD._fired) return;
  if(Date.now()<CLOUD.retryAt) return;
  const cur=cloudSnapshot();
  if(cur!==null && cur!==CLOUD.lastSnap){ IS_MODIFIED=true; cloudSchedule(); }
 }
-setInterval(cloudWatch,1500);
-["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,400);},true));
+setInterval(cloudWatch,3000);   // construire le CSV complet est coûteux : inutile toutes les 1,5 s
+["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{if(AUTH.role!=="prof") return;clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,800);},true));
 
 function saveData(){
- if(!AUTH.role) return;
+ if(AUTH.role!=="prof") return;
  IS_MODIFIED=true;
  cloudSchedule();
 }
@@ -10302,6 +10379,7 @@ function ensureNoteIds(){
  Object.values(DATA.notes||{}).forEach(arr=>{(arr||[]).forEach(n=>{if(!n.id) n.id='n_'+Math.random().toString(36).slice(2,9);});});
 }
 function updateTabWarningIndicators(){
+  try{ window.refreshOnlineCorrectionBadge && window.refreshOnlineCorrectionBadge(); }catch(e){}
   let hasMissingC = false;
   let hasHiddenC = false;
   [...(DATA.classes || []), ...grpEns()].forEach(cls => {
@@ -12194,8 +12272,35 @@ function initApp(){
   const idx=DATA.homeworkSubmissions.findIndex(item=>item.id===normalized.id || (item.homeworkId===normalized.homeworkId && item.testId===normalized.testId && item.studentId===normalized.studentId));
   if(idx>=0) DATA.homeworkSubmissions[idx]=normalized;
   else DATA.homeworkSubmissions.push(normalized);
+  try{ refreshOnlineCorrectionBadge(); }catch(e){}
   return normalized;
  }
+ /* Nombre de copies en attente de correction : 1 par élève et par test rendu, non validé (même critère que « à valider » de la correction) */
+ function countPendingOnlineCorrections(){
+  if(AUTH.role!=="prof") return 0;
+  ensureHomeworkStore();
+  let n=0;
+  (DATA.homework||[]).forEach(homework=>{
+   (homework.testIds||[]).forEach(testId=>{
+    const test=getHomeworkTest(testId);
+    if(!test || test.options?.trainingMode) return;
+    const cls=homeworkClassById(homework.classId);
+    (cls?.memberIds||[]).forEach(studentId=>{
+     const sub=getHomeworkSubmission(homework.id,test.id,studentId);
+     if(sub && !sub.validatedAt && !sub.manualOverride) n++;
+    });
+   });
+  });
+  return n;
+ }
+ function refreshOnlineCorrectionBadge(){
+  const btn=document.querySelector('.tab-btn[data-target="onlineTestsView"]'); if(!btn) return;
+  const n=countPendingOnlineCorrections();
+  if(n>0){ btn.dataset.pendingCount=n>99?"99+":String(n); btn.title=n+" copie"+(n>1?"s":"")+" en attente de correction"; }
+  else { delete btn.dataset.pendingCount; btn.removeAttribute("title"); }
+ }
+ window.countPendingOnlineCorrections=countPendingOnlineCorrections;
+ window.refreshOnlineCorrectionBadge=refreshOnlineCorrectionBadge;
  function getHomeworkOnDate(dateISO){
   ensureHomeworkStore();
   const list=DATA.homework.filter(item=>item.dateISO===dateISO);
@@ -14951,7 +15056,7 @@ document.getElementById("schDelete").onclick=()=>{
    it.className="dr-item"+(b.classList.contains("active")?" active":"");
    const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
    const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
-   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg" title="À traiter">⚠️</span>':"")+(hid?'<span class="dr-bdg" title="Évaluations masquées">👁️</span>':"");
+   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg" title="À traiter">⚠️</span>':"")+(hid?'<span class="dr-bdg" title="Évaluations masquées">👁️</span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
    it.querySelector(".dr-lbl").textContent=labelOf(b);
    it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
    body.appendChild(it);
