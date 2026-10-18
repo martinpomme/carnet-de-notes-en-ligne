@@ -1642,7 +1642,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
       <button type="button" id="baremeRemoveBtn" style="margin-left:8px; background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;">✕ Supprimer le barème</button>
     </div>
     <label>Sur</label><input type="number" step="0.01" name="outof" id="noteOutof" value="20">
-    <label>Coef</label><input type="number" step="0.01" name="coef" id="noteCoef" value="1">
+    <label>Coef</label><input type="number" step="any" name="coef" id="noteCoef" value="1">
     <label>Trimestre</label>
     <select name="period" id="notePeriod">
      <option value="T1">Trimestre 1</option><option value="T2">Trimestre 2</option>
@@ -1705,7 +1705,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
      </div>
      <div>
       <label>Coef</label>
-      <input type="number" id="groupNoteCoef" min="0" step="0.01" placeholder="1 par défaut">
+      <input type="number" id="groupNoteCoef" min="0" step="any" placeholder="1 par défaut">
      </div>
     </div>
     <label>Trimestre</label>
@@ -1791,7 +1791,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
      <div style="flex:1;"><label>Sur</label><input type="number" step="0.01" id="classOutof" value="20"></div>
      <div style="flex:0;"><button type="button" class="btn btn-sm" id="classEvalCreateBaremeBtn" style="margin-top:18px;font-size:12px;white-space:nowrap;">Créer un barème</button></div>
     </div>
-    <label>Coef</label><input type="number" step="0.01" id="classCoef" value="1">
+    <label>Coef</label><input type="number" step="any" id="classCoef" value="1">
     <label>Trimestre</label>
     <select id="classEvalPeriod">
      <option value="T1">Trimestre 1</option><option value="T2">Trimestre 2</option>
@@ -1893,7 +1893,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
           </div>
           <div>
             <label>Coef</label>
-            <input type="number" step="0.01" id="profBatchEditCoef" placeholder="(Inchangé)">
+            <input type="number" step="any" id="profBatchEditCoef" placeholder="(Inchangé)">
           </div>
         </div>
 
@@ -2117,7 +2117,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
    </div>
    <div class="form-row">
     <input id="newSubjectInput" placeholder="Nouvelle matière" style="flex:1;">
-    <input id="newSubjectCoef" placeholder="Coef" type="number" step="0.01" value="1" style="width:80px;">
+    <input id="newSubjectCoef" placeholder="Coef" type="number" step="any" value="1" style="width:80px;">
     <button class="btn btn-primary" id="addSubjectBtn">Ajouter</button>
    </div>
    <table>
@@ -2138,7 +2138,7 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
    <form id="editSubjectForm" class="modal-form">
     <input type="hidden" id="editSubjectIndex">
     <label>Nom de la matière</label><input id="editSubjectName">
-    <label>Coefficient</label><input id="editSubjectCoef" type="number" step="0.01">
+    <label>Coefficient</label><input id="editSubjectCoef" type="number" step="any">
     <div class="modal-actions">
      <button type="button" class="btn btn-danger" id="editSubjectRemoveFromClass" style="display:none;margin-right:auto;">Retirer de la classe</button>
      <button type="button" class="btn" id="editSubjectCancel">Annuler</button>
@@ -4074,6 +4074,10 @@ function fmt(x,decimals=2){
  if(typeof x!=='number'||Number.isNaN(x)) return "";
  return parseFloat(x.toFixed(decimals)).toString().replace('.',',');
 }
+function fmtCoef(x){
+ if(typeof x!=='number'||Number.isNaN(x)) return "";
+ return String(parseFloat(x.toPrecision(12))).replace('.',',');
+}
 function escHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function specialMeaning(txt){return {Abs:"Absent(e)",Disp:"Dispensé(e)",NE:"Non évalué(e)",NR:"Non rendu",EA:"En attente",X:"Pas de note pour cet élève"}[txt]||"";}
 function isSpecial(n){return n&&typeof n.noteText==="string"&&(SPECIAL_VALUES.has(n.noteText)||n.noteText==="X");}
@@ -4615,7 +4619,7 @@ function renderClassPreviewContent(){
     info.style.gap = "2px";
     info.innerHTML = `
       <div style="font-size:1.1em; color:#1e293b;">${ev.label || "-"}</div>
-      <div style="font-size:0.75em; color:#64748b; font-weight:normal;">${formatDateAAAA(ev.dateJJMMAA)} — Coef. ${fmt(ev.coef, 2)}</div>
+      <div style="font-size:0.75em; color:#64748b; font-weight:normal;">${formatDateAAAA(ev.dateJJMMAA)} — Coef. ${fmtCoef(ev.coef)}</div>
     `;
     
     // Milieu : Notes des élèves
@@ -4661,7 +4665,7 @@ function renderClassPreviewContent(){
           sup.style.fontWeight = "400";
           sup.style.fontSize = "0.75em";
           sup.style.marginLeft = "1px";
-          sup.textContent = `(${fmt(note.coef, note.coef % 1 === 0 ? 0 : 1)})`;
+          sup.textContent = `(${fmtCoef(note.coef)})`;
           btn.appendChild(sup);
         }
 
@@ -4869,7 +4873,7 @@ function showEvalStatsOnly(ev, classId) {
     <p><strong>Évaluation :</strong> ${ev.label || '-'}</p>
     <p><strong>Matière :</strong> ${ev.subject}</p>
     <p><strong>Date :</strong> ${ev.dateJJMMAA || '-'}</p>
-    <p><strong>Barème :</strong> /${fmt(ev.outof)} (Coef. ${fmt(ev.coef, 2)})</p>
+    <p><strong>Barème :</strong> /${fmt(ev.outof)} (Coef. ${fmtCoef(ev.coef)})</p>
     ${classStatsHtml}${baremeHtml}${compsHtml}
   `;
 
@@ -5214,7 +5218,7 @@ function renderProfViewForPeriod(studentId,periodKey){
    }
    if(isRedVal||n.noteText==="EA") tdNote.style.color="var(--danger)";
    const tdOutof=document.createElement("td"); tdOutof.textContent=fmt(n.outof);
-   const tdCoef=document.createElement("td"); tdCoef.textContent=n.coef===0?"":fmt(n.coef,2);
+   const tdCoef=document.createElement("td"); tdCoef.textContent=n.coef===0?"":fmtCoef(n.coef);
    const tdImportant=document.createElement("td");
    const impChk=document.createElement("input"); impChk.type="checkbox"; impChk.checked=!!n.important;
    const lockedByPeriod=periodKey!=="YEAR"&&!!LOCKED_PERIODS[periodKey];
@@ -5467,7 +5471,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
      if(n.coef!==1&&n.coef!==0){
       const sup=document.createElement("sup");
       sup.style.marginLeft="1px";
-      sup.textContent=`(${fmt(n.coef, 2)})`;
+      sup.textContent=`(${fmtCoef(n.coef)})`;
       btn.appendChild(sup);
      }
     }
@@ -5500,7 +5504,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
   }
   const head=document.createElement("div"); head.className="matiere-head";
   const titleWrap=document.createElement("div"); titleWrap.className="matiere-title"; titleWrap.appendChild(name);
-  if(!isCompRub){ const cf=document.createElement("div"); cf.className="matiere-coef"; cf.textContent="Coef. "+fmt(subjectCoef,2); titleWrap.appendChild(cf); }
+  if(!isCompRub){ const cf=document.createElement("div"); cf.className="matiere-coef"; cf.textContent="Coef. "+fmtCoef(subjectCoef); titleWrap.appendChild(cf); }
   head.appendChild(titleWrap); head.appendChild(avg);
   line.appendChild(head); line.appendChild(notesWrap); container.appendChild(line);
  }
@@ -7090,7 +7094,7 @@ function renderGroupNoteTable(){
         <td><input type="text" value="${escHtml(row.label||"")}" data-group-row="${idx}" data-group-field="label" placeholder="Nom de l’évaluation ${idx+1}"></td>
         <td class="group-note-priority-cell"><input type="text" value="${escHtml(getGroupRowDisplayScore(row))}" data-group-score="${idx}" data-group-row="${idx}" data-group-field="score" ${hasBareme?'readonly ':''}class="${hasBareme?'group-note-score-lock ':''}group-note-priority-input" placeholder="${hasBareme?'Calculé via le barème':'Score'}"></td>
         <td><input type="number" step="0.01" value="${row.outof ?? ''}" data-group-row="${idx}" data-group-field="outof"></td>
-        <td><input type="number" step="0.01" value="${row.coef ?? ''}" data-group-row="${idx}" data-group-field="coef"></td>
+        <td><input type="number" step="any" value="${row.coef ?? ''}" data-group-row="${idx}" data-group-field="coef"></td>
         <td style="text-align:center;"><input type="checkbox" ${row.important?'checked':''} data-group-row="${idx}" data-group-field="important"></td>
         <td style="text-align:center;"><button type="button" class="group-note-action-btn blue" data-group-comp-btn="${idx}" title="Associer des compétences">${row.competencies?.length?'✎':'+'}</button></td>
         <td style="text-align:center;"><button type="button" class="group-note-action-btn orange" data-group-comment-btn="${idx}" title="Ajouter un commentaire">${row.comment?'✎':'+'}</button></td>
@@ -7733,7 +7737,7 @@ function showNoteDetailByObj(n, studentId){
     <p><strong>Évaluation :</strong> ${n.label||'-'}</p>
     <p><strong>Date :</strong> ${formatDateAAAA(n.dateJJMMAA)||'-'}</p>
     <p><strong>Note :</strong> ${displayed}</p>
-    ${n.coef !== 0 ? `<p><strong>Coef :</strong> ${fmt(n.coef,2)}</p>` : ""}
+    ${n.coef !== 0 ? `<p><strong>Coef :</strong> ${fmtCoef(n.coef)}</p>` : ""}
     ${n.important?'<p style="color:#ef4444;"><strong>⭐ Note importante</strong></p>':""}
     ${n.classCommon?'<p style="color:#6b7280;">Évaluation de '+(grpById(n.classId)?'groupe':'classe')+'</p>':""}
     ${baremeHtml}${linkedCompsHtml}${classStatsHtml}${personalCommentHtml}
@@ -8393,7 +8397,7 @@ function openEvalTableModal(classId, ev){
  <div class="card">
  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
   <div>
-   <strong>${cls.name}</strong> — ${ev.subject} — ${ev.label||"-"} — ${ev.dateJJMMAA} — Sur ${fmt(ev.outof)} — Coef ${fmt(ev.coef,2)} — ${ev.period||"YEAR"}
+   <strong>${cls.name}</strong> — ${ev.subject} — ${ev.label||"-"} — ${ev.dateJJMMAA} — Sur ${fmt(ev.outof)} — Coef ${fmtCoef(ev.coef)} — ${ev.period||"YEAR"}
    ${hasBareme?'<span class="bareme-badge">📊 Barème</span>':''}
    ${ev.defaultImportant?'⭐':""}
   </div>
@@ -8757,7 +8761,7 @@ function openClassModal(isNew){
     <input type="checkbox" value="${name}" ${cls.subjects.includes(name)?'checked':""} data-name="${name}" style="width:20px;height:20px;cursor:pointer;"> 
     <div style="display:flex;align-items:center;gap:4px;">
      <span style="font-size:0.85em;color:#64748b;">Coef:</span>
-     <input type="number" step="0.01" value="${currentCoef}" class="class-subject-coef" data-name="${name}" style="width:55px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:4px;">
+     <input type="number" step="any" value="${currentCoef}" class="class-subject-coef" data-name="${name}" style="width:55px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:4px;">
     </div>
     <span style="font-weight:600;flex:1;">${name}</span>
   </div>`;
@@ -8839,7 +8843,7 @@ function renderManageSubjectsTable(){
   const coef=typeof s==='object'?s.coef:1;
   return `<tr draggable="true" data-index="${idx}" class="draggable-subject">
    <td style="cursor:move;">☰ ${name}</td>
-   <td>${fmt(coef,2)}</td>
+   <td>${fmtCoef(coef)}</td>
    <td style="display:flex;gap:8px;">
     <button class="btn" data-edit="${idx}">Modifier</button>
     <button class="btn btn-danger" data-delete="${idx}">Supprimer</button>
@@ -11870,7 +11874,7 @@ window.downloadStudentReleve = function(studentId, period) {
     
     subNotes.forEach(n => {
       let noteVal = "";
-      let coefVal = n.coef === 0 ? "" : fmt(n.coef, 2);
+      let coefVal = n.coef === 0 ? "" : fmtCoef(n.coef);
       
       if (n.absent || n.noteText === "Abs") noteVal = "Abs";
       else if (n.dispensed || n.noteText === "Disp") noteVal = "Disp";
@@ -11926,7 +11930,7 @@ window.downloadStudentReleve = function(studentId, period) {
     const subCoef = getSubjectCoef(subName);
 
     notesData.push([
-      { content: `Coeff. matière : ${fmt(subCoef, 2)}`, styles: { fontStyle: 'italic', fontSize: 7, textColor: [100, 116, 139] } },
+      { content: `Coeff. matière : ${fmtCoef(subCoef)}`, styles: { fontStyle: 'italic', fontSize: 7, textColor: [100, 116, 139] } },
       { content: "MOYENNE MATIÈRE :", styles: { halign: 'right', fontStyle: 'bold', fontSize: 8, textColor: [71, 85, 105] } },
       { content: subAvg !== null ? fmt(subAvg, 2) : "-", styles: { fontStyle: 'bold', fontSize: 12, halign: 'center', textColor: [30, 58, 138] } },
       "", // Colonne Coef vide
