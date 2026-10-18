@@ -4595,7 +4595,10 @@ function renderClassPreviewContent(){
     return;
   }
   
-  const students = DATA.students.filter(s => s.classId === CURRENT_PREVIEW_CLASS_ID)
+  // Classe : élèves de la classe ; groupe : membres du groupe (leur classe d'origine est différente de l'id du groupe)
+  const students = (cls.isGroup
+                      ? DATA.students.filter(s => (cls.memberIds || []).includes(s.id))
+                      : DATA.students.filter(s => s.classId === CURRENT_PREVIEW_CLASS_ID))
                     .sort((a, b) => a.last.localeCompare(b.last) || a.first.localeCompare(b.first));
   
   let totalSum = 0, totalCount = 0;
