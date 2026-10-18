@@ -9996,7 +9996,10 @@ function checkStudentLogin(login,exceptId){
 }
 
 async function cloudPull(){
- const j=await api("load");
+ let j=null;
+ const pf=CLOUD.prefetch; CLOUD.prefetch=null;   // chargement lancé dès l'ouverture de la page (session déjà enregistrée)
+ if(pf && pf.u===AUTH.user && pf.p===AUTH.pass && Date.now()-pf.t<60000){ j=await pf.promise; }
+ if(!j||!j.ok) j=await api("load");
  if(!j.ok) throw new Error(j.error||"erreur");
  CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
@@ -10115,7 +10118,7 @@ function cloudSchedule(){
  if(AUTH.role!=="prof") return;
  if(!CLOUD.ready){ cloudStatus("error","Non connecté – modifications NON enregistrées."); return; }
  cloudStatus("pending","Enregistrement dans Google Sheets…");
- clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},800);
+ clearTimeout(CLOUD.timer); CLOUD._fired=false; CLOUD.timer=setTimeout(()=>{CLOUD._fired=true;cloudPush(false);},500);
 }
 async function cloudPush(force){
  if(AUTH.role!=="prof"){ IS_MODIFIED=false; return; }   // les élèves n'enregistrent pas le carnet (le serveur refuse)
@@ -10134,7 +10137,7 @@ async function cloudPush(force){
   const j=await api("save",{lines,accounts,cancelled,baseRev:CLOUD.rev,force:!!force,reqId:CLOUD.lastTry.id});
   if(j.ok){
    CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0; CLOUD.lastTry=null;
-   if(j.merged) CLOUD.stale=true;           // le serveur a fusionné des rendus d'élèves : on les recharge au prochain contrôle
+   if(j.merged){ CLOUD.stale=true; setTimeout(()=>cloudCheckRemoteUpdates(false),600); }   // le serveur a fusionné des rendus d'élèves ou les modifications d'un autre appareil : on les recharge
    cancelled.forEach(k=>window.HW_CANCELLED_SUBS&&window.HW_CANCELLED_SUBS.delete(k));
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
    IS_MODIFIED=false;
@@ -10209,7 +10212,7 @@ function cloudWatch(){
  if(cur!==null && cur!==CLOUD.lastSnap){ IS_MODIFIED=true; cloudSchedule(); }
 }
 setInterval(cloudWatch,3000);   // construire le CSV complet est coûteux : inutile toutes les 1,5 s
-["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{if(AUTH.role!=="prof") return;clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,800);},true));
+["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{if(AUTH.role!=="prof") return;clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,500);},true));
 
 function saveData(){
  if(AUTH.role!=="prof") return;
@@ -14036,7 +14039,13 @@ function runNonRegressionTests() {
 
 /* Réveil du serveur Google (démarrage à froid = plusieurs secondes) pendant la saisie des identifiants */
 function warmUpServer(){
- try{ if(authLoad()) return; fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ping"})}).catch(()=>{}); }catch(e){}
+ try{
+  const sv=authLoad();
+  if(sv){   // session enregistrée : on lance le chargement des données PENDANT que l'interface s'initialise
+   CLOUD.prefetch={u:sv.u,p:sv.p,t:Date.now(),promise:fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"load",user:sv.u,pass:sv.p})}).then(r=>r.json()).catch(()=>null)};
+   return;
+  }
+  fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ping"})}).catch(()=>{}); }catch(e){}
 }
 warmUpServer();
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initApp();bootAuth();});
