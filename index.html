@@ -1649,7 +1649,7 @@ body.consult-mode #logoutBtn{display:none!important}
  <div class="modal-card" style="width:480px"><div class="modal-header"><h3 id="schEventTitle">Ajouter un cours</h3><button class="modal-close" id="schEventClose">×</button></div>
  <div class="modal-body"><form id="schEventForm" class="modal-form" autocomplete="off">
   <div id="schSubjWrap"><label>Matière</label><select id="schSubject"></select></div>
-  <div id="schNameWrap" style="display:none"><label>Nom de l'événement</label><input type="text" id="schEvName" maxlength="80" placeholder="Ex. Sortie scolaire, Conseil de classe…" style="width:100%"></div>
+  <div id="schNameWrap" style="display:none"><label>Nom de l'événement</label><div style="display:flex;gap:8px;align-items:center"><input type="text" id="schEvName" maxlength="80" placeholder="Ex. Sortie scolaire, Conseil de classe…" style="flex:1;min-width:0"><label class="sch-dot" title="Couleur de l'événement" style="background:#ffffff;border:1px solid #94a3b8;flex:none;margin:0" id="schEvColorDot"><input type="color" id="schEvColor" value="#ffffff"></label></div></div>
   <label>Classe(s)</label><div id="schClasses" class="sch-classes"></div>
   <label>Professeur</label><select id="schProf"></select>
   <label>Salle</label><select id="schRoom"></select>
@@ -4239,7 +4239,7 @@ function buildCSVText(){
   V.sanctions.forEach(x=>rows.push(["sanction",x.id,x.sid,x.level,x.date,x.time||"",escapeCsv(x.motif||""),escapeCsv(JSON.stringify(x.d||{})),escapeCsv(x.prof||""),x.createdAt||""].join(";")));}
  holEns().forEach(x=>rows.push(["holiday",x.id,escapeCsv(x.name),x.from,x.to].join(";")));
  schEns().rooms.forEach(r=>rows.push(["room","",escapeCsv(r)].join(";")));
- schEns().events.forEach(e=>rows.push(["scheduleEvent",e.id,escapeCsv(e.subject),escapeCsv(JSON.stringify(e.classIds||[])),escapeCsv(e.room||""),e.date,e.start,e.end,e.cancelled?1:0,e.changed?1:0,e.serie||"",e.hors?1:0,e.holCancel?1:0,e.created||"",e.evt?1:0].join(";")));
+ schEns().events.forEach(e=>rows.push(["scheduleEvent",e.id,escapeCsv(e.subject),escapeCsv(JSON.stringify(e.classIds||[])),escapeCsv(e.room||""),e.date,e.start,e.end,e.cancelled?1:0,e.changed?1:0,e.serie||"",e.hors?1:0,e.holCancel?1:0,e.created||"",e.evt?1:0,e.evt?(e.color||""):""].join(";")));
  const h = DATA.competenciesHierarchy || COMPETENCIES_HIERARCHY;
  for(const cycle in h){
   for(const domain in h[cycle]){
@@ -4363,7 +4363,7 @@ function importCSV(text){
   else if(type==="holiday"){ holEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),from:cols[3],to:cols[4]}); }
   else if(type==="group"){ let mi=[]; try{mi=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} let ss; try{ const raw=unescapeCsv(cols[4]||""); ss=raw?JSON.parse(raw):undefined; }catch(e){ ss=undefined; } if(cols[1]) grpEns().push({id:cols[1],name:unescapeCsv(cols[2]||""),memberIds:mi,subjectsSel:Array.isArray(ss)?ss:undefined}); }
   else if(type==="room"){ const r=unescapeCsv(cols[2]||""); if(r) schEns().rooms.push(r); }
-  else if(type==="scheduleEvent"){ let ci=[]; try{ci=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} schEns().events.push({id:cols[1],subject:unescapeCsv(cols[2]||""),classIds:ci,room:unescapeCsv(cols[4]||""),date:cols[5],start:cols[6],end:cols[7],cancelled:cols[8]==="1",changed:cols[9]==="1",serie:cols[10]||"",hors:cols[11]==="1",holCancel:cols[12]==="1",created:cols[13]||"",evt:cols[14]==="1"}); }
+  else if(type==="scheduleEvent"){ let ci=[]; try{ci=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} schEns().events.push({id:cols[1],subject:unescapeCsv(cols[2]||""),classIds:ci,room:unescapeCsv(cols[4]||""),date:cols[5],start:cols[6],end:cols[7],cancelled:cols[8]==="1",changed:cols[9]==="1",serie:cols[10]||"",hors:cols[11]==="1",holCancel:cols[12]==="1",created:cols[13]||"",evt:cols[14]==="1",color:cols[15]||undefined}); }
   else if(type==="compHierarchy"){
    try {
     const cycle = unescapeCsv(cols[1]||"");
@@ -14306,6 +14306,7 @@ function targetStudents(id){ const g=grpById(id); if(g){ const m=new Set(g.membe
 function studentInTargets(st,ids){ if(!st||!Array.isArray(ids)) return false; return ids.some(id=>{ if(id===st.classId) return true; const g=grpById(id); return !!g&&(g.memberIds||[]).includes(st.id); }); }
 
 function subjColor(n){ const s=SUBJECT_REGISTRY.find(x=>x&&typeof x==="object"&&x.name===n); if(s&&s.color) return s.color; let h=0; for(const ch of String(n||"")) h=(h*31+ch.charCodeAt(0))>>>0; return SCH_PAL[h%SCH_PAL.length]; }
+function evColor(e){ return e&&e.evt ? (/^#[0-9a-f]{6}$/i.test(e.color||"")?e.color:"#ffffff") : subjColor(e&&e.subject); }
 function inkFor(c){ const m=/^#?([0-9a-f]{6})$/i.exec(c||""); if(!m) return "#000"; const v=parseInt(m[1],16); return (0.299*(v>>16)+0.587*(v>>8&255)+0.114*(v&255))>150?"#000":"#fff"; }
 function profCiv(){ return PROF_INFO.civ==="Madame"?"Mme":PROF_INFO.civ==="Monsieur"?"M.":""; }
 function profShort(){ return ((profCiv()+" "+(PROF_INFO.last||"")).trim())||"Professeur"; }
@@ -14321,7 +14322,7 @@ function schEvents(){
  return ev;
 }
 function schBlock(e,pos,chip){
- const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
+ const bg=e.cancelled?"#fff":evColor(e), ink=e.cancelled?"#000":inkFor(bg);
  const who=AUTH.role==="eleve"?profShort():(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
  const warn=(e.changed||e.cancelled)?`<svg class="sch-warn" viewBox="0 0 24 24" width="${chip?15:17}" height="${chip?15:17}" aria-label="${e.cancelled?'Cours annulé':'Cours modifié'}"><path fill="currentColor" fill-rule="evenodd" d="M11.29 3.71Q12 2.5 12.71 3.71L21.79 19.29Q22.5 20.5 21.1 20.5L2.9 20.5Q1.5 20.5 2.21 19.29ZM12 9.3a1.2 1.2 0 0 1 1.2 1.2v3.4a1.2 1.2 0 0 1-2.4 0v-3.4A1.2 1.2 0 0 1 12 9.3ZM12 16.2a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2Z"/></svg>`:"";
  const subj=`<b${e.cancelled?' style="text-decoration:line-through"':""}>${escHtml(String(e.subject).toUpperCase())}</b>`;
@@ -14404,7 +14405,7 @@ function schDetClose(){ schDet.classList.remove("open"); schDet.setAttribute("ar
 function schDetFill(){
  const e=schEns().events.find(x=>x.id===schDetId); if(!e){ schDetClose(); return; }
  const cl=(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
- const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
+ const bg=e.cancelled?"#fff":evColor(e), ink=e.cancelled?"#000":inkFor(bg);
  const dt=new Date(e.date+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
  const row=(k,v)=>`<div style="display:flex;gap:10px;margin:6px 0"><span style="width:90px;color:#64748b">${k}</span><span style="flex:1">${v}</span></div>`;
  document.getElementById("schDetTitle").textContent=e.evt?"Détail de l'événement":"Détail du cours";
@@ -14429,6 +14430,7 @@ function schOpen(id,asEvent){
  document.getElementById("schSubjWrap").style.display=isEv?"none":"";
  document.getElementById("schNameWrap").style.display=isEv?"":"none";
  document.getElementById("schEvName").value=isEv&&e?e.subject:"";
+ { const c=(isEv&&e&&e.color)?e.color:"#ffffff"; document.getElementById("schEvColor").value=c; document.getElementById("schEvColorDot").style.background=c; }
  const names=SUBJECT_REGISTRY.map(s=>typeof s==="object"?s.name:s); if(e&&!e.evt&&!names.includes(e.subject)) names.push(e.subject);
  document.getElementById("schSubject").innerHTML=names.map(n=>`<option>${escHtml(n)}</option>`).join("");
  { const chk=(id,n)=>`<label><input type="checkbox" value="${id}"${e&&(e.classIds||[]).includes(id)?" checked":""}>${escHtml(n)}</label>`;
@@ -14458,9 +14460,10 @@ document.getElementById("schEventClose").onclick=schClose;
 document.getElementById("schEventCancel").onclick=schClose;
 document.getElementById("schDelete").onclick=()=>openConfirmModal({message:"Supprimer définitivement ce cours ?",onConfirm:()=>{ const s=schEns(); s.events=s.events.filter(x=>x.id!==SCH.editId); schCommit(); }});
 document.getElementById("schCancelEv").onclick=()=>{ const e=schEns().events.find(x=>x.id===SCH.editId); if(!e) return; e.cancelled=!e.cancelled; e.holCancel=false; schCommit(); };
+document.getElementById("schEvColor").addEventListener("input",ev=>{ document.getElementById("schEvColorDot").style.background=ev.target.value; });
 document.getElementById("schEventForm").addEventListener("submit",ev=>{
  ev.preventDefault();
- const v={subject:SCH.evt?document.getElementById("schEvName").value.trim():document.getElementById("schSubject").value, evt:!!SCH.evt,
+ const v={subject:SCH.evt?document.getElementById("schEvName").value.trim():document.getElementById("schSubject").value, evt:!!SCH.evt, color:SCH.evt?document.getElementById("schEvColor").value:undefined,
   classIds:[...document.querySelectorAll("#schClasses input:checked")].map(i=>i.value),
   room:document.getElementById("schRoom").value, date:document.getElementById("schDate").value,
   start:document.getElementById("schStart").value, end:document.getElementById("schEnd").value};
@@ -14472,7 +14475,7 @@ document.getElementById("schEventForm").addEventListener("submit",ev=>{
  const s=schEns();
  if(!SCH.editId){ if(schCreate(v,msg)) schCommit(); return; }
  const e=s.events.find(x=>x.id===SCH.editId); if(!e) return schClose();
- const diff=["subject","room","date","start","end"].some(k=>e[k]!==v[k])||[...(e.classIds||[])].sort().join()!==[...v.classIds].sort().join();
+ const diff=["subject","room","date","start","end"].some(k=>e[k]!==v[k])||(!!e.evt&&(e.color||"#ffffff")!==(v.color||"#ffffff"))||[...(e.classIds||[])].sort().join()!==[...v.classIds].sort().join();
  if(!diff){ schClose(); return; }
  SCH.pending=v; const openSig=()=>{ const sg=document.getElementById("schSignalModal"); sg.classList.add("open"); sg.setAttribute("aria-hidden","false"); };
  if(schSerieCount(e)>1) schScopeOpen("edit",e,sc=>{ SCH.scope=sc; openSig(); }); else { SCH.scope="one"; openSig(); }
@@ -15016,7 +15019,7 @@ function hEvFill(){
  const e=schEns().events.find(x=>x.id===HIST.evId); if(!e) return;
  const m=hModal("histEv",110), r=apFind(e);
  const cl=(e.classIds||[]).map(id=>targetName(id)).filter(Boolean).join(", ");
- const bg=e.cancelled?"#fff":subjColor(e.subject), ink=e.cancelled?"#000":inkFor(bg);
+ const bg=e.cancelled?"#fff":evColor(e), ink=e.cancelled?"#000":inkFor(bg);
  let info;
  if(r){ const na=(r.absent||[]).length, nl=Object.keys(r.late||{}).length;
   info='<b style="color:#16a34a">✔ Appel effectué</b> — '+na+' absent'+(na>1?"s":"")+', '+nl+' retard'+(nl>1?"s":""); }
@@ -15261,6 +15264,7 @@ function schApplyEdit(e,v,flag,scope){
  const delta=Math.round((new Date(v.date+"T12:00:00")-new Date(old.date+"T12:00:00"))/864e5);
  schScopeSet(e,scope).forEach(t=>{
   if(v.subject!==old.subject) t.subject=v.subject;
+  if(t.evt&&v.color) t.color=v.color;
   if(v.room!==old.room) t.room=v.room;
   if(v.start!==old.start) t.start=v.start;
   if(v.end!==old.end) t.end=v.end;
