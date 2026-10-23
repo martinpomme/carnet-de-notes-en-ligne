@@ -1381,11 +1381,27 @@ body.consult-mode #logoutBtn{display:none!important}
 .hwc-choice.is-ko .hwc-mark{border-color:#dc2626}
 .online-choice-row,.online-answer-target,.online-blank-token{-webkit-touch-callout:none}
 .online-choice-marker,.online-choice-status{-webkit-user-select:none;user-select:none}
+
+/* Boutons enregistrement manuel / actualisation + aperçu élève */
+.save-actions{display:flex;gap:6px;align-items:center}
+.sa-btn{padding:5px 10px!important;font-size:13px;white-space:nowrap}
+.sa-btn:disabled{opacity:.6;cursor:wait}
+.sa-btn.spin span::after{content:"…"}
+@keyframes saSpin{to{transform:rotate(360deg)}}
+body.student-mode #manualSaveBtn{display:none!important}
+body.ed-preview #saveActions{display:none!important}
+body.auth-pending #saveActions{display:none!important}
+@media (max-width:600px){ .sa-btn span{display:none} .sa-btn{padding:6px 9px!important} }
+#edPreviewBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:900;display:none;align-items:center;gap:12px;background:#1e3a8a;color:#fff;padding:10px 12px 10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(15,23,42,.35);font-size:14px;font-weight:600;max-width:calc(100vw - 24px)}
+#edPreviewBar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#edPreviewBar button{border:0;border-radius:999px;background:#fff;color:#1e3a8a;font-weight:700;padding:7px 14px;cursor:pointer;white-space:nowrap}
+body.ed-preview #edPreviewBar{display:flex}
+#consultStage{height:auto!important;min-height:0!important;padding:28px 18px;text-align:center;color:var(--muted);font-size:15px}
 </style>
 </head>
 <body class="auth-pending">
 <header>
- <div class="hdr-left"><h1>Ecole Directe</h1><div id="saveStatusBanner" class="save-status-banner"></div></div>
+ <div class="hdr-left"><h1>Ecole Directe</h1><div id="saveStatusBanner" class="save-status-banner"></div><div class="save-actions" id="saveActions"><button type="button" class="icon-btn sa-btn" id="manualSaveBtn" title="Enregistrer maintenant">💾 <span>Enregistrer</span></button><button type="button" class="icon-btn sa-btn" id="refreshSiteBtn" title="Actualiser les données (sans recharger la page)">🔄 <span>Actualiser</span></button></div></div>
   <div class="locks" id="locksBar">
   <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1">🔓</button></div>
   <div class="lock-item"><span class="lock-label">Trimestre 2</span><button class="lock-btn" data-lock="T2" title="Verrouiller / déverrouiller le trimestre 2">🔓</button></div>
@@ -1601,12 +1617,12 @@ body.consult-mode #logoutBtn{display:none!important}
    <input type="text" id="consultSearch" placeholder="Rechercher un élève (nom ou prénom)…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="consultList">
    <div class="cs-list" id="consultList" role="listbox" hidden></div>
   </div>
-  <div id="consultStage">
-   <div class="cs-load" id="consultLoad"><div class="cs-spin"></div><div id="consultLoadTxt"></div></div>
-  </div>
+  <div id="consultStage">Recherchez un élève : son compte s'affiche directement, tel qu'il le voit, sans connexion.</div>
  </section>
 
 </div>
+
+<div id="edPreviewBar"><span id="edPreviewTxt"></span><button type="button" id="edPreviewExit">Quitter l'aperçu</button></div>
 
 <div id="loginOverlay">
  <form class="login-card" id="loginForm" autocomplete="on">
@@ -10237,7 +10253,7 @@ async function cloudPush(force){
 }
 let CLOUD_POLL_FAILS=0, CLOUD_LAST_ACTIVITY=Date.now();
 async function cloudCheckRemoteUpdates(showStatus=false){
- if(!AUTH.role || IS_MODIFIED || CLOUD.saving || CLOUD.polling) return;
+ if(!AUTH.role || IS_MODIFIED || CLOUD.saving || CLOUD.polling || (window.EDPREV&&window.EDPREV.active)) return;
  CLOUD.polling=true; CLOUD.lastCheck=Date.now();
  try{
   const j=await api("rev");
@@ -10289,6 +10305,43 @@ function cloudWatch(){
 }
 setInterval(cloudWatch,3000);   // construire le CSV complet est coûteux : inutile toutes les 1,5 s
 ["click","change","input","blur","keyup"].forEach(ev=>document.addEventListener(ev,()=>{if(AUTH.role!=="prof") return;clearTimeout(CLOUD._w);CLOUD._w=setTimeout(cloudWatch,500);},true));
+
+// ── Enregistrement manuel + actualisation sans recharger l'onglet ──
+async function manualSave(){
+ if(AUTH.role!=="prof" || !CLOUD.ready || (window.EDPREV&&window.EDPREV.active)) return;
+ const b=document.getElementById("manualSaveBtn"); if(b){ b.disabled=true; b.classList.add("spin"); }
+ try{
+  clearTimeout(CLOUD.timer); CLOUD._fired=true; CLOUD.retryAt=0;
+  IS_MODIFIED=true;
+  cloudStatus("pending");
+  let t=0; while(CLOUD.saving && t<60){ await cloudSleep(250); t++; }
+  await cloudPush(true);
+ }catch(e){ cloudStatus("error","Échec de l'enregistrement ("+(e.message||e)+")"); }
+ finally{ if(b){ b.disabled=false; b.classList.remove("spin"); } }
+}
+async function manualRefresh(){
+ if(!AUTH.role || (window.EDPREV&&window.EDPREV.active)) return;
+ const b=document.getElementById("refreshSiteBtn"); if(b){ b.disabled=true; b.classList.add("spin"); }
+ try{
+  if(AUTH.role==="prof"){
+   if(IS_MODIFIED || (CLOUD.timer && !CLOUD._fired)){ await manualSave(); }   /* on n'écrase jamais des modifications non enregistrées */
+   let t=0; while(CLOUD.saving && t<60){ await cloudSleep(250); t++; }
+   if(IS_MODIFIED){ cloudStatus("error","Actualisation annulée : des modifications ne sont pas encore enregistrées."); return; }
+  }
+  if(CLOUD.polling){ let t=0; while(CLOUD.polling && t<40){ await cloudSleep(250); t++; } }
+  const openTab=document.querySelector("#mainTabs .tab-btn.active")?.dataset.target;
+  await cloudPull();
+  IS_MODIFIED=false;
+  if(openTab) document.querySelector('#mainTabs .tab-btn[data-target="'+openTab+'"]')?.click();
+  if(AUTH.role==="prof") cloudStatus("ok","Données actualisées à "+cloudHour());
+ }catch(e){
+  console.error("refresh:",e);
+  if(AUTH.role==="prof") cloudStatus("error","Actualisation impossible ("+(e.message||e)+")");
+  else alert("Actualisation impossible : "+(e.message||e));
+ }finally{ if(b){ b.disabled=false; b.classList.remove("spin"); } }
+}
+document.getElementById("manualSaveBtn")?.addEventListener("click",manualSave);
+document.getElementById("refreshSiteBtn")?.addEventListener("click",manualRefresh);
 
 function saveData(){
  if(AUTH.role!=="prof") return;
@@ -13046,6 +13099,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   ];
   if(test.options?.timed) badges.push(formatOnlineTestDuration(test.options.timeLimitSeconds||0));
   if(test.options?.trainingMode) badges.push("Mode entraînement");
+  if(test.options?.focusMode && !test.options?.trainingMode) badges.push("Mode Focus : ne quitte pas la page");
   if(otManual(test)) badges.push("Correction professeur");
   body.innerHTML=`
    <div class="homework-quiz-card">
@@ -13205,6 +13259,8 @@ async function finishHomeworkQuiz(reason){
   HOMEWORK_STATE.quiz.remainingSeconds=HOMEWORK_STATE.quiz.test.options?.timed ? Number(HOMEWORK_STATE.quiz.test.options.timeLimitSeconds)||0 : null;
   HOMEWORK_STATE.quiz.totalSeconds=HOMEWORK_STATE.quiz.remainingSeconds;
   HOMEWORK_STATE.quiz.submitted=false;
+  HOMEWORK_STATE.quiz.started=true;
+  HOMEWORK_STATE.quiz.leftPage=false;
   if(HOMEWORK_STATE.quiz.timerId) clearInterval(HOMEWORK_STATE.quiz.timerId);
   if(HOMEWORK_STATE.quiz.remainingSeconds>0){
    HOMEWORK_STATE.quiz.timerId=setInterval(()=>{
@@ -13215,6 +13271,34 @@ async function finishHomeworkQuiz(reason){
   }
   renderHomeworkQuizQuestion();
  }
+
+ /* ── Mode Focus (élève) : fonctionne sur ordinateur ET mobile ──
+    Mobile : on s'appuie sur visibilitychange / pagehide (changement d'appli, écran verrouillé, onglet changé)
+    et on re-vérifie au retour sur la page (le navigateur peut avoir suspendu le JavaScript en arrière-plan). */
+ function hwFocusActive(){
+  const q=HOMEWORK_STATE.quiz;
+  return !!(q && q.started && !q.submitted && q.test?.options?.focusMode && !q.test.options.trainingMode && homeworkQuizModal?.classList.contains("open"));
+ }
+ function hwFocusLeft(){
+  if(!hwFocusActive()) return;
+  HOMEWORK_STATE.quiz.leftPage=true;
+  finishHomeworkQuiz("focus");
+ }
+ function hwFocusBack(){
+  const q=HOMEWORK_STATE.quiz;
+  if(q && q.leftPage && !q.submitted && q.started && q.test?.options?.focusMode && homeworkQuizModal?.classList.contains("open")){
+   finishHomeworkQuiz("focus");   /* l'envoi n'avait pas abouti en arrière-plan : on le relance */
+  }
+ }
+ document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") hwFocusLeft(); else hwFocusBack(); });
+ window.addEventListener("pagehide",hwFocusLeft);
+ document.addEventListener("freeze",hwFocusLeft);
+ window.addEventListener("pageshow",hwFocusBack);
+ window.addEventListener("focus",hwFocusBack);
+ window.addEventListener("blur",()=>{
+  if(!hwFocusActive()) return;
+  setTimeout(()=>{ if(hwFocusActive() && !document.hasFocus()) hwFocusLeft(); },120);
+ });
  function renderHomeworkQuizQuestion(){
   const body=document.getElementById("homeworkQuizBody");
   const quiz=HOMEWORK_STATE.quiz;
@@ -13270,7 +13354,7 @@ async function finishHomeworkQuiz(reason){
  function renderHomeworkQuizResult(homework,test,submission,result,reason){
   const body=document.getElementById("homeworkQuizBody");
   if(!body) return;
-  const reasonText=reason==="timeout" ? "Le temps imparti est écoulé." : "Le test a été rendu.";
+  const reasonText=reason==="timeout" ? "Le temps imparti est écoulé." : (reason==="focus" ? "Le test a été rendu automatiquement car tu as quitté la page." : "Le test a été rendu.");
   const noteValue=submission.manualOverride || (submission.review?.finalScore!=null ? submission.review.finalScore : (!result.manualReview && !test.options?.hideGrade ? result.earned : ""));
   const total=fmt(result.total,2).replace(/\.00$/,"");
   const showScore=noteValue!=="" && noteValue!=null && !test.options?.hideGrade && !result.manualReview;
@@ -13449,7 +13533,6 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      dateJJMMAA:homeworkDateToFr(hw.dateISO),
      isoDate:hw.dateISO,
      outof:total,
-     coef:1,
      period,
      defaultImportant:!!hw.isExam,
      hwDirect:isHomeworkDirectTest(test)
@@ -13465,7 +13548,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      if(!isProf) return;
      if(LOCKED_PERIODS[period]) return;
      const reveal=homeworkEvalRevealed(hw,test);
-     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,hideFromStudent:!reveal,hwRevealed:reveal,hwKey:key,hwId:hw.id,hwTestId:test.id};
+     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,coef:1,hideFromStudent:!reveal,hwRevealed:reveal,hwKey:key,hwId:hw.id,hwTestId:test.id};
      cls.evals.push(ev);
      changed=true;
     }else if(isProf && !(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period])){
@@ -13474,6 +13557,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
       ev.hwRevealed=true; ev.hideFromStudent=false; revealedNow=true; changed=true;
      }
     }
+    if(ev.coef==null || isNaN(Number(ev.coef))){ ev.coef=1; if(isProf) changed=true; }   /* le coef modifié par le prof est conservé */
     const members=(cls.memberIds||[]).filter(id=>isProf || id===myId);
     members.forEach(sid=>{
      const arr=DATA.notes[sid]||(DATA.notes[sid]=[]);
@@ -15418,19 +15502,17 @@ document.getElementById("schDelete").onclick=()=>{
 })();
 </script>
 <script>
-/* Onglet Consultation : aperçu fidèle du compte d'un élève (connexion automatique dans un cadre) */
+/* Onglet Consultation : affiche directement le compte d'un élève (aucune connexion, aucun cadre) */
 (function(){
  const view=document.getElementById("consultView"); if(!view) return;
- const inp=document.getElementById("consultSearch"), list=document.getElementById("consultList"),
-       stage=document.getElementById("consultStage"), load=document.getElementById("consultLoad"), loadTxt=document.getElementById("consultLoadTxt"),
-       wrap=inp.parentNode;
+ const inp=document.getElementById("consultSearch"), list=document.getElementById("consultList"), wrap=inp.parentNode;
  const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/œ/gi,"oe").replace(/æ/gi,"ae").toLowerCase();
  const words=s=>norm(s).split(/[^a-z0-9]+/).filter(Boolean);
  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const cname=id=>(DATA.classes.find(c=>c.id===id)||{}).name||"";
- let items=[], act=-1, frame=null, srcCache=null, token=0, timer=null;
+ let items=[], act=-1;
+ const PREV=window.EDPREV={active:false};
 
- const hasAcc=s=>{ const a=(typeof ACCOUNTS!=="undefined"&&ACCOUNTS)?ACCOUNTS[s.id]:null; return !!(a&&a.login&&a.pwd); };
  function closeList(){ list.hidden=true; inp.classList.remove("open"); inp.setAttribute("aria-expanded","false"); act=-1; }
  function setAct(i){
   act=i; list.querySelectorAll(".cs-it").forEach((el,k)=>el.classList.toggle("act",k===i));
@@ -15442,47 +15524,76 @@ document.getElementById("schDelete").onclick=()=>{
   items=DATA.students.filter(s=>{ const w=words(s.first+" "+s.last); return q.every(t=>w.some(x=>x.indexOf(t)===0)); })
    .sort((a,b)=>(norm(a.last)+" "+norm(a.first)).localeCompare(norm(b.last)+" "+norm(b.first)));
   list.innerHTML=items.length
-   ? items.map((s,i)=>'<div class="cs-it'+(hasAcc(s)?"":" off")+'" role="option" data-i="'+i+'"><span>'+esc(s.first)+" <b>"+esc(s.last)+'</b></span><span class="cs-cl">'+(hasAcc(s)?esc(cname(s.classId)):"Pas de compte")+"</span></div>").join("")
+   ? items.map((s,i)=>'<div class="cs-it" role="option" data-i="'+i+'"><span>'+esc(s.first)+" <b>"+esc(s.last)+'</b></span><span class="cs-cl">'+esc(cname(s.classId))+"</span></div>").join("")
    : '<div class="cs-empty">Aucun élève trouvé</div>';
   list.hidden=false; inp.classList.add("open"); inp.setAttribute("aria-expanded","true");
   setAct(items.length?0:-1);
  }
 
- function showLoad(txt,isErr){ loadTxt.textContent=txt; load.classList.toggle("err",!!isErr); load.classList.add("on"); }
- function hideLoad(){ load.classList.remove("on"); }
- function clearFrame(){ clearTimeout(timer); if(frame){ frame.remove(); frame=null; } }
-
- async function selfHtml(){
-  if(srcCache) return srcCache;
-  if(!/^https?:$/.test(location.protocol)) return null;
-  const r=await fetch(location.href.split("#")[0],{credentials:"same-origin"});
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  const t=await r.text();
-  if(!/<\/html>\s*$/i.test(t)) throw new Error("page incomplète");
-  return (srcCache=t);
+ /* ── Aperçu : la page passe en « mode élève » avec les données déjà chargées, puis revient à l'identique ── */
+ function filterForStudent(sid){
+  const vis=x=>!(x && x.hideFromStudent);
+  DATA.notes=DATA.notes||{};
+  if(DATA.notes[sid]) DATA.notes[sid]=DATA.notes[sid].filter(vis);
+  [...(DATA.classes||[]),...(typeof grpEns==="function"?grpEns():[])].forEach(c=>{
+   if(Array.isArray(c.evals)) c.evals=c.evals.filter(vis);
+   if(Array.isArray(c.compEvals)) c.compEvals=c.compEvals.filter(vis);
+  });
+  if(Array.isArray(DATA.competencies)) DATA.competencies=DATA.competencies.filter(c=>c.studentId!==sid || vis(c));
  }
-
- async function openPreview(s){
-  const a=ACCOUNTS[s.id], my=++token;
-  clearFrame();
-  showLoad("Connexion au compte de "+s.first+" "+s.last+"…");
-  let html=null; try{ html=await selfHtml(); }catch(e){ html=null; }
-  if(my!==token) return;
-  if(!html && !/^(https?|file):$/.test(location.protocol)){
-   showLoad("Aperçu indisponible : ouvrez le site depuis son adresse web directe (et non dans un cadre intégré).",true); return;
+ function saveLabels(){
+  const q=(sel)=>document.querySelector(sel);
+  return {
+   t1:q('.tab-btn[data-target="elevesView"]')?.textContent, t3:q('.tab-btn[data-target="appreciationsView"]')?.textContent,
+   h1:q("#elevesView .card-header strong")?.innerHTML, h3:q("#appreciationsView .card-header strong")?.innerHTML,
+   ph:document.getElementById("studentPlaceholder")?.textContent
+  };
+ }
+ function restoreLabels(L){
+  const q=(sel)=>document.querySelector(sel);
+  if(L.t1!=null&&q('.tab-btn[data-target="elevesView"]')) q('.tab-btn[data-target="elevesView"]').textContent=L.t1;
+  if(L.t3!=null&&q('.tab-btn[data-target="appreciationsView"]')) q('.tab-btn[data-target="appreciationsView"]').textContent=L.t3;
+  if(L.h1!=null&&q("#elevesView .card-header strong")) q("#elevesView .card-header strong").innerHTML=L.h1;
+  if(L.h3!=null&&q("#appreciationsView .card-header strong")) q("#appreciationsView .card-header strong").innerHTML=L.h3;
+ }
+ function exitPreview(silent){
+  if(!PREV.active) return;
+  PREV.active=false;
+  try{ DATA=JSON.parse(PREV.backup); }catch(e){ console.error("restauration:",e); }
+  AUTH.role=PREV.role; AUTH.studentId=PREV.studentId;
+  document.body.classList.remove("student-mode","ed-preview");
+  restoreLabels(PREV.labels);
+  IS_MODIFIED=PREV.modified;
+  PREV.backup=null;
+  try{ applyProfMode(); }catch(e){}
+  try{ rebuildUI(); }catch(e){ console.error(e); }
+  if(!silent) document.querySelector('#mainTabs .tab-btn[data-target="consultView"]')?.click();
+ }
+ function enterPreview(s){
+  if(PREV.active) exitPreview(true);
+  PREV.backup=JSON.stringify(DATA); PREV.role=AUTH.role; PREV.studentId=AUTH.studentId; PREV.modified=IS_MODIFIED; PREV.labels=saveLabels();
+  PREV.active=true;
+  try{
+   filterForStudent(s.id);
+   AUTH.role="eleve"; AUTH.studentId=s.id;
+   document.body.classList.add("ed-preview");
+   rebuildUI();
+   applyStudentMode();
+   document.getElementById("edPreviewTxt").textContent="Aperçu du compte de "+s.first+" "+s.last;
+   document.querySelector('#mainTabs .tab-btn[data-target="scheduleView"]')?.click();
+   window.scrollTo(0,0);
+  }catch(e){
+   console.error("aperçu:",e);
+   exitPreview(false);
+   alert("Impossible d'afficher le compte de cet élève.");
   }
-  const fr=document.createElement("iframe");
-  fr.className="cs-frame"; fr.title="Compte de "+s.first+" "+s.last;
-  fr.setAttribute("allow","clipboard-write; fullscreen");
-  fr.name="ED_CONSULT:"+JSON.stringify({u:a.login,p:a.pwd});
-  if(html) fr.srcdoc=html; else fr.src=location.href.split("#")[0];
-  frame=fr; stage.appendChild(fr);
-  timer=setTimeout(()=>{ if(my===token) hideLoad(); },60000);
  }
+ document.getElementById("edPreviewExit")?.addEventListener("click",()=>exitPreview(false));
+ window.addEventListener("beforeunload",()=>{ if(PREV.active){ PREV.active=false; } });
 
  function select(i){
-  const s=items[i]; if(!s||!hasAcc(s)) return;
-  inp.value=s.first+" "+s.last; closeList(); openPreview(s);
+  const s=items[i]; if(!s) return;
+  inp.value=s.first+" "+s.last; closeList(); enterPreview(s);
  }
 
  inp.addEventListener("input",render);
@@ -15495,13 +15606,9 @@ document.getElementById("schDelete").onclick=()=>{
   else if(e.key==="Escape"){ closeList(); }
  });
  list.addEventListener("mousedown",e=>{ const el=e.target.closest(".cs-it"); if(!el) return; e.preventDefault(); select(+el.dataset.i); });
+ list.addEventListener("touchend",e=>{ const el=e.target.closest(".cs-it"); if(!el) return; e.preventDefault(); select(+el.dataset.i); });
  list.addEventListener("mousemove",e=>{ const el=e.target.closest(".cs-it"); if(el&&+el.dataset.i!==act) setAct(+el.dataset.i); });
  document.addEventListener("mousedown",e=>{ if(!wrap.contains(e.target)) closeList(); });
-
- window.addEventListener("message",e=>{
-  const d=e.data; if(!d||!d.edConsult||!frame||e.source!==frame.contentWindow) return;
-  clearTimeout(timer); hideLoad();
- });
 
  const tab=document.querySelector('.tab-btn[data-target="consultView"]');
  if(tab) tab.addEventListener("click",()=>setTimeout(()=>{ try{ inp.focus({preventScroll:true}); }catch(e){} },40));
