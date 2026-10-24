@@ -1618,6 +1618,20 @@ a[x-apple-data-detectors]{ color:inherit!important; text-decoration:none!importa
 #msgCtx button.dg{ color:var(--danger) }
 #msgCtx button i{ display:inline-flex; width:18px; justify-content:center; font-style:normal }
 .cm.ctx{ outline:2px solid #0a7fbf; outline-offset:1px }
+.cl-it.ctx{ outline:2px solid #0a7fbf; outline-offset:-2px }
+/* Mode « Sélectionner » (messagerie) */
+.ch-msgs.selecting .cm{ cursor:pointer; position:relative; padding-left:36px; max-width:92% }
+.cm-ck,.cl-ck{ flex:none; width:20px; height:20px; border:2px solid #94a3b8; border-radius:50%; background:#fff; box-sizing:border-box; display:inline-block; position:relative }
+.cm-ck{ position:absolute; left:9px; top:9px }
+.cm.picked .cm-ck,.cl-it.picked .cl-ck{ background:#0a7fbf; border-color:#0a7fbf }
+.cm.picked .cm-ck::after,.cl-it.picked .cl-ck::after{ content:""; position:absolute; left:5px; top:1px; width:5px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg) }
+.cm.picked{ outline:2px solid #0a7fbf; outline-offset:1px }
+.cl-it.picked{ background:#e3f0fb }
+.ch-selbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 12px; border-top:1px solid var(--border); background:#fff }
+.ch-selbar .sp{ flex:1 }
+.ch-selbar .sb-n{ font-size:13px; color:var(--muted); font-weight:600 }
+.ch-selbar .btn:disabled{ opacity:.45; cursor:not-allowed }
+.tl-dot.appel{ --c:#dc2626 }
 .cm-ed{ font-style:italic; margin-right:3px }
 @media (pointer:coarse){
  body:not(.student-mode) #homeChat .cm{ -webkit-touch-callout:none; -webkit-user-select:none; user-select:none }
@@ -1985,7 +1999,10 @@ a[x-apple-data-detectors]{ color:inherit!important; text-decoration:none!importa
 <div id="msgCtx" role="menu" aria-label="Actions du message">
  <button type="button" role="menuitem" data-ctx="copy"><i data-ico="copy"></i>Copier</button>
  <button type="button" role="menuitem" data-ctx="edit"><i data-ico="edit"></i>Modifier</button>
+ <button type="button" role="menuitem" data-ctx="select"><i data-ico="select"></i>Sélectionner</button>
+ <button type="button" role="menuitem" data-ctx="unread"><i data-ico="unread"></i>Marquer non lue</button>
  <button type="button" role="menuitem" data-ctx="del" class="dg"><i data-ico="del"></i>Supprimer</button>
+ <button type="button" role="menuitem" data-ctx="delthread" class="dg"><i data-ico="del"></i>Supprimer la discussion</button>
 </div>
 
 <div id="edPreviewBar"><span id="edPreviewTxt"></span><button type="button" id="edPreviewExit">Quitter l'aperçu</button></div>
@@ -10638,15 +10655,17 @@ async function cloudPush(force){
   const lines=csvToLogicalLines(csv);
   const accounts=DATA.students.filter(s=>ACCOUNTS[s.id]).map(s=>({id:s.id,login:ACCOUNTS[s.id].login,pwd:ACCOUNTS[s.id].pwd}));
   const cancelled=[...(window.HW_CANCELLED_SUBS||[])];
+  const deletedMsgs=[...(window.HW_DELETED_MSGS||[])];   // messages supprimés par le professeur (le serveur ne doit pas les ré-ajouter)
   // Identifiant de requête : réutilisé UNIQUEMENT pour renvoyer exactement les mêmes données après un échec réseau
   // (le serveur ne les applique alors pas deux fois)
-  const cle=(snap||"")+"|"+cancelled.join(",")+"|"+(force?1:0);
+  const cle=(snap||"")+"|"+cancelled.join(",")+"|"+deletedMsgs.join(",")+"|"+(force?1:0);
   if(!CLOUD.lastTry||CLOUD.lastTry.cle!==cle) CLOUD.lastTry={cle,id:Date.now().toString(36)+Math.random().toString(36).slice(2,8)};
-  const j=await api("save",{lines,accounts,cancelled,baseRev:CLOUD.rev,force:!!force,reqId:CLOUD.lastTry.id});
+  const j=await api("save",{lines,accounts,cancelled,deletedMsgs,baseRev:CLOUD.rev,force:!!force,reqId:CLOUD.lastTry.id});
   if(j.ok){
    CLOUD.rev=j.rev; CLOUD.lastSnap=snap; CLOUD.retryAt=0; CLOUD.lastTry=null;
    if(j.merged){ CLOUD.stale=true; setTimeout(()=>cloudCheckRemoteUpdates(false),600); }   // le serveur a fusionné des rendus d'élèves ou les modifications d'un autre appareil : on les recharge
    cancelled.forEach(k=>window.HW_CANCELLED_SUBS&&window.HW_CANCELLED_SUBS.delete(k));
+   deletedMsgs.forEach(k=>window.HW_DELETED_MSGS&&window.HW_DELETED_MSGS.delete(k));
    if(CLOUD.again){ CLOUD.saving=false; return cloudPush(false); }
    IS_MODIFIED=false;
    cloudStatus("ok","Enregistré dans Google Sheets à "+cloudHour());
@@ -15886,6 +15905,7 @@ function vsAlertUpdate(){
  const m=vsMissing();
  setWn(document.querySelector('.tab-btn[data-target="appelView"]'),m.now.length>0,"L'appel n'a pas été fait");
  setWn(document.querySelector('.tab-btn[data-target="vieView"]'),m.past.length>0,"Appel manquant");
+ try{ const sig=m.now.concat(m.past).map(e=>e.id+"|"+e.date).join(","); if(window._appelSig!==sig){ window._appelSig=sig; if(window.renderHomeTimeline) window.renderHomeTimeline(); } }catch(x){}
  if(_lastMiss!==m.past.length){ _lastMiss=m.past.length; if(document.getElementById("vieView").classList.contains("active")) renderVie(); }
 }
 setInterval(vsAlertUpdate,20000);
@@ -16212,7 +16232,7 @@ const isoOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const uid=p=>p+"_"+Math.random().toString(36).slice(2,9)+Date.now().toString(36);
 const isStu=()=>AUTH.role==="eleve";
 const isPrev=()=>document.body.classList.contains("ed-preview");
-const H={thread:null,filter:"",draft:{},read:new Set(),readFor:null,pendingScroll:false};
+const H={thread:null,filter:"",draft:{},read:new Set(),readFor:null,pendingScroll:false,sel:{on:false,kind:"",ids:new Set()}};
 
 function ensure(){
  if(!Array.isArray(DATA.posts)) DATA.posts=[];
@@ -16311,6 +16331,17 @@ function tlItems(){
     ini:initials(s.studentId),todo:!s.validatedAt&&!s.manualOverride});
   });
   subs.sort((a,b)=>b.ts-a.ts).slice(0,12).forEach(r=>out.push(r));
+  /* Appels non faits (mêmes cas que le panneau d'attention) : disparaissent dès que l'appel est enregistré */
+  try{
+   const mm=(typeof vsMissing==="function")?vsMissing():{now:[],past:[]}, vus={}, miss=[];
+   mm.now.concat(mm.past).forEach(e=>{ const k=e.id+"|"+e.date; if(!vus[k]){ vus[k]=1; miss.push(e); } });
+   miss.sort((a,b)=>(b.date+b.start<a.date+a.start)?-1:1).slice(0,25).forEach(e=>{
+    let ts=new Date(e.date+"T"+(e.start||"12:00")+":00").getTime(); if(isNaN(ts)) ts=new Date(e.date+"T12:00:00").getTime();
+    const cls=(e.classIds||[]).map(id=>{ try{ return targetName(id); }catch(x){ return ""; } }).filter(Boolean).join(", ");
+    out.push({k:"a"+e.id+e.date,type:"appel",act:"appel",ts,iso:e.date,today:e.date===today,evId:e.id,todo:true,tag:"À faire",
+     title:"Appel non fait",sub:[(e.start||"")+(e.end?"–"+e.end:""),e.subject,cls].filter(Boolean).join(" · ")});
+   });
+  }catch(x){ console.warn("appels timeline:",x); }
  }
  const groups={};
  unreadMessages().forEach(m=>{ (groups[m.sid]||(groups[m.sid]=[])).push(m); });
@@ -16326,7 +16357,7 @@ function tlItems(){
 function updateHomeBadges(items){
  const b=$("homeTabBtn"); if(!b) return;
  const msgs=unreadMessages().length;
- const others=(items||[]).filter(it=>it.type==="grade"?it.today:(it.type==="sub"?it.todo:false)).length;
+ const others=(items||[]).filter(it=>it.type==="grade"?it.today:((it.type==="sub"||it.type==="appel")?it.todo:false)).length;
  const set=(cls,n)=>{
   let el=b.querySelector("."+cls);
   if(!n){ if(el) el.remove(); return; }
@@ -16347,9 +16378,10 @@ function renderTimeline(){
   let dot;
   if(it.type==="grade") dot='<span class="tl-dot'+(it.today?" today":"")+'">/'+esc(it.outof)+'</span>';
   else if(it.type==="sub") dot='<span class="tl-dot sub'+(it.today?" today":"")+'">'+esc(it.ini)+'</span>';
+  else if(it.type==="appel") dot='<span class="tl-dot appel'+(it.today?" today":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(it.today?" today":"")+'">'+ICON_MAIL+'</span>';
-  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'">'+dot
-   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">À corriger</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
+  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'">'+dot
+   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
  });
  host.innerHTML=html+'</div>';
 }
@@ -16488,11 +16520,13 @@ function pmExec(cmd,val){ restoreRange(); try{ document.execCommand("styleWithCS
 const ICON_SEND='<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.1 6.5L15 12 3.3 13.9z"/></svg>';
 const ICON_BACK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>';
 function threadMessages(sid){ return myMessages().filter(m=>m.sid===sid).sort((a,b)=>new Date(a.at)-new Date(b.at)); }
+const selMsgOn=()=>!isStu()&&H.sel.on&&H.sel.kind==="msg";
+const selThrOn=()=>!isStu()&&H.sel.on&&H.sel.kind==="thread";
 function bubble(m){
  const me=!incoming(m);
  const tick=me?(isRead(m)?'<span class="tk r">✓✓</span>':'<span class="tk">✓</span>'):"";
  const bl=(me&&!isStu()&&m.bl)?'<div class="cm-bl">Envoyé à : '+esc(m.bl)+'</div>':"";
- return '<div class="cm '+(me?"me":"th")+'" data-mid="'+esc(m.id)+'">'+bl+'<div>'+esc(m.text).replace(/\n/g,"<br>")+'</div><div class="cm-m">'+(m.editedAt?'<span class="cm-ed">modifié</span>':"")+hhmm(m.at)+tick+'</div></div>';
+ return '<div class="cm '+(me?"me":"th")+(selMsgOn()&&H.sel.ids.has(m.id)?" picked":"")+'" data-mid="'+esc(m.id)+'">'+(selMsgOn()?'<span class="cm-ck" aria-hidden="true"></span>':"")+bl+'<div>'+esc(m.text).replace(/\n/g,"<br>")+'</div><div class="cm-m">'+(m.editedAt?'<span class="cm-ed">modifié</span>':"")+hhmm(m.at)+tick+'</div></div>';
 }
 function threadHtml(sid){
  const ms=threadMessages(sid); let html="", day="", newDone=false;
@@ -16517,7 +16551,7 @@ function listHtml(){
    .concat(sortedStudents().filter(s=>!have.has(s.id)&&(s.first+" "+s.last).toLowerCase().includes(needle)).map(s=>({sid:s.id,last:null,unread:0})));
  }
  if(!rows.length) return '<p class="home-empty">'+(needle?"Aucun élève trouvé.":"Aucune conversation.<br>Utilise « Nouveau » pour écrire à un élève, une classe ou un groupe.")+'</p>';
- return rows.map(r=>'<button type="button" class="cl-it" data-act="thread" data-sid="'+esc(r.sid)+'"><span class="av">'+esc(initials(r.sid))+'</span>'
+ return rows.map(r=>'<button type="button" class="cl-it'+(selThrOn()&&H.sel.ids.has(r.sid)?" picked":"")+'" data-act="thread" data-sid="'+esc(r.sid)+'">'+(selThrOn()&&r.last?'<span class="cl-ck" aria-hidden="true"></span>':"")+'<span class="av">'+esc(initials(r.sid))+'</span>'
   +'<span class="cl-tx"><b>'+esc(stuName(r.sid))+'</b><small>'+(r.last?((incoming(r.last)?"":"Vous : ")+esc(String(r.last.text).replace(/\s+/g," ").slice(0,60))):esc(className(r.sid)))+'</small></span>'
   +'<span class="cl-mt">'+(r.last?'<time>'+esc(shortStamp(r.last.at))+'</time>':"")+(r.unread?'<i class="cl-bd">'+r.unread+'</i>':"")+'</span></button>').join("");
 }
@@ -16526,6 +16560,8 @@ function renderChat(){
  if(!isStu()&&H.thread&&!stuById(H.thread)) H.thread=null;
  const view=isStu()?"thread":(H.thread?"thread":"list"), sid=isStu()?AUTH.studentId:H.thread;
  const key=view==="thread"?(isStu()?"stu":H.thread):"";
+ if(H.sel.on&&(isStu()||H.sel.kind!==(view==="list"?"thread":"msg"))){ H.sel.on=false; H.sel.ids.clear(); }
+ if(H.sel.on){ const ex=H.sel.kind==="thread"?(k=>(DATA.messages||[]).some(z=>z.sid===k)):(k=>!!findMsg(k)); [...H.sel.ids].forEach(k=>{ if(!ex(k)) H.sel.ids.delete(k); }); }
  const oldTa=host.querySelector("textarea"), hadFocus=oldTa&&document.activeElement===oldTa, oldMsgs=host.querySelector(".ch-msgs");
  if(oldTa) H.draft[host.dataset.key||""]=oldTa.value;
  const wasBottom=!oldMsgs||(oldMsgs.scrollHeight-oldMsgs.scrollTop-oldMsgs.clientHeight<40), prevTop=oldMsgs?oldMsgs.scrollTop:0, sameView=host.dataset.view===view+":"+key;
@@ -16533,16 +16569,18 @@ function renderChat(){
   const oldQ=host.querySelector(".ch-search"), keepQ=oldQ&&document.activeElement===oldQ;
   host.innerHTML='<div class="ch-head"><div class="ti"><b>Messagerie</b></div><button type="button" class="btn btn-primary" data-act="newmsg">＋ Nouveau</button></div>'
    +'<input class="ch-search" type="search" placeholder="Rechercher un élève…" aria-label="Rechercher un élève" value="'+esc(H.filter)+'">'
-   +'<div class="ch-list">'+listHtml()+'</div>';
+   +'<div class="ch-list">'+listHtml()+'</div>'+(H.sel.on?selBarHtml():"");
+  if(H.sel.on) selRefresh();
   if(keepQ){ const q=host.querySelector(".ch-search"); q.focus(); q.setSelectionRange(q.value.length,q.value.length); }
  }else{
   const who=isStu()?profName():stuName(sid), sub=isStu()?"Professeur":className(sid), av=isStu()?"P":initials(sid);
   host.innerHTML='<div class="ch-head">'+(isStu()?"":'<button type="button" class="ch-back" data-act="back" aria-label="Retour aux conversations">'+ICON_BACK+'</button>')
    +'<span class="av">'+esc(av)+'</span><div class="ti"><b>'+esc(who)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':"")+'</div></div>'
-   +'<div class="ch-msgs">'+threadHtml(sid)+'</div>'
-   +'<div class="ch-compose"><textarea rows="1" placeholder="Écrire un message…" aria-label="Message"></textarea><button type="button" class="ch-send" data-act="send" aria-label="Envoyer">'+ICON_SEND+'</button></div>';
-  const ta=host.querySelector("textarea"); ta.value=H.draft[key]||""; autosize(ta);
-  if(hadFocus&&sameView) ta.focus();
+   +'<div class="ch-msgs'+(selMsgOn()?" selecting":"")+'">'+threadHtml(sid)+'</div>'
+   +(selMsgOn()?selBarHtml():'<div class="ch-compose"><textarea rows="1" placeholder="Écrire un message…" aria-label="Message"></textarea><button type="button" class="ch-send" data-act="send" aria-label="Envoyer">'+ICON_SEND+'</button></div>');
+  const ta=host.querySelector("textarea"); if(ta){ ta.value=H.draft[key]||""; autosize(ta); }
+  if(selMsgOn()) selRefresh();
+  if(ta&&hadFocus&&sameView) ta.focus();
   const ms=host.querySelector(".ch-msgs");
   if(H.pendingScroll||!sameView||wasBottom){ const nw=ms.querySelector(".cm-new"); ms.scrollTop=(nw&&!sameView)?Math.max(0,nw.offsetTop-12):ms.scrollHeight; }
   else ms.scrollTop=prevTop;
@@ -16552,7 +16590,7 @@ function renderChat(){
 }
 function autosize(ta){ ta.style.height="auto"; ta.style.height=Math.min(120,ta.scrollHeight)+"px"; }
 function openThread(sid){
- H.thread=sid; H.pendingScroll=false;
+ H.thread=sid; H.pendingScroll=false; H.sel.on=false; H.sel.ids.clear();
  const had=unreadMessages().some(m=>m.sid===sid);
  markRead(sid); renderChat(); if(had) renderTimeline();
  setTimeout(()=>$("homeChat").querySelector("textarea")?.focus(),30);
@@ -16623,21 +16661,30 @@ window.askConfirm=askConfirm;
 const ICON_COPY='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
 $("msgCtx").querySelector('[data-ico="copy"]').innerHTML=ICON_COPY;
 $("msgCtx").querySelector('[data-ico="edit"]').innerHTML=ICON_PEN;
-$("msgCtx").querySelector('[data-ico="del"]').innerHTML=ICON_BIN;
-const CTX={id:null,t:0};
+$("msgCtx").querySelectorAll('[data-ico="del"]').forEach(n=>{ n.innerHTML=ICON_BIN; });
+$("msgCtx").querySelector('[data-ico="select"]').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>';
+$("msgCtx").querySelector('[data-ico="unread"]').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>';
+const CTX={id:null,t:0,kind:"msg"};
 function findMsg(id){ return (DATA.messages||[]).find(z=>z.id===id)||null; }
 function ctxClose(){
  $("msgCtx").classList.remove("open");
- document.querySelectorAll("#homeChat .cm.ctx").forEach(n=>n.classList.remove("ctx"));
+ document.querySelectorAll("#homeChat .ctx").forEach(n=>n.classList.remove("ctx"));
 }
 function ctxOpen(el,x,y){
- if(isStu()) return;
- const m=findMsg(el.dataset.mid); if(!m) return;
- const c=$("msgCtx"), own=m.dir==="p2s";
- CTX.id=m.id; CTX.t=Date.now();
- c.querySelector('[data-ctx="edit"]').hidden=!own;
- c.querySelector('[data-ctx="del"]').hidden=!own;
- document.querySelectorAll("#homeChat .cm.ctx").forEach(n=>n.classList.remove("ctx")); el.classList.add("ctx");
+ if(isStu()||H.sel.on) return;
+ const c=$("msgCtx"); let show;
+ if(el.classList.contains("cm")){
+  const m=findMsg(el.dataset.mid); if(!m) return;
+  CTX.kind="msg"; CTX.id=m.id;
+  show={copy:1,edit:m.dir==="p2s",select:1,unread:0,del:1,delthread:0};   // le professeur peut supprimer (pas modifier) les messages d'élèves
+ }else{
+  const sid=el.dataset.sid, ms=(DATA.messages||[]).filter(z=>z.sid===sid); if(!ms.length) return;
+  CTX.kind="thread"; CTX.id=sid;
+  show={copy:0,edit:0,select:1,unread:ms.some(incoming)&&!ms.some(z=>incoming(z)&&!isRead(z)),del:0,delthread:1};
+ }
+ CTX.t=Date.now();
+ c.querySelectorAll("[data-ctx]").forEach(b=>{ b.hidden=!show[b.dataset.ctx]; });
+ document.querySelectorAll("#homeChat .ctx").forEach(n=>n.classList.remove("ctx")); el.classList.add("ctx");
  c.style.left="0px"; c.style.top="0px"; c.classList.add("open");
  const w=c.offsetWidth, h=c.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
  const left=Math.min(Math.max(8,x),Math.max(8,vw-w-8));
@@ -16653,6 +16700,76 @@ function legacyCopy(t){
 function copyText(t){
  if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t).then(()=>true,()=>legacyCopy(t));
  return Promise.resolve(legacyCopy(t));
+}
+/* ───────── Sélection multiple, suppression, « non lue » ───────── */
+function selBarHtml(){
+ const th=H.sel.kind==="thread";
+ return '<div class="ch-selbar"><button type="button" class="btn" data-act="selcancel">Annuler</button><button type="button" class="btn" data-act="selall">Tout</button><span class="sb-n"></span><span class="sp"></span>'
+  +(th?'<button type="button" class="btn sb-act" data-act="selunread">Marquer non lue</button>':"")
+  +'<button type="button" class="btn cf-danger sb-act" data-act="seldel">Supprimer</button></div>';
+}
+function selRefresh(){
+ const host=$("homeChat"); if(!host||!H.sel.on) return;
+ const th=H.sel.kind==="thread";
+ host.querySelectorAll(th?".cl-it":".cm").forEach(el=>{
+  const k=th?el.dataset.sid:el.dataset.mid, on=H.sel.ids.has(k);
+  el.classList.toggle("picked",on); el.setAttribute("aria-checked",on?"true":"false");
+ });
+ const n=H.sel.ids.size, c=host.querySelector(".sb-n"); if(c) c.textContent=n+(n>1?" sélectionnés":" sélectionné");
+ host.querySelectorAll(".sb-act").forEach(b=>{ b.disabled=!n; });
+}
+function selStart(kind,id){
+ if(isStu()) return;
+ H.sel={on:true,kind:kind,ids:new Set(id?[id]:[])}; renderChat();
+}
+function selCancel(){ H.sel.on=false; H.sel.ids.clear(); renderChat(); }
+function selToggleAll(){
+ const th=H.sel.kind==="thread", host=$("homeChat");
+ const keys=[...host.querySelectorAll(th?".cl-it[data-sid]":".cm[data-mid]")].map(el=>th?el.dataset.sid:el.dataset.mid)
+  .filter(k=>th?(DATA.messages||[]).some(z=>z.sid===k):true);
+ const all=keys.length&&keys.every(k=>H.sel.ids.has(k));
+ keys.forEach(k=>all?H.sel.ids.delete(k):H.sel.ids.add(k)); selRefresh();
+}
+function dropMessages(set){
+ const del=(window.HW_DELETED_MSGS||(window.HW_DELETED_MSGS=new Set()));
+ set.forEach(id=>del.add(id));
+ DATA.messages=(DATA.messages||[]).filter(z=>!set.has(z.id));
+}
+async function deleteMessages(ids){
+ const list=ids.map(findMsg).filter(Boolean); if(!list.length) return;
+ const n=list.length, m0=list[0];
+ let detail;
+ if(n===1){
+  const multi=m0.dir==="p2s"&&!!m0.bid&&(DATA.messages||[]).some(z=>z.bid===m0.bid&&z.id!==m0.id);
+  detail=m0.dir==="s2p"?"Le message de l’élève disparaîtra aussi de sa conversation.":(multi?"Ce message a été envoyé à plusieurs élèves : seul celui de cette conversation sera supprimé.":"Il disparaîtra aussi de la conversation de l’élève.");
+ }else detail="Les messages supprimés disparaîtront aussi de la conversation de l’élève.";
+ const yes=await askConfirm(n===1?"Supprimer ce message ?":"Supprimer ces "+n+" messages ?",{title:n===1?"Supprimer le message":"Supprimer les messages",detail,ok:"Supprimer",danger:true});
+ if(!yes) return;
+ dropMessages(new Set(list.map(m=>m.id)));
+ H.sel.on=false; H.sel.ids.clear(); saveData(); renderHome(); toast(n===1?"Message supprimé.":n+" messages supprimés.");
+}
+async function deleteThreads(sids){
+ sids=sids.filter(s=>(DATA.messages||[]).some(z=>z.sid===s)); if(!sids.length) return;
+ const set=new Set(sids), list=(DATA.messages||[]).filter(z=>set.has(z.sid)), n=sids.length;
+ const yes=await askConfirm(n===1?"Supprimer la discussion avec "+stuName(sids[0])+" ?":"Supprimer ces "+n+" discussions ?",{
+  title:n===1?"Supprimer la discussion":"Supprimer les discussions",
+  detail:list.length+" message"+(list.length>1?"s":"")+" supprimé"+(list.length>1?"s":"")+", y compris dans la conversation de l’élève. Cette action est définitive.",ok:"Supprimer",danger:true});
+ if(!yes) return;
+ dropMessages(new Set(list.map(z=>z.id)));
+ if(H.thread&&set.has(H.thread)) H.thread=null;
+ H.sel.on=false; H.sel.ids.clear(); saveData(); renderHome(); toast(n===1?"Discussion supprimée.":n+" discussions supprimées.");
+}
+/* « Non lue » : le dernier message reçu de l'élève redevient non lu -> 1 notification par discussion */
+function markThreadsUnread(sids){
+ let n=0;
+ sids.forEach(sid=>{
+  const inc=(DATA.messages||[]).filter(z=>z.sid===sid&&incoming(z)).sort((a,b)=>new Date(a.at)-new Date(b.at));
+  if(!inc.length) return;
+  const last=inc[inc.length-1]; if(last.read||H.read.has(last.id)){ last.read=false; n++; }
+ });
+ H.sel.on=false; H.sel.ids.clear();
+ if(n) saveData();
+ renderHome(); toast(n?(n>1?n+" discussions marquées non lues.":"Discussion marquée non lue."):"Rien à marquer : aucun message reçu.");
 }
 const EM={id:null};
 function openEditMsg(m){
@@ -16670,14 +16787,14 @@ function saveEditMsg(){
  const chat=$("homeChat"), ctx=$("msgCtx"), em=$("emModal");
  /* Clic droit (ordinateur) */
  chat.addEventListener("contextmenu",e=>{
-  if(isStu()) return; const el=e.target.closest(".cm"); if(!el) return;
+  if(isStu()) return; const el=e.target.closest(".cm,.cl-it"); if(!el) return;
   e.preventDefault(); ctxOpen(el,e.clientX,e.clientY);
  });
  /* Appui long (mobile / tablette) */
  let LP=null;
  chat.addEventListener("touchstart",e=>{
-  if(isStu()||e.touches.length!==1) return;
-  const el=e.target.closest(".cm"); if(!el) return;
+  if(isStu()||e.touches.length!==1||H.sel.on) return;
+  const el=e.target.closest(".cm,.cl-it"); if(!el) return;
   const t=e.touches[0], st={el,x:t.clientX,y:t.clientY,fired:false,timer:0};
   st.timer=setTimeout(()=>{ st.fired=true; try{ if(navigator.vibrate) navigator.vibrate(15); }catch(_){} ctxOpen(el,st.x,st.y); },480);
   LP=st;
@@ -16700,24 +16817,22 @@ function saveEditMsg(){
   if($("cfModal").classList.contains("open")) cfClose(false);
   if(em.classList.contains("open")) closeModal("emModal");
   if(ctx.classList.contains("open")) ctxClose();
+  else if(H.sel.on&&!$("cfModal").classList.contains("open")) selCancel();
  });
  /* Actions du menu */
  ctx.addEventListener("click",async e=>{
   const b=e.target.closest("[data-ctx]"); if(!b) return;
   if(Date.now()-CTX.t<350) return;
-  const id=CTX.id, act=b.dataset.ctx; ctxClose();
+  const id=CTX.id, kind=CTX.kind, act=b.dataset.ctx; ctxClose();
+  if(act==="select"){ selStart(kind==="thread"?"thread":"msg",id); return; }
+  if(kind==="thread"){
+   if(act==="unread") markThreadsUnread([id]); else if(act==="delthread") deleteThreads([id]);
+   return;
+  }
   const m=findMsg(id); if(!m) return;
   if(act==="copy"){ copyText(m.text||"").then(ok=>toast(ok?"Message copié.":"Copie impossible sur cet appareil.")); }
   else if(act==="edit"&&m.dir==="p2s"){ openEditMsg(m); }
-  else if(act==="del"&&m.dir==="p2s"){
-   const multi=!!m.bid&&(DATA.messages||[]).some(z=>z.bid===m.bid&&z.id!==m.id);
-   const yes=await askConfirm("Supprimer ce message ?",{
-    title:"Supprimer le message",
-    detail:multi?"Ce message a été envoyé à plusieurs élèves : seul celui de cette conversation sera supprimé.":"Il disparaîtra aussi de la conversation de l’élève.",
-    ok:"Supprimer",danger:true});
-   if(!yes) return;
-   DATA.messages=(DATA.messages||[]).filter(z=>z.id!==id); saveData(); renderHome(); toast("Message supprimé.");
-  }
+  else if(act==="del"){ deleteMessages([id]); }
  });
  /* Fenêtre « modifier le message » */
  em.addEventListener("click",e=>{ if(e.target===em||e.target.closest('[data-em="close"]')) closeModal("emModal"); });
@@ -16734,9 +16849,23 @@ function renderHome(){
  }catch(e){ console.error("accueil:",e); }
 }
 window.renderHome=renderHome;
+window.renderHomeTimeline=function(){ try{ renderTimeline(); }catch(e){} };
 
 /* ───────── Événements ───────── */
 $("homeView").addEventListener("click",e=>{
+ if(H.sel.on&&!isStu()){
+  const a0=e.target.closest("[data-act]"), ac=a0&&a0.dataset.act;
+  if(ac==="selcancel"){ selCancel(); return; }
+  if(ac==="selall"){ selToggleAll(); return; }
+  if(ac==="seldel"){ const ids=[...H.sel.ids]; if(ids.length) (H.sel.kind==="thread"?deleteThreads(ids):deleteMessages(ids)); return; }
+  if(ac==="selunread"){ const ids=[...H.sel.ids]; if(ids.length) markThreadsUnread(ids); return; }
+  const th=H.sel.kind==="thread", it=e.target.closest(th?".cl-it":".cm");
+  if(it&&$("homeChat").contains(it)){
+   const k=th?it.dataset.sid:it.dataset.mid;
+   if(th&&!(DATA.messages||[]).some(z=>z.sid===k)) return;
+   H.sel.ids.has(k)?H.sel.ids.delete(k):H.sel.ids.add(k); selRefresh(); return;
+  }
+ }
  const b=e.target.closest("[data-act]"); if(!b) return;
  const act=b.dataset.act;
  if(act==="newpost") openPost(null);
@@ -16752,6 +16881,14 @@ $("homeView").addEventListener("click",e=>{
   const k=b.dataset.kind;
   if(k==="grade") goTab("elevesView");
   else if(k==="sub") goTab("onlineTestsView");
+  else if(k==="appel"){
+   try{
+    const ev=(schEns().events||[]).find(x=>x.id===b.dataset.ev);
+    if(ev&&ev.date===isoOf(new Date())){ apLoad(ev); goTab("appelView"); }
+    else if(ev){ VS.tab="hist"; HIST.cur=new Date(ev.date+"T12:00:00"); HIST.view="day"; goTab("vieView"); try{ renderVie(); }catch(x){} }
+    else goTab("appelView");
+   }catch(x){ goTab("appelView"); }
+  }
   else if(k==="msg"){ if(isStu()){ markRead(); renderTimeline(); renderChat(); $("homeChat").querySelector("textarea")?.focus(); } else openThread(b.dataset.sid); }
  }
  else if(act==="thread") openThread(b.dataset.sid);
