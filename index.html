@@ -932,8 +932,10 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
 .btn-homework-review{
  width:48px; height:42px; border-radius:12px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer; font-size:18px; display:inline-flex; align-items:center; justify-content:center; padding:0;
 }
-.btn-homework-review.is-warning{ border:2px solid #f59e0b; color:#b45309; background:#fff7ed }
-.btn-homework-review.is-danger{ border:3px solid #dc2626; color:#b91c1c; background:#fff1f2 }
+.btn-homework-review.is-yellow{ border:3px solid #facc15; color:#a16207; background:#fefce8 }
+.btn-homework-review.is-orange{ border:3px solid #f97316; color:#c2410c; background:#fff7ed }
+.btn-homework-review.is-red{ border:3px solid #dc2626; color:#b91c1c; background:#fff1f2 }
+.btn-homework-review.is-green{ border:3px solid #16a34a; color:#15803d; background:#f0fdf4 }
 body.student-mode #homeworkView .card-header strong::after{ content:""; }
 @media (max-width:980px){
  .homework-shell,.homework-review-layout{ grid-template-columns:1fr }
@@ -1498,8 +1500,8 @@ body.student-mode #homeNewPost{display:none}
 .tl-day:first-child{margin-top:2px}
 .tl-it{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border:0;background:transparent;border-radius:12px;text-align:left;cursor:pointer;color:inherit}
 .tl-it:hover{background:#f1f6fb}
-.tl-dot{--c:#0068aa;position:relative;z-index:1;flex:none;width:50px;height:50px;border-radius:50%;border:2px solid var(--c);background:#fff;color:var(--c);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;letter-spacing:-.02em;box-sizing:border-box}
-.tl-dot.today{border-width:6px}
+.tl-dot{--c:#0068aa;position:relative;z-index:1;flex:none;width:50px;height:50px;border-radius:50%;border:1.5px solid #d3dce6;background:#fff;color:var(--c);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;letter-spacing:-.02em;box-sizing:border-box}
+.tl-dot.new{border-color:var(--c);border-width:4px}
 .tl-dot.sub{--c:#0d9488}
 .tl-dot.msg{--c:#d97706}
 .tl-dot svg{display:block}
@@ -1639,7 +1641,7 @@ a[x-apple-data-detectors]{ color:inherit!important; text-decoration:none!importa
 
 /* ═══ Cercle « nouveau » : un peu plus grand, moins épais ═══ */
 .tl-dot{ margin:3px }
-.tl-dot.today{ width:56px; height:56px; border-width:4px; margin:0 }
+.tl-dot.new{ width:56px; height:56px; border-width:3px; border-color:var(--c); margin:0 }
 .tl-list::before{ left:36px }
 
 /* ═══ Pastilles de l'onglet Accueil : rouge à gauche (notifs), bleue à droite (messagerie) ═══ */
@@ -1650,15 +1652,77 @@ a[x-apple-data-detectors]{ color:inherit!important; text-decoration:none!importa
 /* Pastilles de la messagerie : bleues */
 .cl-bd{ background:#0a7fbf!important }
 </style>
+<style id="patch-2026-10c">
+/* ── Cadenas : icônes blanches ── */
+.lock-btn .lk-ic{ display:block; width:16px; height:16px; fill:none; stroke:#fff; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round }
+.lock-btn{ background:var(--grad); border-color:#00508f; color:#fff }
+.lock-btn.locked, header .lock-btn.locked{ background:#dc2626; border-color:#fca5a5; color:#fff }
+header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.4) }
+.dr-locks .lock-btn{ background:var(--grad); border:1px solid #00508f; color:#fff }
+.dr-locks .lock-btn.locked{ background:#dc2626; border-color:#b91c1c; color:#fff }
+
+/* ── Pastilles œil / attention : bleu du thème, icône blanche ── */
+.tab-btn.has-empty-eval::after,.subtab-btn.has-empty-eval::after,.period-btn.has-empty-eval::after,
+.tab-btn.has-hidden-eval::before,.subtab-btn.has-hidden-eval::before,.period-btn.has-hidden-eval::before,
+.tab-btn.has-miss-call::after,.vs-tab.vs-warn::after{
+ content:""; font-size:0; padding:0!important; background-color:#0a7fbf!important; background-repeat:no-repeat; background-position:center; background-size:60% 60%;
+ border:2px solid #fff!important; box-shadow:0 1px 3px rgba(0,0,0,.3); box-sizing:border-box;
+}
+.tab-btn.has-empty-eval::after,.subtab-btn.has-empty-eval::after,.period-btn.has-empty-eval::after,
+.tab-btn.has-miss-call::after,.vs-tab.vs-warn::after{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5 2.5 20h19L12 3.5z'/%3E%3Cpath d='M12 10v4.5M12 17.3v.1'/%3E%3C/svg%3E");
+}
+.tab-btn.has-hidden-eval::before,.subtab-btn.has-hidden-eval::before,.period-btn.has-hidden-eval::before{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+}
+.dr-item .dr-bdg.dr-pas{ display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#0a7fbf; font-size:0; line-height:1; flex:0 0 auto }
+.dr-item .dr-bdg.dr-pas svg{ display:block }
+
+/* ── Bloc d'un test (prof) : pastille = nombre de tests rendus ── */
+.online-test-card{ position:relative }
+.online-test-badge{
+ position:absolute; top:-10px; right:-10px; z-index:5; min-width:24px; height:24px; padding:0 7px; border-radius:999px; box-sizing:border-box;
+ background:#0a7fbf; color:#fff; font:700 13px/1 Arial,Helvetica,sans-serif; display:flex; align-items:center; justify-content:center;
+ border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.3); pointer-events:none;
+}
+</style>
+<style id="patch-2026-10d">
+/* ── Pastilles de notification : sans contour blanc ── */
+#homeTabBtn .hb{ border:0!important; box-shadow:none!important }
+.online-test-badge{ background:#ef4444!important; border:0!important; box-shadow:none!important }
+.tab-btn[data-pending-count]::after{ border:0!important; box-shadow:none!important }
+/* œil : icône bleue sur fond blanc */
+.tab-btn.has-hidden-eval::before,.subtab-btn.has-hidden-eval::before,.period-btn.has-hidden-eval::before{
+ background-color:#fff!important; border:0!important; box-shadow:0 0 0 1px #cfd8e3,0 1px 3px rgba(0,0,0,.2)!important;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a7fbf' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")!important;
+}
+/* attention : icône blanche sur fond rouge */
+.tab-btn.has-empty-eval::after,.subtab-btn.has-empty-eval::after,.period-btn.has-empty-eval::after,
+.tab-btn.has-miss-call::after,.vs-tab.vs-warn::after{
+ background-color:#dc2626!important; border:0!important; box-shadow:none!important;
+}
+.dr-item .dr-bdg.dr-pas-eye{ background:#fff; box-shadow:0 0 0 1px #cfd8e3 }
+.dr-item .dr-bdg.dr-pas-warn{ background:#dc2626 }
+/* ── Timeline : nouvelle notif = léger contour épais ── */
+.tl-dot.new{ border-color:var(--c); border-width:3px }
+/* ── Discussions de groupe ── */
+.av.av-grp{ background:#0a7fbf; color:#fff }
+.cm-row{ display:flex; gap:8px; align-items:flex-start }
+.cm-tx{ min-width:0; flex:1; padding-top:4px }
+.cm-ini{ flex:none; width:28px; height:28px; padding:0; border:0; border-radius:50%; background:var(--blueBox); color:var(--blueText); font:800 11px Arial,Helvetica,sans-serif; cursor:pointer }
+.cm-ini:hover{ filter:brightness(.95) }
+.cm-who{ margin:0 0 6px; padding:4px 10px; border-radius:8px; background:#0f172a; color:#fff; font-size:12px; font-weight:600; width:max-content; max-width:100% }
+.cm-who[hidden]{ display:none }
+</style>
 </head>
 <body class="auth-pending">
 <header>
  <div class="hdr-left"><div class="brand"><img src="data:image/png;base64,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" alt="Logo Ecole Directe"><h1>Ecole Directe</h1></div><div id="saveStatusBanner" class="save-status-banner"></div><div class="save-actions" id="saveActions"><button type="button" class="icon-btn sa-btn" id="manualSaveBtn" title="Enregistrer maintenant" aria-label="Enregistrer maintenant"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button><button type="button" class="icon-btn sa-btn" id="refreshSiteBtn" title="Actualiser les données (sans recharger la page)" aria-label="Actualiser les données"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button></div></div>
   <div class="locks" id="locksBar">
-  <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1">🔓</button></div>
-  <div class="lock-item"><span class="lock-label">Trimestre 2</span><button class="lock-btn" data-lock="T2" title="Verrouiller / déverrouiller le trimestre 2">🔓</button></div>
-  <div class="lock-item"><span class="lock-label">Trimestre 3</span><button class="lock-btn" data-lock="T3" title="Verrouiller / déverrouiller le trimestre 3">🔓</button></div>
-  <div class="lock-item"><span class="lock-label">Trimestre 4</span><button class="lock-btn" data-lock="T4" title="Verrouiller / déverrouiller le trimestre 4">🔓</button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 2</span><button class="lock-btn" data-lock="T2" title="Verrouiller / déverrouiller le trimestre 2"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 3</span><button class="lock-btn" data-lock="T3" title="Verrouiller / déverrouiller le trimestre 3"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
+  <div class="lock-item"><span class="lock-label">Trimestre 4</span><button class="lock-btn" data-lock="T4" title="Verrouiller / déverrouiller le trimestre 4"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
  </div>
  <div class="header-actions">
  <span id="userLabel"></span>
@@ -1951,6 +2015,8 @@ a[x-apple-data-detectors]{ color:inherit!important; text-decoration:none!importa
   <div class="modal-body">
    <div class="pm-lab">Destinataires</div>
    <div id="mmPick"></div>
+   <div class="pm-lab" style="margin-top:14px">Objet <small style="font-weight:500;color:var(--muted)">(nom de la discussion en cas d’envoi groupé)</small></div>
+   <input id="mmSubject" type="text" maxlength="80" placeholder="Ex. : Sortie du vendredi" autocomplete="off" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font:inherit">
    <textarea id="mmText" placeholder="Écris ton message…"></textarea>
   </div>
   <div class="pm-foot">
@@ -4661,7 +4727,7 @@ function buildCSVText(){
   }
  }
  (DATA.posts||[]).forEach(p=>rows.push(["post",p.id,escapeCsv(p.html||""),p.color||"",escapeCsv(JSON.stringify({all:!!p.all,ids:p.ids||[]})),p.createdAt||"",escapeCsv(p.author||""),p.updatedAt||""].join(";")));
- (DATA.messages||[]).forEach(m=>rows.push(["msg",m.id,m.sid,m.dir,escapeCsv(m.text||""),m.at||"",m.read?1:0,m.bid||"",escapeCsv(m.bl||"")].join(";")));
+ (DATA.messages||[]).forEach(m=>rows.push(["msg",m.id,m.sid,m.dir,escapeCsv(m.text||""),m.at||"",m.read?1:0,m.bid||"",escapeCsv(m.bl||""),escapeCsv(m.bs||"")].join(";")));
  return rows.join("\n");
 }
 
@@ -4779,7 +4845,7 @@ function importCSV(text){
   else if(type==="room"){ const r=unescapeCsv(cols[2]||""); if(r) schEns().rooms.push(r); }
   else if(type==="scheduleEvent"){ let ci=[]; try{ci=JSON.parse(unescapeCsv(cols[3]||"[]"))||[];}catch(e){} schEns().events.push({id:cols[1],subject:unescapeCsv(cols[2]||""),classIds:ci,room:unescapeCsv(cols[4]||""),date:cols[5],start:cols[6],end:cols[7],cancelled:cols[8]==="1",changed:cols[9]==="1",serie:cols[10]||"",hors:cols[11]==="1",holCancel:cols[12]==="1",created:cols[13]||"",evt:cols[14]==="1",color:cols[15]||undefined}); }
   else if(type==="post"){ if(!Array.isArray(DATA.posts)) DATA.posts=[]; let au={}; try{au=JSON.parse(unescapeCsv(cols[4]||"{}"))||{};}catch(e){} DATA.posts.push({id:cols[1],html:unescapeCsv(cols[2]||""),color:cols[3]||"",all:!!au.all,ids:Array.isArray(au.ids)?au.ids:[],createdAt:cols[5]||"",author:unescapeCsv(cols[6]||""),updatedAt:cols[7]||""}); }
-  else if(type==="msg"){ if(!Array.isArray(DATA.messages)) DATA.messages=[]; DATA.messages.push({id:cols[1],sid:cols[2],dir:cols[3],text:unescapeCsv(cols[4]||""),at:cols[5]||"",read:cols[6]==="1",bid:cols[7]||"",bl:unescapeCsv(cols[8]||"")}); }
+  else if(type==="msg"){ if(!Array.isArray(DATA.messages)) DATA.messages=[]; DATA.messages.push({id:cols[1],sid:cols[2],dir:cols[3],text:unescapeCsv(cols[4]||""),at:cols[5]||"",read:cols[6]==="1",bid:cols[7]||"",bl:unescapeCsv(cols[8]||""),bs:unescapeCsv(cols[9]||"")}); }
   else if(type==="compHierarchy"){
    try {
     const cycle = unescapeCsv(cols[1]||"");
@@ -4813,11 +4879,12 @@ function initLocksEvents(){
   };
  });
 }
+const LOCK_SVG_ON='<svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>', LOCK_SVG_OFF='<svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>';
 function refreshLocksUI(){
  document.querySelectorAll(".lock-btn").forEach(btn=>{
   const k=btn.dataset.lock; btn.classList.toggle("locked",!!LOCKED_PERIODS[k]);
   const label = k.startsWith("T") ? "Trimestre " + k.slice(1) : k;
-  btn.textContent=LOCKED_PERIODS[k]?"🔒":"🔓";
+  btn.innerHTML=LOCKED_PERIODS[k]?LOCK_SVG_ON:LOCK_SVG_OFF;
   btn.title=label+(LOCKED_PERIODS[k]?" : verrouillé (cliquer pour déverrouiller)":" : déverrouillé (cliquer pour verrouiller)");
  });
 }
@@ -10464,6 +10531,11 @@ async function api(action,extra){
 }
 
 async function submitHomeworkSubmissionCloud(submission){
+ if(document.body.classList.contains("ed-preview")){
+  /* Consultation : le rendu reste local pendant l'aperçu, il est enregistré à la sortie */
+  const P=window.EDPREV; if(P){ (P.subs||(P.subs=[])).push(submission.id); }
+  return submission;
+ }
  if(AUTH.role!=="eleve"){
   saveData();
   return submission;
@@ -10700,7 +10772,10 @@ async function cloudCheckRemoteUpdates(showStatus=false){
    await cloudPull();
    if(showStatus && AUTH.role==="prof") cloudStatus("ok","Données mises à jour depuis Google Sheets – "+cloudHour());
   }else if(j.ok && AUTH.role==="eleve"){
-   CLOUD.rev=j.rev;   // rien de nouveau pour l'élève : on se contente de suivre la révision
+   /* Accueil ouvert : un message supprimé par le professeur doit disparaître sans attendre → rechargement (au plus 1 fois par minute) */
+   const surAccueil=document.getElementById("homeView")?.classList.contains("active");
+   if(surAccueil && j.rev!=null && String(j.rev)!==String(CLOUD.rev) && Date.now()-(CLOUD._homePull||0)>60000){ CLOUD._homePull=Date.now(); await cloudPull(); }
+   else CLOUD.rev=j.rev;   // rien de nouveau pour l'élève : on se contente de suivre la révision
   }
  }catch(e){
   CLOUD_POLL_FAILS++;
@@ -14428,36 +14503,70 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   renderOnlineTestsView();
   alert(`${publishedCount} note${publishedCount>1?"s":""} saisie${publishedCount>1?"s":""} dans l'évaluation de classe.`);
  }
- function getHomeworkReviewStateForTest(testId){
-  const assignments=getHomeworkReviewAssignments(testId);
-  let hasDanger=false;
-  let hasWarning=false;
-  assignments.forEach(item=>{
+ /* Bilan d'un test : copies rendues / non rendues / non corrigées (toutes assignations confondues, hors entraînement) */
+ function getHomeworkReviewStatsForTest(testId){
+  const st={ students:0, submitted:0, notReturned:0, uncorrected:0 };
+  getHomeworkReviewAssignments(testId).forEach(item=>{
    const cls=homeworkClassById(item.homework.classId);
    (cls?.memberIds||[]).forEach(studentId=>{
-    const submission=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
-    if(!submission?.submittedAt) return;
-    if(otManual(item.test) && !submission.validatedAt && !submission.manualOverride) hasDanger=true;
-    else if(!otManual(item.test) && !submission.validatedAt && !submission.manualOverride) hasWarning=true;
+    st.students++;
+    const sub=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
+    if(!sub || !sub.submittedAt){ st.notReturned++; return; }
+    st.submitted++;
+    if(!sub.validatedAt && !sub.manualOverride) st.uncorrected++;
    });
   });
-  return hasDanger ? "danger" : (hasWarning ? "warning" : "neutral");
+  return st;
  }
+ /* none : rien d'assigné · yellow : des non-rendus · orange : des corrections manquantes · red : les deux · green : tout est OK */
+ function getHomeworkReviewStateForTest(testId){
+  const st=getHomeworkReviewStatsForTest(testId);
+  if(!st.students) return "none";
+  if(st.notReturned>0 && st.uncorrected>0) return "red";
+  if(st.notReturned>0) return "yellow";
+  if(st.uncorrected>0) return "orange";
+  return "green";
+ }
+ const HW_REVIEW_TITLES={
+  none:"Voir les soumissions",
+  yellow:"Voir les soumissions · des élèves n’ont pas encore rendu le test",
+  orange:"Voir les soumissions · des copies rendues restent à corriger",
+  red:"Voir les soumissions · des élèves n’ont pas rendu le test et des copies restent à corriger",
+  green:"Voir les soumissions · tout est rendu et corrigé"
+ };
  function enhanceOnlineTestCardsForHomework(){
   const list=document.getElementById("onlineTestsList");
   if(!list) return;
   list.querySelectorAll(".btn-preview-online-test").forEach(btn=>{
    const actions=btn.closest(".online-test-card-actions");
-   if(!actions || actions.querySelector(`.btn-homework-review[data-testid="${CSS.escape(btn.dataset.testid)}"]`)) return;
+   if(!actions) return;
+   const stats=getHomeworkReviewStatsForTest(btn.dataset.testid);
    const state=getHomeworkReviewStateForTest(btn.dataset.testid);
-   const reviewBtn=document.createElement("button");
-   reviewBtn.type="button";
-   reviewBtn.className=`btn-homework-review ${state==="danger" ? "is-danger" : (state==="warning" ? "is-warning" : "")}`;
-   reviewBtn.dataset.testid=btn.dataset.testid;
-   reviewBtn.title="Voir les soumissions";
-   reviewBtn.innerHTML='<svg viewBox="0 0 36 28" width="30" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(0 2) scale(.95)" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></g><path d="M25 8l3 3 6-7" stroke="#16a34a" stroke-width="2.6"/><path d="M26 17l7 7M33 17l-7 7" stroke="#dc2626" stroke-width="2.6"/></svg>'; reviewBtn.setAttribute("aria-label","Voir et corriger les soumissions");
-   reviewBtn.addEventListener("click",()=>openHomeworkReviewModal(btn.dataset.testid));
-   actions.appendChild(reviewBtn);
+   let reviewBtn=actions.querySelector(`.btn-homework-review[data-testid="${CSS.escape(btn.dataset.testid)}"]`);
+   if(!reviewBtn){
+    reviewBtn=document.createElement("button");
+    reviewBtn.type="button";
+    reviewBtn.dataset.testid=btn.dataset.testid;
+    /* crayon à droite ; croix et ✓ à gauche */
+    reviewBtn.innerHTML='<svg viewBox="0 0 36 28" width="30" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(14 2) scale(.95)" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></g><path d="M2 8l3 3 6-7" stroke="#16a34a" stroke-width="2.6"/><path d="M3 17l7 7M10 17l-7 7" stroke="#dc2626" stroke-width="2.6"/></svg>';
+    reviewBtn.setAttribute("aria-label","Voir et corriger les soumissions");
+    reviewBtn.addEventListener("click",()=>openHomeworkReviewModal(btn.dataset.testid));
+    actions.appendChild(reviewBtn);
+   }
+   reviewBtn.className="btn-homework-review"+(state==="none"?"":" is-"+state);
+   reviewBtn.title=HW_REVIEW_TITLES[state]||HW_REVIEW_TITLES.none;
+   /* pastille de notif sur le bloc du test : nombre de tests rendus */
+   const card=btn.closest(".online-test-card");
+   if(card){
+    card.querySelectorAll(":scope > .online-test-badge").forEach(x=>x.remove());
+    if(stats.submitted>0){
+     const b=document.createElement("span");
+     b.className="online-test-badge";
+     b.textContent=stats.submitted>99?"99+":String(stats.submitted);
+     b.title=stats.submitted+" test"+(stats.submitted>1?"s":"")+" rendu"+(stats.submitted>1?"s":"");
+     card.appendChild(b);
+    }
+   }
   });
  }
  function closeHomeworkAllModals(){
@@ -15999,7 +16108,7 @@ document.getElementById("schDelete").onclick=()=>{
    it.className="dr-item"+(b.classList.contains("active")?" active":"");
    const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
    const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
-   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg" title="À traiter">⚠️</span>':"")+(hid?'<span class="dr-bdg" title="Évaluations masquées">👁️</span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
+   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.3v.1"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
    it.querySelector(".dr-lbl").textContent=labelOf(b);
    it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
    body.appendChild(it);
@@ -16107,7 +16216,7 @@ document.getElementById("schDelete").onclick=()=>{
  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const cname=id=>(DATA.classes.find(c=>c.id===id)||{}).name||"";
  let items=[], act=-1;
- const PREV=window.EDPREV={active:false};
+ const PREV=window.EDPREV={active:false,msgs:[],subs:[]};
 
  function closeList(){ list.hidden=true; inp.classList.remove("open"); inp.setAttribute("aria-expanded","false"); act=-1; }
  function setAct(i){
@@ -16157,19 +16266,39 @@ document.getElementById("schDelete").onclick=()=>{
  function exitPreview(silent){
   if(!PREV.active) return;
   PREV.active=false;
+  /* ce que le professeur a fait « au nom de l'élève » (messages envoyés, tests rendus) est conservé */
+  let keepMsgs=[], keepSubs=[];
+  try{
+   const mids=new Set((PREV.msgs||[]).map(m=>m.id)), sids=new Set(PREV.subs||[]);
+   keepMsgs=(DATA.messages||[]).filter(m=>m&&mids.has(m.id)).map(m=>JSON.parse(JSON.stringify(m)));
+   keepSubs=(DATA.homeworkSubmissions||[]).filter(x=>x&&sids.has(x.id)).map(x=>JSON.parse(JSON.stringify(x)));
+  }catch(e){ console.error("aperçu (conservation):",e); }
   try{ DATA=JSON.parse(PREV.backup); }catch(e){ console.error("restauration:",e); }
   AUTH.role=PREV.role; AUTH.studentId=PREV.studentId;
   document.body.classList.remove("student-mode","ed-preview");
   restoreLabels(PREV.labels);
   IS_MODIFIED=PREV.modified;
-  PREV.backup=null;
+  if(keepMsgs.length||keepSubs.length){
+   try{
+    if(!Array.isArray(DATA.messages)) DATA.messages=[];
+    keepMsgs.forEach(m=>{ if(!DATA.messages.some(x=>x.id===m.id)) DATA.messages.push(m); });
+    if(!Array.isArray(DATA.homeworkSubmissions)) DATA.homeworkSubmissions=[];
+    keepSubs.forEach(x=>{
+     const i=DATA.homeworkSubmissions.findIndex(y=>y.id===x.id||(y.homeworkId===x.homeworkId&&y.testId===x.testId&&y.studentId===x.studentId));
+     if(i>=0) DATA.homeworkSubmissions[i]=x; else DATA.homeworkSubmissions.push(x);
+    });
+    if(keepSubs.length && typeof syncHomeworkDirectGrades==="function"){ try{ syncHomeworkDirectGrades(); }catch(e){ console.error(e); } }
+    saveData();
+   }catch(e){ console.error("aperçu (enregistrement):",e); }
+  }
+  PREV.backup=null; PREV.msgs=[]; PREV.subs=[];
   try{ applyProfMode(); }catch(e){}
   try{ rebuildUI(); }catch(e){ console.error(e); }
   if(!silent) document.querySelector('#mainTabs .tab-btn[data-target="consultView"]')?.click();
  }
  function enterPreview(s){
   if(PREV.active) exitPreview(true);
-  PREV.backup=JSON.stringify(DATA); PREV.role=AUTH.role; PREV.studentId=AUTH.studentId; PREV.modified=IS_MODIFIED; PREV.labels=saveLabels();
+  PREV.msgs=[]; PREV.subs=[]; PREV.backup=JSON.stringify(DATA); PREV.role=AUTH.role; PREV.studentId=AUTH.studentId; PREV.modified=IS_MODIFIED; PREV.labels=saveLabels();
   PREV.active=true;
   try{
    filterForStudent(s.id);
@@ -16290,7 +16419,8 @@ function myMessages(){ ensure(); return isStu()?DATA.messages.filter(m=>m.sid===
 function unreadMessages(){ return myMessages().filter(m=>incoming(m)&&!isRead(m)); }
 
 function markRead(sid){
- ensure(); const list=myMessages().filter(m=>incoming(m)&&!isRead(m)&&(isStu()||m.sid===sid));
+ ensure(); const gset=(!isStu()&&isGrp(sid))?new Set(grpMessages(grpId(sid)).map(z=>z.id)):null;
+ const list=myMessages().filter(m=>incoming(m)&&!isRead(m)&&(isStu()||(gset?gset.has(m.id):m.sid===sid)));
  if(!list.length) return false;
  if(isStu()){
   list.forEach(m=>H.read.add(m.id)); saveRead();
@@ -16375,11 +16505,12 @@ function renderTimeline(){
  let html='<div class="tl-list">', lastDay="";
  items.forEach(it=>{
   if(it.iso!==lastDay){ html+='<div class="tl-day">'+esc(dayLabel(it.iso))+'</div>'; lastDay=it.iso; }
+  const isNew=(it.type==="msg")?true:(it.type==="grade"?!!it.today:!!it.todo);
   let dot;
-  if(it.type==="grade") dot='<span class="tl-dot'+(it.today?" today":"")+'">/'+esc(it.outof)+'</span>';
-  else if(it.type==="sub") dot='<span class="tl-dot sub'+(it.today?" today":"")+'">'+esc(it.ini)+'</span>';
-  else if(it.type==="appel") dot='<span class="tl-dot appel'+(it.today?" today":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
-  else dot='<span class="tl-dot msg'+(it.today?" today":"")+'">'+ICON_MAIL+'</span>';
+  if(it.type==="grade") dot='<span class="tl-dot'+(isNew?" new":"")+'">/'+esc(it.outof)+'</span>';
+  else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'">'+esc(it.ini)+'</span>';
+  else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
+  else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
   html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'">'+dot
    +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
  });
@@ -16519,6 +16650,29 @@ function pmExec(cmd,val){ restoreRange(); try{ document.execCommand("styleWithCS
 /* ───────── Messagerie ───────── */
 const ICON_SEND='<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.1 6.5L15 12 3.3 13.9z"/></svg>';
 const ICON_BACK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>';
+const isGrp=k=>typeof k==="string"&&k.slice(0,2)==="g:";
+const grpId=k=>String(k).slice(2);
+const ICON_GRP='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.6 6-5.6s6 2.3 6 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.6c2.3.3 3.8 2.2 3.8 5"/></svg>';
+/* Discussion de groupe : message du prof envoyé à plusieurs élèves (même bid) + réponses des élèves qui le suivent */
+function grpMessages(bid){
+ const by={}, out=[];
+ (DATA.messages||[]).forEach(m=>{ (by[m.sid]||(by[m.sid]=[])).push(m); });
+ Object.keys(by).forEach(sid=>{
+  let cur="";
+  by[sid].slice().sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(m=>{
+   if(m.dir==="p2s"){ cur=m.bid||""; if(cur===bid) out.push(m); }
+   else if(cur===bid) out.push(m);
+  });
+ });
+ return out.sort((a,b)=>new Date(a.at)-new Date(b.at));
+}
+function grpList(){
+ const ids={}, order=[];
+ (DATA.messages||[]).forEach(m=>{ if(m.dir==="p2s"&&m.bid){ if(!ids[m.bid]){ ids[m.bid]={bid:m.bid,subject:m.bs||m.bl||"Message groupé",label:m.bl||"",members:new Set()}; order.push(m.bid); } if(m.bs&&!ids[m.bid].bsSet){ ids[m.bid].subject=m.bs; ids[m.bid].bsSet=1; } ids[m.bid].members.add(m.sid); } });
+ return order.map(b=>{ const g=ids[b]; g.members=[...g.members]; return g; });
+}
+function grpInfo(bid){ return grpList().find(g=>g.bid===bid)||null; }
+function threadList(key){ return isGrp(key)?grpMessages(grpId(key)):(DATA.messages||[]).filter(z=>z.sid===key); }
 function threadMessages(sid){ return myMessages().filter(m=>m.sid===sid).sort((a,b)=>new Date(a.at)-new Date(b.at)); }
 const selMsgOn=()=>!isStu()&&H.sel.on&&H.sel.kind==="msg";
 const selThrOn=()=>!isStu()&&H.sel.on&&H.sel.kind==="thread";
@@ -16543,25 +16697,61 @@ function listHtml(){
  myMessages().forEach(m=>{ (by[m.sid]||(by[m.sid]=[])).push(m); });
  let rows=Object.keys(by).filter(sid=>stuById(sid)).map(sid=>{
   const l=by[sid].sort((a,b)=>new Date(a.at)-new Date(b.at));
-  return {sid,last:l[l.length-1],unread:l.filter(m=>incoming(m)&&!isRead(m)).length};
- }).sort((a,b)=>new Date(b.last.at)-new Date(a.last.at));
+  return {sid,key:sid,last:l[l.length-1],unread:l.filter(m=>incoming(m)&&!isRead(m)).length};
+ });
  if(needle){
   const have=new Set(rows.map(r=>r.sid));
   rows=rows.filter(r=>stuName(r.sid).toLowerCase().includes(needle))
-   .concat(sortedStudents().filter(s=>!have.has(s.id)&&(s.first+" "+s.last).toLowerCase().includes(needle)).map(s=>({sid:s.id,last:null,unread:0})));
+   .concat(sortedStudents().filter(s=>!have.has(s.id)&&(s.first+" "+s.last).toLowerCase().includes(needle)).map(s=>({sid:s.id,key:s.id,last:null,unread:0})));
  }
- if(!rows.length) return '<p class="home-empty">'+(needle?"Aucun élève trouvé.":"Aucune conversation.<br>Utilise « Nouveau » pour écrire à un élève, une classe ou un groupe.")+'</p>';
- return rows.map(r=>'<button type="button" class="cl-it'+(selThrOn()&&H.sel.ids.has(r.sid)?" picked":"")+'" data-act="thread" data-sid="'+esc(r.sid)+'">'+(selThrOn()&&r.last?'<span class="cl-ck" aria-hidden="true"></span>':"")+'<span class="av">'+esc(initials(r.sid))+'</span>'
-  +'<span class="cl-tx"><b>'+esc(stuName(r.sid))+'</b><small>'+(r.last?((incoming(r.last)?"":"Vous : ")+esc(String(r.last.text).replace(/\s+/g," ").slice(0,60))):esc(className(r.sid)))+'</small></span>'
-  +'<span class="cl-mt">'+(r.last?'<time>'+esc(shortStamp(r.last.at))+'</time>':"")+(r.unread?'<i class="cl-bd">'+r.unread+'</i>':"")+'</span></button>').join("");
+ if(!isStu()){
+  grpList().forEach(g=>{
+   if(needle&&!(g.subject+" "+g.label).toLowerCase().includes(needle)) return;
+   const l=grpMessages(g.bid); if(!l.length) return;
+   rows.push({grp:g,key:"g:"+g.bid,last:l[l.length-1],unread:l.filter(m=>incoming(m)&&!isRead(m)).length});
+  });
+ }
+ rows.sort((a,b)=>(b.last?new Date(b.last.at).getTime():0)-(a.last?new Date(a.last.at).getTime():0));
+ if(!rows.length) return '<p class="home-empty">'+(needle?"Aucun résultat.":"Aucune conversation.<br>Utilise « Nouveau » pour écrire à un élève, une classe ou un groupe.")+'</p>';
+ return rows.map(r=>{
+  const g=r.grp, nm=g?g.subject:stuName(r.sid);
+  const sub=r.last?((incoming(r.last)?(g?initials(r.last.sid)+" : ":""):"Vous : ")+String(r.last.text).replace(/\s+/g," ").slice(0,60)):className(r.sid);
+  return '<button type="button" class="cl-it'+(selThrOn()&&H.sel.ids.has(r.key)?" picked":"")+'" data-act="thread" data-sid="'+esc(r.key)+'">'+(selThrOn()&&r.last?'<span class="cl-ck" aria-hidden="true"></span>':"")
+   +'<span class="av'+(g?" av-grp":"")+'">'+(g?ICON_GRP:esc(initials(r.sid)))+'</span>'
+   +'<span class="cl-tx"><b>'+esc(nm)+'</b><small>'+esc(sub)+'</small></span>'
+   +'<span class="cl-mt">'+(r.last?'<time>'+esc(shortStamp(r.last.at))+'</time>':"")+(r.unread?'<i class="cl-bd">'+r.unread+'</i>':"")+'</span></button>';
+ }).join("");
 }
+function grpThreadHtml(bid){
+ const ms=grpMessages(bid), seen={}; let html="", day="", newDone=false;
+ ms.forEach(m=>{
+  const iso=isoOf(new Date(m.at));
+  if(iso!==day){ html+='<div class="cm-day">'+esc(dayLabel(iso))+'</div>'; day=iso; }
+  if(m.dir==="p2s"){
+   const k=m.at+"|"+m.text; if(seen[k]) return;
+   const sib=ms.filter(z=>z.dir==="p2s"&&z.at===m.at&&z.text===m.text); seen[k]=1;
+   const rd=sib.every(isRead_p2s);
+   html+='<div class="cm me'+(selMsgOn()&&H.sel.ids.has(m.id)?" picked":"")+'" data-mid="'+esc(m.id)+'">'+(selMsgOn()?'<span class="cm-ck" aria-hidden="true"></span>':"")
+    +'<div>'+esc(m.text).replace(/\n/g,"<br>")+'</div><div class="cm-m">'+(m.editedAt?'<span class="cm-ed">modifié</span>':"")+hhmm(m.at)+'<span class="tk'+(rd?" r":"")+'">'+(rd?"✓✓":"✓")+'</span></div></div>';
+  }else{
+   if(!newDone&&!isRead(m)){ html+='<div class="cm-new">Nouveaux messages</div>'; newDone=true; }
+   const cl=className(m.sid);
+   html+='<div class="cm th'+(selMsgOn()&&H.sel.ids.has(m.id)?" picked":"")+'" data-mid="'+esc(m.id)+'">'+(selMsgOn()?'<span class="cm-ck" aria-hidden="true"></span>':"")
+    +'<div class="cm-who" hidden>'+esc(stuName(m.sid))+(cl?" · "+esc(cl):"")+'</div>'
+    +'<div class="cm-row"><button type="button" class="cm-ini" title="Voir le nom de l’élève" aria-label="Voir le nom de l’élève">'+esc(initials(m.sid))+'</button><div class="cm-tx">'+esc(m.text).replace(/\n/g,"<br>")+'</div></div>'
+    +'<div class="cm-m">'+(m.editedAt?'<span class="cm-ed">modifié</span>':"")+hhmm(m.at)+'</div></div>';
+  }
+ });
+ return html||'<p class="home-empty">Aucun message.</p>';
+}
+const isRead_p2s=m=>!!m.read||H.read.has(m.id);
 function renderChat(){
  const host=$("homeChat"); if(!host) return;
- if(!isStu()&&H.thread&&!stuById(H.thread)) H.thread=null;
+ if(!isStu()&&H.thread&&(isGrp(H.thread)?!grpInfo(grpId(H.thread)):!stuById(H.thread))) H.thread=null;
  const view=isStu()?"thread":(H.thread?"thread":"list"), sid=isStu()?AUTH.studentId:H.thread;
  const key=view==="thread"?(isStu()?"stu":H.thread):"";
  if(H.sel.on&&(isStu()||H.sel.kind!==(view==="list"?"thread":"msg"))){ H.sel.on=false; H.sel.ids.clear(); }
- if(H.sel.on){ const ex=H.sel.kind==="thread"?(k=>(DATA.messages||[]).some(z=>z.sid===k)):(k=>!!findMsg(k)); [...H.sel.ids].forEach(k=>{ if(!ex(k)) H.sel.ids.delete(k); }); }
+ if(H.sel.on){ const ex=H.sel.kind==="thread"?(k=>threadList(k).length>0):(k=>!!findMsg(k)); [...H.sel.ids].forEach(k=>{ if(!ex(k)) H.sel.ids.delete(k); }); }
  const oldTa=host.querySelector("textarea"), hadFocus=oldTa&&document.activeElement===oldTa, oldMsgs=host.querySelector(".ch-msgs");
  if(oldTa) H.draft[host.dataset.key||""]=oldTa.value;
  const wasBottom=!oldMsgs||(oldMsgs.scrollHeight-oldMsgs.scrollTop-oldMsgs.clientHeight<40), prevTop=oldMsgs?oldMsgs.scrollTop:0, sameView=host.dataset.view===view+":"+key;
@@ -16573,10 +16763,11 @@ function renderChat(){
   if(H.sel.on) selRefresh();
   if(keepQ){ const q=host.querySelector(".ch-search"); q.focus(); q.setSelectionRange(q.value.length,q.value.length); }
  }else{
-  const who=isStu()?profName():stuName(sid), sub=isStu()?"Professeur":className(sid), av=isStu()?"P":initials(sid);
+  const G=(!isStu()&&isGrp(sid))?grpInfo(grpId(sid)):null;
+  const who=isStu()?profName():(G?G.subject:stuName(sid)), sub=isStu()?"Professeur":(G?(G.label||(G.members.length+" élèves")):className(sid)), av=isStu()?"P":(G?ICON_GRP:initials(sid));
   host.innerHTML='<div class="ch-head">'+(isStu()?"":'<button type="button" class="ch-back" data-act="back" aria-label="Retour aux conversations">'+ICON_BACK+'</button>')
-   +'<span class="av">'+esc(av)+'</span><div class="ti"><b>'+esc(who)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':"")+'</div></div>'
-   +'<div class="ch-msgs'+(selMsgOn()?" selecting":"")+'">'+threadHtml(sid)+'</div>'
+   +'<span class="av'+(G?" av-grp":"")+'">'+(G?av:esc(av))+'</span><div class="ti"><b>'+esc(who)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':"")+'</div></div>'
+   +'<div class="ch-msgs'+(selMsgOn()?" selecting":"")+'">'+(G?grpThreadHtml(G.bid):threadHtml(sid))+'</div>'
    +(selMsgOn()?selBarHtml():'<div class="ch-compose"><textarea rows="1" placeholder="Écrire un message…" aria-label="Message"></textarea><button type="button" class="ch-send" data-act="send" aria-label="Envoyer">'+ICON_SEND+'</button></div>');
   const ta=host.querySelector("textarea"); if(ta){ ta.value=H.draft[key]||""; autosize(ta); }
   if(selMsgOn()) selRefresh();
@@ -16591,17 +16782,28 @@ function renderChat(){
 function autosize(ta){ ta.style.height="auto"; ta.style.height=Math.min(120,ta.scrollHeight)+"px"; }
 function openThread(sid){
  H.thread=sid; H.pendingScroll=false; H.sel.on=false; H.sel.ids.clear();
- const had=unreadMessages().some(m=>m.sid===sid);
+ const had=threadList(sid).some(m=>incoming(m)&&!isRead(m));
  markRead(sid); renderChat(); if(had) renderTimeline();
  setTimeout(()=>$("homeChat").querySelector("textarea")?.focus(),30);
 }
 async function sendFromThread(){
  const ta=$("homeChat").querySelector("textarea"); if(!ta) return;
  const text=ta.value.trim(); if(!text) return;
- ensure(); const sid=isStu()?AUTH.studentId:H.thread;
+ ensure();
+ if(!isStu()&&isGrp(H.thread)){
+  const g=grpInfo(grpId(H.thread)); if(!g) return;
+  const at=new Date().toISOString();
+  g.members.filter(stuById).forEach(x=>DATA.messages.push({id:uid("m"),sid:x,dir:"p2s",text,at,read:false,bid:g.bid,bl:g.label,bs:g.subject}));
+  ta.value=""; H.draft[H.thread]=""; H.pendingScroll=true; saveData(); renderChat();
+  $("homeChat").querySelector("textarea")?.focus(); return;
+ }
+ const sid=isStu()?AUTH.studentId:H.thread;
  const m={id:uid("m"),sid,dir:isStu()?"s2p":"p2s",text,at:new Date().toISOString(),read:false};
  if(isStu()){
-  if(isPrev()){ toast("Aperçu : le message n’est pas envoyé."); return; }
+  if(isPrev()){
+   const P=window.EDPREV; if(P){ (P.msgs||(P.msgs=[])).push(m); }
+   DATA.messages.push(m); ta.value=""; H.draft.stu=""; H.pendingScroll=true; renderChat(); toast("Message envoyé au nom de l’élève."); return;
+  }
   ta.disabled=true;
   try{
    const j=await api("sendMessage",{message:m});
@@ -16619,8 +16821,8 @@ async function sendFromThread(){
 /* Nouveau message (un élève, une sélection, une classe, un groupe ou tous) */
 const MM={pick:{all:false,ids:new Set()}};
 function openNewMsg(){
- MM.pick={all:false,ids:new Set(H.thread?[H.thread]:[])};
- $("mmText").value=""; picker($("mmPick"),MM.pick); openModal("msgModal");
+ MM.pick={all:false,ids:new Set(H.thread&&!isGrp(H.thread)?[H.thread]:[])};
+ $("mmText").value=""; if($("mmSubject")) $("mmSubject").value=""; picker($("mmPick"),MM.pick); openModal("msgModal");
 }
 function sendNewMsg(){
  const text=$("mmText").value.trim();
@@ -16628,9 +16830,11 @@ function sendNewMsg(){
  if(!ids.length){ toast("Choisis au moins un destinataire."); return; }
  if(!text){ toast("Écris un message."); return; }
  ensure(); const at=new Date().toISOString(), bid=ids.length>1?uid("b"):"", bl=ids.length>1?audLabel(MM.pick.all,new Set(ids)):"";
- ids.forEach(sid=>DATA.messages.push({id:uid("m"),sid,dir:"p2s",text,at,read:false,bid,bl}));
+ const bs=ids.length>1?(($("mmSubject")&&$("mmSubject").value.trim())||bl):"";
+ ids.forEach(sid=>DATA.messages.push(ids.length>1?{id:uid("m"),sid,dir:"p2s",text,at,read:false,bid,bl,bs}:{id:uid("m"),sid,dir:"p2s",text,at,read:false,bid,bl}));
  saveData(); closeModal("msgModal");
  if(ids.length===1){ H.thread=ids[0]; H.pendingScroll=true; }
+ else { H.thread="g:"+bid; H.pendingScroll=true; }
  renderChat(); toast(ids.length>1?"Message envoyé à "+ids.length+" élèves.":"Message envoyé.");
 }
 
@@ -16678,7 +16882,7 @@ function ctxOpen(el,x,y){
   CTX.kind="msg"; CTX.id=m.id;
   show={copy:1,edit:m.dir==="p2s",select:1,unread:0,del:1,delthread:0};   // le professeur peut supprimer (pas modifier) les messages d'élèves
  }else{
-  const sid=el.dataset.sid, ms=(DATA.messages||[]).filter(z=>z.sid===sid); if(!ms.length) return;
+  const sid=el.dataset.sid, ms=threadList(sid); if(!ms.length) return;
   CTX.kind="thread"; CTX.id=sid;
   show={copy:0,edit:0,select:1,unread:ms.some(incoming)&&!ms.some(z=>incoming(z)&&!isRead(z)),del:0,delthread:1};
  }
@@ -16726,7 +16930,7 @@ function selCancel(){ H.sel.on=false; H.sel.ids.clear(); renderChat(); }
 function selToggleAll(){
  const th=H.sel.kind==="thread", host=$("homeChat");
  const keys=[...host.querySelectorAll(th?".cl-it[data-sid]":".cm[data-mid]")].map(el=>th?el.dataset.sid:el.dataset.mid)
-  .filter(k=>th?(DATA.messages||[]).some(z=>z.sid===k):true);
+  .filter(k=>th?threadList(k).length>0:true);
  const all=keys.length&&keys.every(k=>H.sel.ids.has(k));
  keys.forEach(k=>all?H.sel.ids.delete(k):H.sel.ids.add(k)); selRefresh();
 }
@@ -16736,11 +16940,12 @@ function dropMessages(set){
  DATA.messages=(DATA.messages||[]).filter(z=>!set.has(z.id));
 }
 async function deleteMessages(ids){
- const list=ids.map(findMsg).filter(Boolean); if(!list.length) return;
+ let list=ids.map(findMsg).filter(Boolean); if(!list.length) return;
+ if(isGrp(H.thread)){ const lm={}; list.forEach(m=>{ lm[m.id]=m; if(m.dir==="p2s"&&m.bid) (DATA.messages||[]).forEach(z=>{ if(z.dir==="p2s"&&z.bid===m.bid&&z.at===m.at&&z.text===m.text) lm[z.id]=z; }); }); list=Object.keys(lm).map(k=>lm[k]); }
  const n=list.length, m0=list[0];
  let detail;
  if(n===1){
-  const multi=m0.dir==="p2s"&&!!m0.bid&&(DATA.messages||[]).some(z=>z.bid===m0.bid&&z.id!==m0.id);
+  const multi=!isGrp(H.thread)&&m0.dir==="p2s"&&!!m0.bid&&(DATA.messages||[]).some(z=>z.bid===m0.bid&&z.id!==m0.id);
   detail=m0.dir==="s2p"?"Le message de l’élève disparaîtra aussi de sa conversation.":(multi?"Ce message a été envoyé à plusieurs élèves : seul celui de cette conversation sera supprimé.":"Il disparaîtra aussi de la conversation de l’élève.");
  }else detail="Les messages supprimés disparaîtront aussi de la conversation de l’élève.";
  const yes=await askConfirm(n===1?"Supprimer ce message ?":"Supprimer ces "+n+" messages ?",{title:n===1?"Supprimer le message":"Supprimer les messages",detail,ok:"Supprimer",danger:true});
@@ -16749,9 +16954,10 @@ async function deleteMessages(ids){
  H.sel.on=false; H.sel.ids.clear(); saveData(); renderHome(); toast(n===1?"Message supprimé.":n+" messages supprimés.");
 }
 async function deleteThreads(sids){
- sids=sids.filter(s=>(DATA.messages||[]).some(z=>z.sid===s)); if(!sids.length) return;
- const set=new Set(sids), list=(DATA.messages||[]).filter(z=>set.has(z.sid)), n=sids.length;
- const yes=await askConfirm(n===1?"Supprimer la discussion avec "+stuName(sids[0])+" ?":"Supprimer ces "+n+" discussions ?",{
+ sids=sids.filter(s=>threadList(s).length>0); if(!sids.length) return;
+ const set=new Set(sids), lmap={}; sids.forEach(k=>threadList(k).forEach(z=>{ lmap[z.id]=z; })); const list=Object.keys(lmap).map(k=>lmap[k]), n=sids.length;
+ const nm0=isGrp(sids[0])?((grpInfo(grpId(sids[0]))||{}).subject||"groupe"):stuName(sids[0]);
+ const yes=await askConfirm(n===1?(isGrp(sids[0])?"Supprimer la discussion « "+nm0+" » ?":"Supprimer la discussion avec "+nm0+" ?"):"Supprimer ces "+n+" discussions ?",{
   title:n===1?"Supprimer la discussion":"Supprimer les discussions",
   detail:list.length+" message"+(list.length>1?"s":"")+" supprimé"+(list.length>1?"s":"")+", y compris dans la conversation de l’élève. Cette action est définitive.",ok:"Supprimer",danger:true});
  if(!yes) return;
@@ -16763,7 +16969,7 @@ async function deleteThreads(sids){
 function markThreadsUnread(sids){
  let n=0;
  sids.forEach(sid=>{
-  const inc=(DATA.messages||[]).filter(z=>z.sid===sid&&incoming(z)).sort((a,b)=>new Date(a.at)-new Date(b.at));
+  const inc=threadList(sid).filter(z=>incoming(z)).sort((a,b)=>new Date(a.at)-new Date(b.at));
   if(!inc.length) return;
   const last=inc[inc.length-1]; if(last.read||H.read.has(last.id)){ last.read=false; n++; }
  });
@@ -16780,7 +16986,11 @@ function saveEditMsg(){
  const m=findMsg(EM.id), text=$("emText").value.trim();
  if(!m){ closeModal("emModal"); return; }
  if(!text){ toast("Le message ne peut pas être vide."); return; }
- if(text!==m.text){ m.text=text; m.editedAt=new Date().toISOString(); saveData(); }
+ if(text!==m.text){
+  const old=m.text, now=new Date().toISOString();
+  const targets=(isGrp(H.thread)&&m.dir==="p2s"&&m.bid)?(DATA.messages||[]).filter(z=>z.dir==="p2s"&&z.bid===m.bid&&z.at===m.at&&z.text===old):[m];
+  targets.forEach(z=>{ z.text=text; z.editedAt=now; }); saveData();
+ }
  closeModal("emModal"); renderChat(); toast("Message modifié.");
 }
 (function(){
@@ -16862,7 +17072,7 @@ $("homeView").addEventListener("click",e=>{
   const th=H.sel.kind==="thread", it=e.target.closest(th?".cl-it":".cm");
   if(it&&$("homeChat").contains(it)){
    const k=th?it.dataset.sid:it.dataset.mid;
-   if(th&&!(DATA.messages||[]).some(z=>z.sid===k)) return;
+   if(th&&!threadList(k).length) return;
    H.sel.ids.has(k)?H.sel.ids.delete(k):H.sel.ids.add(k); selRefresh(); return;
   }
  }
@@ -16895,6 +17105,11 @@ $("homeView").addEventListener("click",e=>{
  else if(act==="back"){ H.thread=null; renderChat(); }
  else if(act==="newmsg") openNewMsg();
  else if(act==="send") sendFromThread();
+});
+$("homeChat").addEventListener("click",e=>{
+ const ini=e.target.closest(".cm-ini"); if(!ini||H.sel.on) return;
+ const bub=ini.closest(".cm"), w=bub&&bub.querySelector(".cm-who"); if(!w) return;
+ const open=w.hidden; $("homeChat").querySelectorAll(".cm-who").forEach(x=>{ x.hidden=true; }); w.hidden=!open;
 });
 $("homeChat").addEventListener("input",e=>{
  if(e.target.matches("textarea")){ autosize(e.target); H.draft[$("homeChat").dataset.key||""]=e.target.value; }
