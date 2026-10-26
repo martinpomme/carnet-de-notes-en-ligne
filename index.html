@@ -932,10 +932,18 @@ body.student-mode .tab-btn{ flex:1 1 0; min-width:0; text-align:center; padding-
 .btn-homework-review{
  width:48px; height:42px; border-radius:12px; border:1px solid #cbd5e1; background:#fff; color:#334155; cursor:pointer; font-size:18px; display:inline-flex; align-items:center; justify-content:center; padding:0;
 }
-.btn-homework-review.is-yellow{ border:3px solid #facc15; color:#a16207; background:#fefce8 }
-.btn-homework-review.is-orange{ border:3px solid #f97316; color:#c2410c; background:#fff7ed }
-.btn-homework-review.is-red{ border:3px solid #dc2626; color:#b91c1c; background:#fff1f2 }
-.btn-homework-review.is-green{ border:3px solid #16a34a; color:#15803d; background:#f0fdf4 }
+.homework-review-assignment{ position:relative; display:block; width:100%; text-align:left; box-sizing:border-box }
+.homework-review-assignment.is-yellow{ border:3px solid #facc15; background:#fefce8; padding:10px }
+.homework-review-assignment.is-orange{ border:3px solid #f97316; background:#fff7ed; padding:10px }
+.homework-review-assignment.is-red{ border:3px solid #dc2626; background:#fff1f2; padding:10px }
+.homework-review-assignment.is-green{ border:3px solid #16a34a; background:#f0fdf4; padding:10px }
+.homework-review-assignment.active{ box-shadow:0 0 0 3px rgba(0,104,170,.45) }
+.homework-grade-input{ -webkit-touch-callout:none }
+.hw-spec-pop{ position:fixed; z-index:400; display:flex; gap:6px; padding:8px; background:#fff; border:1px solid #cbd5e1; border-radius:14px; box-shadow:0 8px 24px rgba(15,23,42,.22) }
+.hw-spec-pop button{ min-width:46px; height:38px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc; color:#0f172a; font-weight:700; cursor:pointer }
+.hw-spec-pop button:hover{ background:#e0f2fe; border-color:#0068aa }
+.hw-spec-pop button.clr{ font-weight:600; color:#64748b }
+.homework-review-assignment .hw-assign-badge{ margin:0; position:absolute; top:8px; right:8px; min-width:24px; height:24px; padding:0 7px; border-radius:999px; box-sizing:border-box; background:#ef4444; color:#fff; font:700 13px/1 Arial,Helvetica,sans-serif; display:inline-flex; align-items:center; justify-content:center; pointer-events:none }
 body.student-mode #homeworkView .card-header strong::after{ content:""; }
 @media (max-width:980px){
  .homework-shell,.homework-review-layout{ grid-template-columns:1fr }
@@ -1714,6 +1722,55 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 .cm-who{ margin:0 0 6px; padding:4px 10px; border-radius:8px; background:#0f172a; color:#fff; font-size:12px; font-weight:600; width:max-content; max-width:100% }
 .cm-who[hidden]{ display:none }
 </style>
+<style id="patch-2026-10e">
+/* ── Pastilles à chiffre : nombre parfaitement centré ── */
+#homeTabBtn .hb, .tab-btn[data-pending-count]::after, .online-test-badge, .dr-item .dr-bdg.dr-cnt, .cl-bd{
+ display:inline-flex!important; align-items:center; justify-content:center; text-align:center;
+ line-height:1!important; box-sizing:border-box; font-variant-numeric:tabular-nums; padding-top:0!important; padding-bottom:0!important;
+}
+#homeTabBtn .hb{ display:flex!important }
+/* ── Pastille d'attention : panneau blanc, « ! » rouge, sur pastille rouge ── */
+.tab-btn.has-empty-eval::after,.subtab-btn.has-empty-eval::after,.period-btn.has-empty-eval::after,
+.tab-btn.has-miss-call::after,.vs-tab.vs-warn::after{
+ background-color:#dc2626!important; background-repeat:no-repeat!important; background-position:center!important; background-size:66% 66%!important;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z' fill='white' stroke='white' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M12 9.4v5.3' stroke='%23dc2626' stroke-width='2.7' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='18' r='1.55' fill='%23dc2626'/%3E%3C/svg%3E")!important;
+}
+.dr-item .dr-bdg.dr-pas-warn{ background:#dc2626!important }
+/* ── Test basique ── */
+#onlineBasicTestModal label{ display:block; font-weight:600; font-size:13px; color:#334155; margin:0 0 4px }
+#onlineBasicTestModal :is(input:not([type=checkbox]),select){ width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:10px; font:inherit; background:#fff; box-sizing:border-box }
+#onlineBasicTestModal :is(input,select):focus{ outline:none; border-color:#0a7fbf; box-shadow:0 0 0 3px rgba(10,127,191,.15) }
+.obt-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 14px }
+.obt-full{ grid-column:1/-1 }
+.obt-hint{ margin:12px 0; padding:10px 12px; border-radius:10px; background:#f1f8fd; color:#475569; font-size:13px }
+.obt-rows{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; max-height:46vh; overflow:auto; padding-right:2px }
+.obt-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:8px 10px; border:1px solid #d6edf9; border-radius:12px; background:#fff }
+.obt-q{ font-weight:700; color:#005c9a; min-width:112px }
+#onlineBasicTestModal .obt-type{ width:auto }
+.obt-n{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#475569 }
+.obt-n button{ width:28px; height:28px; border-radius:50%; border:1px solid #0a7fbf; background:#fff; color:#0a7fbf; font-size:16px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:0 }
+.obt-chips{ display:inline-flex; flex-wrap:wrap; gap:5px; flex:1 1 180px }
+.obt-chip{ min-width:30px; height:30px; padding:0 6px; border-radius:999px; border:1px solid #0a7fbf; background:#fff; color:#0a7fbf; font-weight:700; font-size:13px; line-height:1; cursor:pointer; display:inline-flex; align-items:center; justify-content:center }
+.obt-chip.on{ background:#0a7fbf; color:#fff }
+.obt-pts{ display:inline-flex!important; align-items:center; gap:4px; margin:0!important; font-weight:400!important }
+#onlineBasicTestModal .obt-pts input{ width:72px }
+.obt-del{ padding:4px 10px }
+@media (max-width:640px){ .obt-grid{ grid-template-columns:1fr } }
+/* ── Correction : note finale + commentaire général ── */
+.hwc-top{ position:sticky; top:0; z-index:3; background:#fff; border:1px solid #bfe0f3; border-radius:12px; padding:12px 14px; margin-bottom:14px; box-shadow:0 2px 6px rgba(15,23,42,.06) }
+.hwc-top label{ display:block; font-weight:700; color:#005c9a; margin:0 0 4px }
+.hwc-top-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px }
+.hwc-top-row label{ margin:0 }
+#hwcFinalGrade{ width:96px; padding:8px 10px; border:2px solid #0a7fbf; border-radius:10px; font:700 18px/1 inherit; text-align:center; box-sizing:border-box }
+.hwc-top-total{ font-weight:700; color:#475569 }
+.hwc-quick{ display:inline-flex; gap:6px; flex-wrap:wrap; margin-left:auto }
+.hwc-quick .btn{ padding:5px 12px }
+.hwc-top-hint{ font-size:12.5px; color:#64748b; margin:6px 0 10px }
+.hwc-link{ border:0; background:none; color:#0a7fbf; text-decoration:underline; cursor:pointer; font:inherit; padding:0 }
+.hwc-opt{ font-weight:400; color:#64748b; font-size:12px }
+#hwcGeneralComment{ overflow:auto!important; width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:10px; font:inherit; resize:vertical!important; box-sizing:border-box }
+.hwc-general{ margin:10px 0 }
+</style>
 </head>
 <body class="auth-pending">
 <header>
@@ -1909,6 +1966,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
       <div id="onlineTestsSummary" class="online-modal-note" style="margin-top:0;">0 test réalisé</div>
       <select id="onlineTestsSubjectFilter" class="modern-select" aria-label="Filtrer par matière"><option value="">Toutes les matières</option></select>
       <button class="btn btn-primary" id="openCreateOnlineTestBtn" type="button" style="font-size:16px;padding:12px 18px;">+ Créer un test</button>
+      <button class="btn" id="openBasicOnlineTestBtn" type="button" style="font-size:16px;padding:12px 18px;background:#fff;color:#0a7fbf;border:2px solid #0a7fbf;">Créer test basique</button>
      </div>
      <div id="onlineTestsList" class="online-tests-grid"></div>
     </div>
@@ -2971,6 +3029,35 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
  </div>
 </div>
 
+<div id="onlineBasicTestModal" class="modal" aria-hidden="true" style="z-index:140;">
+ <div class="modal-card online-modal-medium" role="dialog" aria-modal="true">
+  <div class="modal-header">
+   <h3>Créer un test basique</h3>
+   <button class="modal-close" id="onlineBasicClose" type="button">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="onlineBasicForm" class="modal-form obt-form" autocomplete="off">
+    <div class="obt-grid">
+     <div class="obt-full"><label for="onlineBasicTitle">Nom du test</label><input id="onlineBasicTitle" placeholder="Ex : Contrôle chapitre 4" required></div>
+     <div><label for="onlineBasicSubject">Matière</label><select id="onlineBasicSubject"></select></div>
+     <div><label for="onlineBasicCount">Nombre de questions</label><input id="onlineBasicCount" type="number" min="1" max="100" step="1" value="10"></div>
+     <div><label for="onlineBasicType">Type par défaut</label><select id="onlineBasicType"><option value="qcu">QCU (une seule bonne réponse)</option><option value="qcm">QCM (plusieurs bonnes réponses)</option><option value="written">Réponse à écrire (saisie par l’élève)</option></select></div>
+     <div><label for="onlineBasicLabels">Propositions</label><select id="onlineBasicLabels"><option value="abc">Lettres : A, B, C, D…</option><option value="num">Chiffres : 1, 2, 3, 4…</option></select></div>
+     <div><label for="onlineBasicProps">Propositions par question</label><input id="onlineBasicProps" type="number" min="2" max="10" step="1" value="4"></div>
+     <div><label for="onlineBasicPoints">Points par question</label><input id="onlineBasicPoints" type="number" min="0.25" step="0.25" value="1"></div>
+    </div>
+    <div class="obt-hint">Les questions s’appellent « Question n°x » et les propositions sont de simples lettres ou chiffres. Question par question, tu peux changer le type (QCU / QCM / réponse à écrire), ajouter ou retirer une proposition, et cliquer sur la ou les bonnes réponses (facultatif : la correction reste manuelle).</div>
+    <div id="onlineBasicRows" class="obt-rows"></div>
+    <button type="button" class="btn" id="onlineBasicAddRow">+ Ajouter une question</button>
+    <div class="modal-actions">
+     <button type="button" class="btn" id="onlineBasicCancel">Annuler</button>
+     <button type="submit" class="btn btn-primary">Créer le test</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
 <div id="onlineTestBuilderModal" class="modal" aria-hidden="true" style="z-index:150;">
  <div class="modal-card online-modal-wide" role="dialog" aria-modal="true">
   <div class="modal-header">
@@ -3098,12 +3185,6 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
   <div class="modal-body">
    <div class="homework-review-layout">
     <div class="homework-review-assignments">
-     <div class="homework-review-sort">
-      <select id="homeworkReviewSort">
-       <option value="class">Tri par classe puis matière</option>
-       <option value="uncorrected">Tri par test non corrigé</option>
-      </select>
-     </div>
      <div id="homeworkReviewAssignments"></div>
     </div>
     <div class="homework-review-students">
@@ -4669,8 +4750,8 @@ function buildCSVText(){
   const cls=CLS_BY_ID[s.classId];
   rows.push(["student",s.id,escapeCsv(s.first),escapeCsv(s.last),s.classId||"",escapeCsv(cls?.name||""),s.sex||""].join(";"));
  });
- (DATA.groups||[]).forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
- (DATA.groups||[]).forEach(g=>{
+ grpForCsv().forEach(g=>rows.push(["group",g.id,escapeCsv(g.name),escapeCsv(JSON.stringify(g.memberIds||[])),Array.isArray(g.subjectsSel)?escapeCsv(JSON.stringify(g.subjectsSel)):""].join(";")));
+ grpForCsv().forEach(g=>{
   (g.evals||[]).forEach(ev=>rows.push(["classEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.isoDate,ev.outof,ev.coef,ev.period||"",ev.defaultImportant?1:0,escapeCsv(ev.generalComment||""),ev.hideFromStudent?1:0,escapeCsv(JSON.stringify(ev.bareme||null)),escapeCsv(ev.hwKey||""),ev.hwDirect?1:0,ev.hwRevealed?1:0,ev.hideUntil||"",(Array.isArray(ev.hwEdited)?ev.hwEdited.join(","):"")].join(";")));
   (g.compEvals||[]).forEach(ev=>rows.push(["classCompEval",ev.id,g.id,escapeCsv(ev.subject),escapeCsv(ev.label),ev.dateJJMMAA,ev.period||"",escapeCsv(JSON.stringify(ev.template||[])),ev.hideFromStudent?1:0,ev.hideUntil||""].join(";")));
  });
@@ -8400,7 +8481,7 @@ function renderGroupList(){
  const term=(document.getElementById("groupSearch").value||"").toLowerCase();
  const keep=document.getElementById("groupListUI").dataset.sel||"";
  list.innerHTML="";
- grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).filter(g=>g.name.toLowerCase().includes(term)).forEach(g=>{
+ grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).filter(g=>g.name.toLowerCase().includes(term)).forEach(g=>{
   const c=classLike(g.id);
   const opt=document.createElement("option"); opt.value=g.id; opt.textContent=g.name;
   let hasMissing=false, hasHidden=false;
@@ -8418,11 +8499,11 @@ function renderClassSelects(){
  const _ncs=document.getElementById("newClassSelect"), _ncsPrev=_ncs.value;
  _ncs.innerHTML='<option value="">Toutes les classes</option>'+DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
  if(_ncsPrev && DATA.classes.some(c=>c.id===_ncsPrev)) _ncs.value=_ncsPrev;
- const _grpOptions=()=>'<option value="">Tous les groupes</option>'+grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("");
+ const _grpOptions=()=>'<option value="">Tous les groupes</option>'+grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("");
  const _ngs=document.getElementById("newGroupSelect");
  if(_ngs){ const _prev=_ngs.value; _ngs.innerHTML=_grpOptions(); if(_prev && grpEns().some(g=>g.id===_prev)) _ngs.value=_prev; }
  const classSelect=document.getElementById("classSelect");
- if(classSelect) classSelect.innerHTML=DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("")+(grpEns().length?`<optgroup label="Groupes">${grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
+ if(classSelect) classSelect.innerHTML=DATA.classes.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${c.id}">${c.name}</option>`).join("")+(grpUi().length?`<optgroup label="Groupes">${grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"})).map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
  const classSubject=document.getElementById("classSubject");
  if(classSubject) classSubject.innerHTML=SUBJECT_REGISTRY.map(s=>`<option>${typeof s==='object'?s.name:s}</option>`).join("");
  const appFilter=document.getElementById("appreciationClassFilter");
@@ -11535,6 +11616,114 @@ document.getElementById("openCreateOnlineTestBtn")?.addEventListener("click",()=
  startOnlineTestFlow(null);
 });
 
+/* ── Test basique : questions « Question n°x », propositions A B C… ou 1 2 3… ── */
+const onlineBasicModal=document.getElementById("onlineBasicTestModal");
+const BASIC_TEST={ rows:[] };
+const BASIC_LETTERS="ABCDEFGHIJ";
+function basicLabel(k){ return document.getElementById("onlineBasicLabels").value==="num" ? String(k+1) : BASIC_LETTERS[k]; }
+function basicClampN(v){ const n=Math.floor(Number(v)); return Number.isFinite(n) ? Math.max(2,Math.min(10,n)) : 4; }
+function basicPoints(v){ const n=Number(String(v).replace(",",".")); return n>0 ? n : 1; }
+function basicNewRow(){
+ return { type:document.getElementById("onlineBasicType").value, n:basicClampN(document.getElementById("onlineBasicProps").value), points:basicPoints(document.getElementById("onlineBasicPoints").value), correct:[] };
+}
+function renderBasicRows(){
+ const box=document.getElementById("onlineBasicRows"); if(!box) return;
+ box.innerHTML=BASIC_TEST.rows.map((r,i)=>`
+  <div class="obt-row" data-i="${i}">
+   <div class="obt-q">Question n°${i+1}</div>
+   <select class="obt-type" data-act="type"><option value="qcu"${r.type==="qcu"?" selected":""}>QCU</option><option value="qcm"${r.type==="qcm"?" selected":""}>QCM</option><option value="written"${r.type==="written"?" selected":""}>Réponse à écrire</option></select>
+   ${r.type==="written"?`<div class="obt-n" style="grid-column:span 2;opacity:.8"><span>Réponse saisie par l’élève · correction manuelle</span></div>`:`<div class="obt-n"><button type="button" data-act="minus" aria-label="Retirer une proposition">−</button><span>${r.n} prop.</span><button type="button" data-act="plus" aria-label="Ajouter une proposition">+</button></div>
+   <div class="obt-chips">${Array.from({length:r.n},(_,k)=>`<button type="button" class="obt-chip${r.correct.includes(k)?" on":""}" data-act="chip" data-k="${k}" title="Marquer comme bonne réponse">${basicLabel(k)}</button>`).join("")}</div>`}
+   <label class="obt-pts"><input type="number" min="0.25" step="0.25" value="${r.points}" data-act="points"> pt</label>
+   <button type="button" class="btn btn-danger obt-del" data-act="del" aria-label="Supprimer la question">×</button>
+  </div>`).join("");
+ document.getElementById("onlineBasicCount").value=BASIC_TEST.rows.length||"";
+}
+function openBasicOnlineTest(){
+ const sel=document.getElementById("onlineBasicSubject");
+ const choices=getOnlineTestSubjectChoices();
+ sel.innerHTML='<option value="">Matière (facultatif)</option>'+choices.map(n=>`<option value="${escHtml(n)}">${escHtml(n)}</option>`).join("");
+ document.getElementById("onlineBasicTitle").value="";
+ document.getElementById("onlineBasicCount").value="10";
+ document.getElementById("onlineBasicType").value="qcu";
+ document.getElementById("onlineBasicLabels").value="abc";
+ document.getElementById("onlineBasicProps").value="4";
+ document.getElementById("onlineBasicPoints").value="1";
+ BASIC_TEST.rows=Array.from({length:10},()=>basicNewRow());
+ renderBasicRows();
+ setModalOpen(onlineBasicModal,true);
+ setTimeout(()=>document.getElementById("onlineBasicTitle")?.focus(),50);
+}
+function closeBasicOnlineTest(){ setModalOpen(onlineBasicModal,false); }
+document.getElementById("openBasicOnlineTestBtn")?.addEventListener("click",()=>{ if(AUTH.role!=="prof") return; openBasicOnlineTest(); });
+document.getElementById("onlineBasicClose")?.addEventListener("click",closeBasicOnlineTest);
+document.getElementById("onlineBasicCancel")?.addEventListener("click",closeBasicOnlineTest);
+document.getElementById("onlineBasicAddRow")?.addEventListener("click",()=>{ BASIC_TEST.rows.push(basicNewRow()); renderBasicRows(); });
+document.getElementById("onlineBasicCount")?.addEventListener("change",e=>{
+ const n=Math.max(1,Math.min(100,Math.floor(Number(e.target.value))||BASIC_TEST.rows.length||1));
+ while(BASIC_TEST.rows.length<n) BASIC_TEST.rows.push(basicNewRow());
+ if(BASIC_TEST.rows.length>n) BASIC_TEST.rows.length=n;
+ renderBasicRows();
+});
+["onlineBasicType","onlineBasicProps","onlineBasicPoints"].forEach(id=>{
+ document.getElementById(id)?.addEventListener("change",()=>{
+  const d=basicNewRow();
+  BASIC_TEST.rows.forEach(r=>{
+   if(id==="onlineBasicType"){ r.type=d.type; if(r.type==="qcu") r.correct=r.correct.slice(0,1); if(r.type==="written") r.correct=[]; }
+   if(id==="onlineBasicProps"){ r.n=d.n; r.correct=r.correct.filter(k=>k<r.n); }
+   if(id==="onlineBasicPoints") r.points=d.points;
+  });
+  renderBasicRows();
+ });
+});
+document.getElementById("onlineBasicLabels")?.addEventListener("change",renderBasicRows);
+document.getElementById("onlineBasicRows")?.addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]"); if(!b || b.tagName==="SELECT" || b.tagName==="INPUT") return;
+ const row=b.closest(".obt-row"); const r=BASIC_TEST.rows[Number(row?.dataset.i)]; if(!r) return;
+ const act=b.dataset.act;
+ if(act==="del"){ BASIC_TEST.rows.splice(Number(row.dataset.i),1); }
+ else if(act==="plus"){ r.n=Math.min(10,r.n+1); }
+ else if(act==="minus"){ r.n=Math.max(2,r.n-1); r.correct=r.correct.filter(k=>k<r.n); }
+ else if(act==="chip"){
+  const k=Number(b.dataset.k);
+  if(r.correct.includes(k)) r.correct=r.correct.filter(x=>x!==k);
+  else r.correct = r.type==="qcm" ? [...r.correct,k] : [k];
+ }
+ renderBasicRows();
+});
+document.getElementById("onlineBasicRows")?.addEventListener("change",e=>{
+ const t=e.target; const row=t.closest(".obt-row"); const r=BASIC_TEST.rows[Number(row?.dataset.i)]; if(!r) return;
+ if(t.dataset.act==="type"){ r.type=t.value; if(r.type==="qcu") r.correct=r.correct.slice(0,1); if(r.type==="written") r.correct=[]; renderBasicRows(); }
+ else if(t.dataset.act==="points"){ r.points=basicPoints(t.value); renderBasicRows(); }
+});
+document.getElementById("onlineBasicForm")?.addEventListener("submit",e=>{
+ e.preventDefault();
+ if(AUTH.role!=="prof") return;
+ const title=document.getElementById("onlineBasicTitle").value.trim();
+ if(!title){ alert("Le nom du test est requis."); return; }
+ if(!BASIC_TEST.rows.length){ alert("Ajoute au moins une question."); return; }
+ const anyCorrect=BASIC_TEST.rows.some(r=>r.correct.length);
+ const meta=defaultOnlineTestMeta();
+ meta.title=title;
+ meta.subject=document.getElementById("onlineBasicSubject").value.trim();
+ meta.defaultPoints=basicPoints(document.getElementById("onlineBasicPoints").value);
+ /* sans bonne réponse définie, afficher un « correctif » n'aurait aucun sens pour l'élève */
+ meta.options.hideCorrection=!anyCorrect;
+ meta.questions=BASIC_TEST.rows.map((r,i)=>({
+  id:makeUid("otq"), type:r.type, prompt:`Question n°${i+1}`, points:r.points,
+  ...(r.type==="written"
+   ? { expectedAnswers:[] }
+   : { choices:Array.from({length:r.n},(_,k)=>({ id:makeUid("choice"), text:basicLabel(k), correct:r.correct.includes(k) })) })
+ }));
+ const finalTest=sanitizeOnlineTest(meta);
+ ensureOnlineTestsStore();
+ DATA.onlineTests.unshift(finalTest);
+ saveData();
+ closeBasicOnlineTest();
+ renderOnlineTestsView();
+ activateMainView("onlineTestsView");
+});
+
 onlineTestSetupForm?.addEventListener("submit",e=>{
  e.preventDefault();
  const title=document.getElementById("onlineTestTitleInput").value.trim();
@@ -12811,7 +13000,7 @@ function initApp(){
   correction: null,
  quiz: null,
  studentDatePinned: false,
- filter: { cls:"", group:"", subject:"" }
+ filter: { cls:"", group:"", student:"", subject:"" }
  };
  const HW_ALL="__ALL__";
 
@@ -12868,9 +13057,10 @@ function initApp(){
   return {id:g.id,name:g.name,subjects:subs,memberIds:studs.map(s=>s.id),isGroup:true};
  }
  function homeworkTargetOptionsHtml(sel){
-  const gl=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  const solo=isSoloId(sel)?`<optgroup label="Élève"><option value="${escHtml(sel)}" selected>${escHtml(homeworkClassName(sel))}</option></optgroup>`:"";
+  const gl=grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
   return homeworkSortedClasses().map(cls=>`<option value="${escHtml(cls.id)}" ${cls.id===sel?"selected":""}>${escHtml(cls.name)}</option>`).join("")
-   +(gl.length?`<optgroup label="Groupes">${gl.map(g=>`<option value="${escHtml(g.id)}" ${g.id===sel?"selected":""}>${escHtml(g.name)}</option>`).join("")}</optgroup>`:"");
+   +(gl.length?`<optgroup label="Groupes">${gl.map(g=>`<option value="${escHtml(g.id)}" ${g.id===sel?"selected":""}>${escHtml(g.name)}</option>`).join("")}</optgroup>`:"")+solo;
  }
  function homeworkStudentById(studentId){
   return DATA.students.find(s=>s.id===studentId) || null;
@@ -13018,9 +13208,9 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
    HOMEWORK_STATE.draft=normalizeHomeworkEntry({...existing, locked:false});
   }else{
    const info=homeworkTeacherCalendarInfo();
-   if(!info.specT || !info.specS){ alert("Sélectionne une classe (ou un groupe) et une matière précises pour ajouter un devoir."); return; }
+   if(!info.specT || !info.specS){ alert("Sélectionne une classe, un groupe ou un élève, et une matière précises pour ajouter un devoir."); return; }
    const classId=info.t, subject=info.s;
-   if(!info.lessonDates.has(HOMEWORK_STATE.selectedDate)){
+   if(!info.solo && !info.lessonDates.has(HOMEWORK_STATE.selectedDate)){
     alert("Il n’y a pas de cours de "+subject+" pour "+homeworkClassName(classId)+" à cette date dans l’emploi du temps.");
     return;
    }
@@ -13137,12 +13327,24 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   return order.filter(n=>out.includes(n)).concat(out.filter(n=>!order.includes(n)));
  }
  /* Filtre du professeur : "" = rien (défaut), HW_ALL = « Toutes … », sinon un identifiant / une matière précise. */
+ function hwFilterTarget(f){ return f.student?soloGrpId(f.student):(f.group||f.cls); }
+ function hwTargetHitsEvent(t,e){
+  const ids=e.classIds||[];
+  if(ids.includes(t)) return true;
+  if(!isSoloId(t)) return false;
+  const sid=t.slice(SOLO_PFX.length), st=homeworkStudentById(sid);
+  if(!st) return false;
+  if(st.classId && ids.includes(st.classId)) return true;
+  return grpEns().some(g=>!isSoloGrp(g) && ids.includes(g.id) && (g.memberIds||[]).includes(sid));
+ }
  function normalizeHomeworkFilter(){
   const f=HOMEWORK_STATE.filter;
+  if(f.student && !homeworkStudentById(f.student)) f.student="";
+  if(f.student){ f.group=""; f.cls=""; ensureSoloGroup(f.student); }
   if(f.group && !grpById(f.group)) f.group="";
   if(f.cls && f.cls!==HW_ALL && !DATA.classes.some(c=>c.id===f.cls)) f.cls="";
   if(f.group) f.cls="";
-  const t=f.group||f.cls;
+  const t=hwFilterTarget(f);
   const specT=!!t && t!==HW_ALL;
   if(!specT && f.subject===HW_ALL) f.subject="";                       // « Toutes matières » exige une classe/un groupe
   if(specT && f.subject && f.subject!==HW_ALL && !homeworkClassSubjects(t).includes(f.subject)) f.subject="";
@@ -13150,7 +13352,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   if(f.subject && f.subject!==HW_ALL && !f.group && !specT && !homeworkAllSubjects().includes(f.subject)) f.subject="";
  }
  function homeworkFilterMatches(item){
-  const f=HOMEWORK_STATE.filter, t=f.group||f.cls, s=f.subject;
+  const f=HOMEWORK_STATE.filter, t=hwFilterTarget(f), s=f.subject;
   if(t && t!==HW_ALL && item.classId!==t) return false;
   if(s && s!==HW_ALL && item.subject!==s) return false;
   return true;
@@ -13159,13 +13361,13 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
  function homeworkLessonDates(t,s){
   const set=new Set();
   ((DATA.schedule&&DATA.schedule.events)||[]).forEach(e=>{
-   if(!e.cancelled && e.date && (s===null || (!e.evt && e.subject===s)) && (t===null || (e.classIds||[]).includes(t))) set.add(e.date);
+   if(!e.cancelled && e.date && (s===null || (!e.evt && e.subject===s)) && (t===null || hwTargetHitsEvent(t,e))) set.add(e.date);
   });
   return set;
  }
  function homeworkTeacherCalendarInfo(){
   normalizeHomeworkFilter();
-  const f=HOMEWORK_STATE.filter, t=f.group||f.cls, s=f.subject;
+  const f=HOMEWORK_STATE.filter, t=hwFilterTarget(f), s=f.subject;
   const specT=!!t && t!==HW_ALL, specS=!!s && s!==HW_ALL;
   const hwDates=new Set((DATA.homework||[]).filter(homeworkFilterMatches).map(i=>i.dateISO));
   let restrict=false, lessonDates=null;
@@ -13175,7 +13377,9 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   }else if(t===HW_ALL && specS){         // toutes classes : tout jour où la matière est enseignée reste cliquable
    restrict=true; lessonDates=homeworkLessonDates(null,s);
   }
-  return { t, s, specT, specS, hwDates, restrict, lessonDates };
+  const solo=!!t && isSoloId(t);
+  if(solo){ restrict=false; lessonDates=null; }   // un élève seul : aucun cours programmé nécessaire
+  return { t, s, specT, specS, hwDates, restrict, lessonDates, solo };
  }
  function homeworkDateAllowed(info,dateISO){
   return !info.restrict || info.hwDates.has(dateISO) || !!(info.lessonDates && info.lessonDates.has(dateISO));
@@ -13220,12 +13424,22 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const info=homeworkTeacherCalendarInfo();
   const f=HOMEWORK_STATE.filter;
   const classes=homeworkSortedClasses();
-  const groups=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  const groups=grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
   const subjects=info.specT ? homeworkClassSubjects(info.t) : homeworkAllSubjects();
   const date=HOMEWORK_STATE.selectedDate;
+  const stuOpts=(()=>{
+   const studs=(DATA.students||[]).slice().sort((a,b)=>(a.last||"").localeCompare(b.last||"","fr")||(a.first||"").localeCompare(b.first||"","fr")); let h="";
+   homeworkSortedClasses().forEach(c=>{
+    const m=studs.filter(x=>x.classId===c.id); if(!m.length) return;
+    h+=`<optgroup label="${escHtml(c.name)}">${m.map(x=>`<option value="${escHtml(x.id)}" ${x.id===f.student?"selected":""}>${escHtml((x.last||"")+" "+(x.first||""))}</option>`).join("")}</optgroup>`;
+   });
+   const orph=studs.filter(x=>!homeworkSortedClasses().some(c=>c.id===x.classId));
+   if(orph.length) h+=`<optgroup label="Sans classe">${orph.map(x=>`<option value="${escHtml(x.id)}" ${x.id===f.student?"selected":""}>${escHtml((x.last||"")+" "+(x.first||""))}</option>`).join("")}</optgroup>`;
+   return h;
+  })();
   let addReason="";
-  if(!info.specT || !info.specS) addReason="Sélectionne une classe (ou un groupe) et une matière précises.";
-  else if(!info.lessonDates.has(date)) addReason="Aucun cours de cette matière pour cette classe à cette date dans l’emploi du temps.";
+  if(!info.specT || !info.specS) addReason="Sélectionne une classe, un groupe ou un élève, et une matière précises.";
+  else if(!info.solo && !info.lessonDates.has(date)) addReason="Aucun cours de cette matière pour cette classe à cette date dans l’emploi du temps.";
   else if(hasHomeworkCollision({id:"",dateISO:date,classId:info.t,subject:info.s})) addReason="Un devoir existe déjà pour cette classe, cette matière et cette date.";
   return `
    <div class="homework-toolbar ${HOMEWORK_STATE.draft ? "is-hidden" : ""}">
@@ -13245,6 +13459,14 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
      <div class="modal-form">
       <label>Groupes</label>
       <select id="homeworkGroupSelect"><option value="">—</option>${groups.map(g=>`<option value="${escHtml(g.id)}" ${g.id===f.group?"selected":""}>${escHtml(g.name)}</option>`).join("")}</select>
+     </div>
+     <div class="modal-form">
+      <label>&nbsp;</label>
+      <span style="padding:9px 2px;font-weight:700;color:#64748b">OU</span>
+     </div>
+     <div class="modal-form">
+      <label>Élève</label>
+      <select id="homeworkStudentSelect"><option value="">—</option>${stuOpts}</select>
      </div>
      <div class="modal-form">
       <label>Matière</label>
@@ -14011,7 +14233,8 @@ async function finishHomeworkQuiz(reason){
      </div>
     </div>
     <p class="online-preview-note">${test.options?.hideCorrection ? "La note validée par l’enseignant est disponible." : "La correction validée par l’enseignant est disponible."}</p>
-    ${(finalValue!=="" || !test.options?.hideCorrection) ? `<div class="hwc-notebar">${finalValue!=="" ? `<div class="online-preview-score">Note : ${escHtml(String(finalValue))} / ${total}</div>` : ""}${test.options?.hideCorrection ? "" : `<button type="button" class="btn btn-primary" data-hw-action="open-correctif" data-homework-id="${escHtml(homework.id)}" data-test-id="${escHtml(test.id)}" data-student-id="${escHtml(homeworkStudentId())}">Afficher le correctif</button>`}</div>` : ""}
+    ${(()=>{ const gc=String(submission.review?.generalComment||"").trim(); return gc ? `<div class="hwc-comment hwc-general"><b>Commentaire du professeur</b>${escHtml(gc).replace(/\n/g,"<br>")}</div>` : ""; })()}
+    ${(finalValue!=="" || !test.options?.hideCorrection) ? `<div class="hwc-notebar">${finalValue!=="" ? `<div class="online-preview-score">Note : ${escHtml(String(finalValue))}${CLASS_SPECIAL_VALUES.has(String(finalValue)) ? "" : " / "+total}</div>` : ""}${test.options?.hideCorrection ? "" : `<button type="button" class="btn btn-primary" data-hw-action="open-correctif" data-homework-id="${escHtml(homework.id)}" data-test-id="${escHtml(test.id)}" data-student-id="${escHtml(homeworkStudentId())}">Afficher le correctif</button>`}</div>` : ""}
     <div class="homework-quiz-actions">
      <button type="button" class="btn btn-primary" data-hw-action="close-quiz">Fermer</button>
     </div>
@@ -14054,6 +14277,52 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   renderHomeworkQuizIntro(homework,test,submission);
   setModalOpen(homeworkQuizModal,true);
  }
+ /* Un élève est « corrigé » quand sa note dans l'évaluation liée est une note ou une valeur spéciale (NE, Abs, Disp, X, EA…) : seule « NR » (ou l'absence de note) reste à corriger. */
+ function hwStudentCorrected(homework,test,studentId){
+  const sub=getHomeworkSubmission(homework.id,test.id,studentId);
+  const cls=classLike(homework.classId);
+  const ev=cls&&(cls.evals||[]).find(e=>e.hwKey===`${homework.id}::${test.id}`);
+  const note=ev&&(DATA.notes&&DATA.notes[studentId]||[]).find(m=>m.classCommon&&m.classId===cls.id&&m.classNoteId===ev.id);
+  if(note){
+   if(note.notReturned) return false;
+   if(typeof note.note==="number" && !isNaN(note.note)) return true;
+   const t=String(note.noteText||"").trim();
+   return t!=="" && t!=="NR";
+  }
+  return !!(sub && (sub.validatedAt||sub.manualOverride));
+ }
+ /* none : rien d'assigné · yellow : non-rendus à traiter · orange : copies rendues à corriger · red : les deux · green : tout est traité */
+ function hwReviewStateOfItem(item){
+  if(!item.totalStudents) return "none";
+  const openNotReturned=item.openNotReturned>0, openSubmitted=item.openSubmitted>0;
+  if(openNotReturned&&openSubmitted) return "red";
+  if(openNotReturned) return "yellow";
+  if(openSubmitted) return "orange";
+  return "green";
+ }
+ function hwFindEvalNote(homeworkId,testId,sid){
+  const hw=getHomeworkById(homeworkId); if(!hw) return null;
+  const cls=classLike(hw.classId); if(!cls) return null;
+  const ev=(cls.evals||[]).find(e=>e.hwKey===`${homeworkId}::${testId}`); if(!ev) return null;
+  const note=((DATA.notes&&DATA.notes[sid])||[]).find(m=>m.classCommon&&m.classId===cls.id&&m.classNoteId===ev.id);
+  return note?{ev,note}:null;
+ }
+ /* Valeur spéciale (Abs, NE, Disp, X, EA) posée sur l'élève, même s'il n'a pas rendu le test */
+ function hwSpecialMark(homework,test,sid){
+  const r=hwFindEvalNote(homework.id,test.id,sid); if(!r) return "";
+  const t=String(r.note.noteText||"").trim();
+  return (CLASS_SPECIAL_VALUES.has(t)&&t!=="NR")?t:"";
+ }
+ /* Pose (ou retire, si value="") une note saisie à la main dans l'évaluation liée : elle n'est plus écrasée par le calcul automatique */
+ function hwApplyManualMark(homeworkId,testId,sid,value){
+  let r=hwFindEvalNote(homeworkId,testId,sid);
+  if(!r){ syncHomeworkDirectGrades(); r=hwFindEvalNote(homeworkId,testId,sid); }
+  if(!r) return false;
+  const v=String(value||"").trim();
+  if(v===""){ r.note.hwAuto=true; return true; }
+  applyHomeworkDirectValue(r.note,v); r.note.hwAuto=false;
+  return true;
+ }
  function getHomeworkReviewAssignments(filterTestId){
   ensureHomeworkStore();
   const list=[];
@@ -14064,9 +14333,16 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     if(filterTestId && test.id!==filterTestId) return;
     const cls=homeworkClassById(homework.classId);
     const memberIds=(cls?.memberIds||[]).slice();
-    const submissions=memberIds.map(studentId=>getHomeworkSubmission(homework.id,test.id,studentId)).filter(Boolean);
-    const pending=submissions.filter(sub=>!sub.validatedAt && !sub.manualOverride).length;
+    const submissions=memberIds.map(studentId=>getHomeworkSubmission(homework.id,test.id,studentId)).filter(sub=>sub&&sub.submittedAt);
+    let openNotReturned=0, openSubmitted=0;
+    memberIds.forEach(studentId=>{
+     if(hwStudentCorrected(homework,test,studentId)) return;
+     const sub=getHomeworkSubmission(homework.id,test.id,studentId);
+     if(sub&&sub.submittedAt) openSubmitted++; else openNotReturned++;
+    });
+    const pending=openNotReturned+openSubmitted;
     list.push({
+     openNotReturned, openSubmitted,
      key:`${homework.id}::${test.id}`,
      homework,
      test,
@@ -14077,9 +14353,12 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     });
    });
   });
-  const mode=document.getElementById("homeworkReviewSort")?.value || "class";
   list.sort((a,b)=>{
-   if(mode==="uncorrected" && b.pending!==a.pending) return b.pending-a.pending;
+   /* du plus récent au plus ancien (date du devoir, puis date de création) */
+   const da=String(a.homework.dateISO||""), db=String(b.homework.dateISO||"");
+   if(da!==db) return da<db?1:-1;
+   const ca=String(a.homework.createdAt||""), cb=String(b.homework.createdAt||"");
+   if(ca!==cb) return ca<cb?1:-1;
    const classCompare=a.className.localeCompare(b.className,"fr",{sensitivity:"base"});
    if(classCompare) return classCompare;
    const subjectCompare=String(a.homework.subject||"").localeCompare(String(b.homework.subject||""),"fr",{sensitivity:"base"});
@@ -14125,7 +14404,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const before=JSON.stringify([note.note,note.noteText]);
   const g=String(grade==null?"":grade).trim();
   if(g==="" ){ note.noteText="NR"; delete note.note; }
-  else if(SPECIAL_VALUES.has(g)){ note.noteText=g; delete note.note; }
+  else if(CLASS_SPECIAL_VALUES.has(g)){ note.noteText=g; delete note.note; }
   else{
    const n=parseFloat(g.replace(",","."));
    if(Number.isNaN(n)){ note.noteText="NR"; delete note.note; }
@@ -14159,7 +14438,6 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      isoDate:hw.dateISO,
      outof:total,
      period,
-     defaultImportant:!!hw.isExam,
      hwDirect:isHomeworkDirectTest(test)
     };
     let ev=cls.evals.find(e=>e.hwKey===key);
@@ -14173,7 +14451,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      if(!isProf) return;
      if(LOCKED_PERIODS[period]) return;
      const reveal=homeworkEvalRevealed(hw,test);
-     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,coef:1,hideFromStudent:!reveal,hwRevealed:reveal,hwKey:key,hwId:hw.id,hwTestId:test.id};
+     ev={id:'ev_'+Math.random().toString(36).slice(2,10),...fields,defaultImportant:false,coef:1,hideFromStudent:!reveal,hwRevealed:reveal,hwKey:key,hwId:hw.id,hwTestId:test.id};
      cls.evals.push(ev);
      changed=true;
     }else if(isProf && !(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period])){
@@ -14271,10 +14549,11 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   if(!HOMEWORK_STATE.reviewSelectedKey && assignments[0]) HOMEWORK_STATE.reviewSelectedKey=assignments[0].key;
   if(assignments.every(item=>item.key!==HOMEWORK_STATE.reviewSelectedKey)) HOMEWORK_STATE.reviewSelectedKey=assignments[0]?.key || "";
   assignmentsWrap.innerHTML = assignments.length ? assignments.map(item=>`
-   <button type="button" class="homework-review-assignment ${item.key===HOMEWORK_STATE.reviewSelectedKey ? "active" : ""}" data-hw-action="select-review-assignment" data-key="${escHtml(item.key)}">
+   <button type="button" class="homework-review-assignment is-${hwReviewStateOfItem(item)} ${item.key===HOMEWORK_STATE.reviewSelectedKey ? "active" : ""}" data-hw-action="select-review-assignment" data-key="${escHtml(item.key)}" title="${escHtml(HW_REVIEW_TITLES[hwReviewStateOfItem(item)]||"")}">
+    ${item.pending>0?`<span class="hw-assign-badge" title="${item.pending} non corrigé${item.pending>1?"s":""}">${item.pending>99?"99+":item.pending}</span>`:""}
     <strong>${escHtml(item.className)} - ${escHtml(item.homework.subject)}</strong>
     <span>${escHtml(homeworkDateToFr(item.homework.dateISO))} · ${escHtml(item.test.title||"Test")}</span>
-    <small>${item.submitted}/${item.totalStudents} rendu(s) · ${item.pending} à valider</small>
+    <small>${item.submitted}/${item.totalStudents} rendu(s) · ${item.pending} non corrigé(s)</small>
    </button>
   `).join("") : '<div class="homework-empty">Aucune assignation de test hors entraînement.</div>';
   const current=assignments.find(item=>item.key===HOMEWORK_STATE.reviewSelectedKey);
@@ -14289,16 +14568,17 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const lineHtml=(stu,item)=>{
     const submission=getHomeworkSubmission(item.homework.id,item.test.id,stu.id);
     const done=!!submission?.submittedAt;
-    const grade=getHomeworkResolvedGrade(submission,item.test);
-    const validated=isHomeworkGradeValidated(submission,item.test);
+    const special=hwSpecialMark(item.homework,item.test,stu.id);
+    const grade=special||getHomeworkResolvedGrade(submission,item.test);
+    const validated=!!special||isHomeworkGradeValidated(submission,item.test);
     return `
      <div class="homework-review-student">
-      <span class="homework-status-dot ${done ? "is-done" : ""}"></span>
+      <span class="homework-status-dot ${done||special ? "is-done" : ""}"></span>
       <div>
        <strong>${escHtml(stu.first)} ${escHtml(stu.last)}${multi ? ` <span style="font-weight:500;color:#005c9a;">· ${escHtml(homeworkDateToFr(item.homework.dateISO))}</span>` : ""}</strong>
-       <div style="color:#64748b;font-size:13px;">${done ? "Test réalisé" : "Pas encore fait"} ${submission?.publishedAt ? "· note publiée" : ""}</div>
+       <div style="color:#64748b;font-size:13px;">${done ? "Test réalisé" : (special ? "Marqué « "+escHtml(special)+" »" : "Pas encore fait")} ${submission?.publishedAt ? "· note publiée" : ""}</div>
       </div>
-      <input class="homework-grade-input" data-hw-action="grade-input" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" value="${escHtml(grade)}" placeholder="Note">
+      <input class="homework-grade-input" data-hw-action="grade-input" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" value="${escHtml(grade)}" placeholder="Note" title="Clic droit ou appui long : Abs, Disp, NE, X, EA…">
       <div style="display:flex;align-items:center;gap:8px;">
        ${validated ? "" : '<span class="homework-review-warning" title="Note non validée">⚠</span>'}
        <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
@@ -14317,7 +14597,6 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  function openHomeworkReviewModal(filterTestId=""){
   HOMEWORK_STATE.reviewFilterTestId=filterTestId || "";
   HOMEWORK_STATE.reviewSelectedKey="";
-  document.getElementById("homeworkReviewSort").value="class";
   renderHomeworkReviewModal();
   setModalOpen(homeworkReviewModal,true);
  }
@@ -14334,7 +14613,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   document.getElementById("homeworkCorrectionTitle").textContent=`Correction · ${student.first} ${student.last}`;
   const body=document.getElementById("homeworkCorrectionBody");
   if(!body) return;
-  body.innerHTML=hwAutoDetails(submission,test).map((detail,index)=>{
+  body.innerHTML=hwcTopHtml(test)+hwAutoDetails(submission,test).map((detail,index)=>{
    const question=detail.question;
    const saved=submission.review?.questionScores?.[question.id];
    const defaultScore=(saved!=null && saved!=="") ? saved : "";
@@ -14354,8 +14633,86 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     </section>
    `;
   }).join("");
+  hwcInitTop(submission,test);
   setModalOpen(homeworkCorrectionModal,true);
  }
+ /* ── Note finale personnalisable + commentaire général (en haut de la correction) ── */
+ function hwcFmt(x){ return String(Math.round(x*100)/100); }
+ function hwcSum(){
+  let t=0;
+  document.querySelectorAll("#homeworkCorrectionBody input[data-question-id]").forEach(inp=>{
+   let v=parseFloat(String(inp.value).replace(",","."));
+   if(Number.isNaN(v)) v=0;
+   t+=Math.max(0,Math.min(Number(inp.max)||0,v));
+  });
+  return t;
+ }
+ function hwcNormGrade(raw){
+  const s=String(raw==null?"":raw).trim();
+  if(!s) return {ok:true,value:""};
+  const sp=[...CLASS_SPECIAL_VALUES].find(v=>v.toLowerCase()===s.toLowerCase());
+  if(sp) return {ok:true,value:sp};
+  if(/^\d+([.,]\d+)?$/.test(s)) return {ok:true,value:hwcFmt(parseFloat(s.replace(",",".")))};
+  return {ok:false,value:""};
+ }
+ function hwcTopHtml(test){
+  const total=hwcFmt(getOnlineTestTotalPoints(test));
+  return `
+   <section class="hwc-top">
+    <div class="hwc-top-row">
+     <label for="hwcFinalGrade">Note</label>
+     <input type="text" id="hwcFinalGrade" inputmode="decimal" autocomplete="off" data-custom="0" aria-label="Note finale">
+     <span class="hwc-top-total">/ ${escHtml(total)}</span>
+     <div class="hwc-quick">
+      ${["Disp","NE","Abs","X"].map(v=>`<button type="button" class="btn" data-hwc-quick="${v}">${v}</button>`).join("")}
+     </div>
+    </div>
+    <div class="hwc-top-hint" id="hwcGradeHint"></div>
+    <label for="hwcGeneralComment">Commentaire général <span class="hwc-opt">(visible par l’élève ; utile pour justifier un bonus ou un malus)</span></label>
+    <textarea id="hwcGeneralComment" rows="2" placeholder="Ex : +1 point pour la présentation soignée."></textarea>
+   </section>`;
+ }
+ function hwcRefreshHint(){
+  const g=document.getElementById("hwcFinalGrade"), h=document.getElementById("hwcGradeHint");
+  if(!g||!h) return;
+  const sum=hwcFmt(hwcSum());
+  h.innerHTML=g.dataset.custom==="1"
+   ? `Note personnalisée · total des points calculé : <b>${escHtml(sum)}</b> <button type="button" class="hwc-link" data-hwc-quick="__total">Revenir au total</button>`
+   : `Total des points calculé automatiquement : <b>${escHtml(sum)}</b> (modifiable)`;
+ }
+ function hwcInitTop(submission,test){
+  const g=document.getElementById("hwcFinalGrade"); if(!g) return;
+  const sum=hwcSum();
+  const saved=submission.manualOverride || submission.review?.finalScore;
+  const savedStr=(saved==null)?"":String(saved).trim();
+  g.dataset.custom="0";
+  const num=parseFloat(savedStr.replace(",","."));
+  if(savedStr!=="" && (CLASS_SPECIAL_VALUES.has(savedStr) || Number.isNaN(num) || Math.abs(num-sum)>0.001)){ g.value=savedStr; g.dataset.custom="1"; }
+  else g.value=hwcFmt(sum);
+  const c=document.getElementById("hwcGeneralComment");
+  if(c) c.value=submission.review?.generalComment||"";
+  hwcRefreshHint();
+ }
+ document.addEventListener("input",e=>{
+  const t=e.target;
+  if(!t.closest || !t.closest("#homeworkCorrectionBody")) return;
+  const g=document.getElementById("hwcFinalGrade"); if(!g) return;
+  if(t.matches("input[data-question-id]")){ if(g.dataset.custom!=="1") g.value=hwcFmt(hwcSum()); hwcRefreshHint(); }
+  else if(t===g){ g.dataset.custom=String(g.value).trim()===""?"0":"1"; hwcRefreshHint(); }
+ });
+ document.addEventListener("focusout",e=>{
+  const g=document.getElementById("hwcFinalGrade");
+  if(g && e.target===g && String(g.value).trim()===""){ g.dataset.custom="0"; g.value=hwcFmt(hwcSum()); hwcRefreshHint(); }
+ });
+ document.addEventListener("click",e=>{
+  const b=e.target.closest && e.target.closest("[data-hwc-quick]");
+  if(!b || !b.closest("#homeworkCorrectionBody")) return;
+  const g=document.getElementById("hwcFinalGrade"); if(!g) return;
+  const v=b.dataset.hwcQuick;
+  if(v==="__total" || (g.dataset.custom==="1" && g.value===v)){ g.dataset.custom="0"; g.value=hwcFmt(hwcSum()); }
+  else{ g.value=v; g.dataset.custom="1"; }
+  hwcRefreshHint();
+ });
  function closeHomeworkCorrectionModal(){
   HOMEWORK_STATE.correction=null;
   setModalOpen(homeworkCorrectionModal,false);
@@ -14381,13 +14738,27 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   document.querySelectorAll("#homeworkCorrectionBody input[data-verdict-key]").forEach(inp=>{ verdicts[inp.dataset.verdictKey]=inp.checked?"ok":"ko"; });
   const qComments={};
   Object.keys(ctx.comments||{}).forEach(k=>{ const t=String(ctx.comments[k]||"").trim(); if(t) qComments[k]=t; });
+  let finalScore=hwcFmt(total), finalCustom=false;
+  const gIn=document.getElementById("hwcFinalGrade");
+  if(gIn){
+   const g=hwcNormGrade(gIn.value);
+   if(!g.ok){ alert("Note invalide : saisis un nombre ou l’une des valeurs Disp / NE / Abs / NR / EA / X."); return; }
+   if(g.value!==""){
+    finalScore=g.value;
+    finalCustom=CLASS_SPECIAL_VALUES.has(g.value) || Math.abs(parseFloat(g.value)-total)>0.001;
+   }
+  }
+  const generalComment=String(document.getElementById("hwcGeneralComment")?.value||"").trim();
   submission.review={
    ...(submission.review||{}),
    questionScores:scores,
    questionComments:qComments,
    verdicts,
-   finalScore:fmt(total,2).replace(/\.00$/,"")
+   finalScore,
+   finalCustom,
+   generalComment
   };
+  submission.manualOverride="";   /* la note saisie ici fait foi */
   submission.validatedAt=new Date().toISOString();
   upsertHomeworkSubmission(submission);
   syncHomeworkDirectGrades();
@@ -14452,10 +14823,10 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    outof: getOnlineTestTotalPoints(test),
    coef: 1,
    period: homeworkPeriodFromDate(homework.dateISO),
-   important: !!homework.isExam,
+   important: false,
    homeworkSubmissionId: submission.id
   });
-  if(SPECIAL_VALUES.has(cleaned)){
+  if(CLASS_SPECIAL_VALUES.has(cleaned)){
    note.noteText=cleaned;
    delete note.note;
   }else{
@@ -14473,8 +14844,24 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   let publishedCount=0;
   getHomeworkReviewScope(assignments,current).forEach(item=>{
    const cls=homeworkClassById(item.homework.classId);
+   const specialMarks=[];   /* valeurs spéciales (Abs, NE, Disp, X, EA) à poser, avec ou sans copie rendue */
    (cls?.memberIds||[]).forEach(studentId=>{
     const submission=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
+    const typedInput=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(item.homework.id)}"][data-test-id="${CSS.escape(item.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
+    const typedRaw=String(typedInput?.value||"").trim();
+    const typedSpecial=[...CLASS_SPECIAL_VALUES].find(v=>v.toLowerCase()===typedRaw.toLowerCase());
+    if(typedSpecial && typedSpecial!=="NR"){
+     /* note spéciale : posée aussi pour les élèves qui n'ont pas rendu le test (absents, dispensés…) */
+     if(submission && submission.submittedAt){
+      submission.manualOverride=typedSpecial;
+      submission.publishedAt=new Date().toISOString();
+      submission.validatedAt=submission.validatedAt || submission.publishedAt;
+      upsertHomeworkSubmission(submission);
+     }
+     specialMarks.push([studentId,typedSpecial]);
+     publishedCount += 1;
+     return;
+    }
     if(!submission || !submission.submittedAt) return;
     const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(item.homework.id)}"][data-test-id="${CSS.escape(item.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
     const resolved=getHomeworkResolvedGrade(submission,item.test);
@@ -14495,6 +14882,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      if(note) note.hideFromStudent=false;
     });
    }
+   specialMarks.forEach(([sid,val])=>hwApplyManualMark(item.homework.id,item.test.id,sid,val));
   });
   syncHomeworkDirectGrades();
   saveData();
@@ -14507,14 +14895,8 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  function getHomeworkReviewStatsForTest(testId){
   const st={ students:0, submitted:0, notReturned:0, uncorrected:0 };
   getHomeworkReviewAssignments(testId).forEach(item=>{
-   const cls=homeworkClassById(item.homework.classId);
-   (cls?.memberIds||[]).forEach(studentId=>{
-    st.students++;
-    const sub=getHomeworkSubmission(item.homework.id,item.test.id,studentId);
-    if(!sub || !sub.submittedAt){ st.notReturned++; return; }
-    st.submitted++;
-    if(!sub.validatedAt && !sub.manualOverride) st.uncorrected++;
-   });
+   st.students+=item.totalStudents; st.submitted+=item.submitted;
+   st.notReturned+=item.totalStudents-item.submitted; st.uncorrected+=item.pending;
   });
   return st;
  }
@@ -14541,7 +14923,6 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    const actions=btn.closest(".online-test-card-actions");
    if(!actions) return;
    const stats=getHomeworkReviewStatsForTest(btn.dataset.testid);
-   const state=getHomeworkReviewStateForTest(btn.dataset.testid);
    let reviewBtn=actions.querySelector(`.btn-homework-review[data-testid="${CSS.escape(btn.dataset.testid)}"]`);
    if(!reviewBtn){
     reviewBtn=document.createElement("button");
@@ -14553,17 +14934,17 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     reviewBtn.addEventListener("click",()=>openHomeworkReviewModal(btn.dataset.testid));
     actions.appendChild(reviewBtn);
    }
-   reviewBtn.className="btn-homework-review"+(state==="none"?"":" is-"+state);
-   reviewBtn.title=HW_REVIEW_TITLES[state]||HW_REVIEW_TITLES.none;
+   reviewBtn.className="btn-homework-review";   // neutre : les couleurs sont sur les blocs d'assignation de la fenêtre de correction
+   reviewBtn.title="Voir et corriger les soumissions";
    /* pastille de notif sur le bloc du test : nombre de tests rendus */
    const card=btn.closest(".online-test-card");
    if(card){
     card.querySelectorAll(":scope > .online-test-badge").forEach(x=>x.remove());
-    if(stats.submitted>0){
+    if(stats.uncorrected>0){
      const b=document.createElement("span");
      b.className="online-test-badge";
-     b.textContent=stats.submitted>99?"99+":String(stats.submitted);
-     b.title=stats.submitted+" test"+(stats.submitted>1?"s":"")+" rendu"+(stats.submitted>1?"s":"");
+     b.textContent=stats.uncorrected>99?"99+":String(stats.uncorrected);
+     b.title=stats.uncorrected+" test"+(stats.uncorrected>1?"s":"")+" non corrigé"+(stats.uncorrected>1?"s":"");
      card.appendChild(b);
     }
    }
@@ -14631,18 +15012,23 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   closeHomeworkAssignTestsModal();
   renderHomeworkView();
  });
- document.getElementById("homeworkReviewSort")?.addEventListener("change",renderHomeworkReviewModal);
  document.getElementById("homeworkView")?.addEventListener("change",e=>{
   const target=e.target;
   if(target.id==="homeworkClassSelect"){
    HOMEWORK_STATE.filter.cls=target.value;
-   if(target.value) HOMEWORK_STATE.filter.group="";
+   if(target.value){ HOMEWORK_STATE.filter.group=""; HOMEWORK_STATE.filter.student=""; }
    renderHomeworkView();
    return;
   }
   if(target.id==="homeworkGroupSelect"){
    HOMEWORK_STATE.filter.group=target.value;
-   if(target.value) HOMEWORK_STATE.filter.cls="";
+   if(target.value){ HOMEWORK_STATE.filter.cls=""; HOMEWORK_STATE.filter.student=""; }
+   renderHomeworkView();
+   return;
+  }
+  if(target.id==="homeworkStudentSelect"){
+   HOMEWORK_STATE.filter.student=target.value;
+   if(target.value){ HOMEWORK_STATE.filter.cls=""; HOMEWORK_STATE.filter.group=""; }
    renderHomeworkView();
    return;
   }
@@ -14660,13 +15046,21 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    return;
   }
   if(target.matches("[data-hw-action='grade-input']")){
-   const submission=getHomeworkSubmission(target.dataset.homeworkId,target.dataset.testId,target.dataset.studentId);
-   if(!submission) return;
-   submission.manualOverride=target.value.trim();
-   upsertHomeworkSubmission(submission);
+   const hid=target.dataset.homeworkId, tid=target.dataset.testId, sid=target.dataset.studentId;
+   const val=target.value.trim();
+   const submission=getHomeworkSubmission(hid,tid,sid);
+   const special=CLASS_SPECIAL_VALUES.has(val) && val!=="NR";
+   if(submission){
+    submission.manualOverride=val;
+    upsertHomeworkSubmission(submission);
+    hwApplyManualMark(hid,tid,sid,special?val:"");      // « Abs », « NE »… s'appliquent tout de suite
+   }else{
+    hwApplyManualMark(hid,tid,sid,val);                 // pas de rendu : la note / valeur spéciale est posée directement
+   }
    syncHomeworkDirectGrades();
    saveData();
    renderOnlineTestsView();
+   renderHomeworkReviewModal();
    return;
   }
   if(target.dataset.hwAction==="editor-font-family"){
@@ -14922,6 +15316,38 @@ function handleHomeworkActionClick(btn){
  };
 })();
 
+/* Mini bannière des notes spéciales : clic droit (ordinateur) ou appui long (mobile) sur une case de note de la fenêtre de correction */
+(function(){
+ const SPEC=["Abs","Disp","NE","X","EA"];
+ let box=null, timer=0, startXY=null;
+ function close(){ if(box){ box.remove(); box=null; } }
+ function open(input){
+  close();
+  box=document.createElement("div"); box.className="hw-spec-pop"; box.setAttribute("role","menu");
+  box.innerHTML=SPEC.map(v=>'<button type="button" data-v="'+v+'">'+v+'</button>').join("")+'<button type="button" data-v="" class="clr" title="Effacer la valeur">Effacer</button>';
+  document.body.appendChild(box);
+  const r=input.getBoundingClientRect(), w=box.offsetWidth, h=box.offsetHeight;
+  let left=Math.max(6,Math.min(window.innerWidth-w-6,r.left+r.width/2-w/2));
+  let top=r.top-h-8; if(top<6) top=r.bottom+8;
+  box.style.left=left+"px"; box.style.top=top+"px";
+  box.addEventListener("click",e=>{
+   const b=e.target.closest("button"); if(!b) return;
+   input.value=b.dataset.v; close();
+   input.dispatchEvent(new Event("change",{bubbles:true}));
+  });
+ }
+ const isGrade=t=>t&&t.closest&&t.closest(".homework-grade-input");
+ document.addEventListener("contextmenu",e=>{ const i=isGrade(e.target); if(!i) return; e.preventDefault(); open(i); });
+ document.addEventListener("pointerdown",e=>{
+  if(box && !box.contains(e.target)) close();
+  const i=isGrade(e.target);
+  if(i && e.pointerType==="touch"){ startXY=[e.clientX,e.clientY]; clearTimeout(timer); timer=setTimeout(()=>open(i),550); }
+ },true);
+ ["pointerup","pointercancel"].forEach(n=>document.addEventListener(n,()=>clearTimeout(timer),true));
+ document.addEventListener("pointermove",e=>{ if(startXY && Math.abs(e.clientX-startXY[0])+Math.abs(e.clientY-startXY[1])>10) clearTimeout(timer); },true);
+ document.addEventListener("scroll",close,true);
+})();
+
 /**
  * Tests de non-régression pour la préservation des compétences
  */
@@ -15064,10 +15490,11 @@ function grpEns(){ if(!Array.isArray(DATA.groups)) DATA.groups=[]; return DATA.g
 function classLike(id){
  const c=DATA.classes.find(x=>x.id===id); if(c) return c;
  const g=(DATA.groups||[]).find(x=>x.id===id); if(!g) return null;
- g.isGroup=true; if(!Array.isArray(g.memberIds)) g.memberIds=[]; if(!Array.isArray(g.evals)) g.evals=[]; if(!Array.isArray(g.compEvals)) g.compEvals=[]; if(!g.subjectCoefs) g.subjectCoefs={};
+ g.isGroup=true; if(isSoloGrp(g)) soloSync(g); if(!Array.isArray(g.memberIds)) g.memberIds=[]; if(!Array.isArray(g.evals)) g.evals=[]; if(!Array.isArray(g.compEvals)) g.compEvals=[]; if(!g.subjectCoefs) g.subjectCoefs={};
  const subs=[]; const add=n=>{ if(n && !subs.includes(n)) subs.push(n); };
  const order=(typeof SUBJECT_REGISTRY!=="undefined"?SUBJECT_REGISTRY:[]).map(s=>typeof s==="object"?s.name:s);
- if(Array.isArray(g.subjectsSel)) g.subjectsSel.forEach(add);   // matières choisies pour le groupe (indépendantes de la classe)
+ if(isSoloGrp(g)){ studentSubjectNames((DATA.students||[]).find(x=>x.id===g.memberIds[0])).forEach(add); }
+ else if(Array.isArray(g.subjectsSel)) g.subjectsSel.forEach(add);   // matières choisies pour le groupe (indépendantes de la classe)
  else g.memberIds.forEach(sid=>{ const st=DATA.students.find(s=>s.id===sid); const cl=st&&DATA.classes.find(x=>x.id===st.classId); ((cl&&cl.subjects)||[]).forEach(x=>add(typeof x==="object"?x.name:x)); });
  g.evals.forEach(e=>add(e.subject));
  g.subjects=order.filter(n=>subs.includes(n)).concat(subs.filter(n=>!order.includes(n)));
@@ -15088,6 +15515,27 @@ function studentSubjectNames(stu){
  return order.filter(n=>out.includes(n)).concat(out.filter(n=>!order.includes(n)));
 }
 function grpById(id){ return grpEns().find(g=>g.id===id)||null; }
+/* Cible « un seul élève » : groupe technique d'un membre, invisible dans les listes de groupes (id = solo_<idÉlève>) */
+const SOLO_PFX="solo_";
+function soloGrpId(sid){ return SOLO_PFX+sid; }
+function isSoloId(id){ return String(id||"").indexOf(SOLO_PFX)===0; }
+function isSoloGrp(g){ return !!g && isSoloId(g.id); }
+function grpUi(){ return grpEns().filter(g=>!isSoloGrp(g)); }
+function soloSync(g){
+ const sid=g.id.slice(SOLO_PFX.length), st=(DATA.students||[]).find(x=>x.id===sid);
+ if(st) g.name=((st.first||"")+" "+(st.last||"")).trim();
+ g.memberIds=[sid];
+}
+function ensureSoloGroup(sid){
+ const id=soloGrpId(sid); let g=grpEns().find(x=>x.id===id);
+ if(!g){ if(!(DATA.students||[]).some(x=>x.id===sid)) return null; g={id,name:"",memberIds:[sid],evals:[],compEvals:[]}; grpEns().push(g); }
+ soloSync(g); return g;
+}
+/* Groupes écrits dans le carnet : les groupes « solo » inutilisés (ni évaluation ni devoir) ne sont pas enregistrés */
+function grpForCsv(){
+ const used=new Set((DATA.homework||[]).map(h=>h.classId));
+ return (DATA.groups||[]).filter(g=>!isSoloGrp(g)||used.has(g.id)||(g.evals||[]).length||(g.compEvals||[]).length);
+}
 function targetName(id){ const c=DATA.classes.find(x=>x.id===id); if(c) return c.name; const g=grpById(id); return g?g.name:""; }
 function targetStudents(id){ const g=grpById(id); if(g){ const m=new Set(g.memberIds||[]); return DATA.students.filter(s=>m.has(s.id)); } return DATA.students.filter(s=>s.classId===id); }
 function studentInTargets(st,ids){ if(!st||!Array.isArray(ids)) return false; return ids.some(id=>{ if(id===st.classId) return true; const g=grpById(id); return !!g&&(g.memberIds||[]).includes(st.id); }); }
@@ -15221,7 +15669,7 @@ function schOpen(id,asEvent){
  const names=SUBJECT_REGISTRY.map(s=>typeof s==="object"?s.name:s); if(e&&!e.evt&&!names.includes(e.subject)) names.push(e.subject);
  document.getElementById("schSubject").innerHTML=names.map(n=>`<option>${escHtml(n)}</option>`).join("");
  { const chk=(id,n)=>`<label><input type="checkbox" value="${id}"${e&&(e.classIds||[]).includes(id)?" checked":""}>${escHtml(n)}</label>`;
-  const gl=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  const gl=grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
   document.getElementById("schClasses").innerHTML=(DATA.classes.length?DATA.classes.map(c=>chk(c.id,c.name)).join(""):"<span class='hint'>Aucune classe créée.</span>")
    +(gl.length?'<div style="flex-basis:100%;font-weight:600;color:#475569;margin-top:6px">Groupes</div>'+gl.map(g=>chk(g.id,g.name)).join(""):""); }
  document.getElementById("schProf").innerHTML=`<option>${escHtml(profShort())}</option>`;
@@ -15304,7 +15752,7 @@ document.getElementById("schSigNo").onclick=()=>schSignal(false);
  /* liste des groupes */
  function listRender(){
   const m=mk("grpListModal",41);
-  const gs=grpEns().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
+  const gs=grpUi().slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{numeric:true,sensitivity:"base"}));
   m.innerHTML='<div class="modal-card" style="width:460px"><div class="modal-header"><h3>Groupes</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
    +'<div style="margin-bottom:12px"><button type="button" class="btn btn-primary" id="grpNew">Créer un groupe</button></div>'
    +(gs.length?gs.map(g=>{ const n=members(g).length; return '<div class="grp-row" data-g="'+escHtml(g.id)+'"><b style="flex:1">'+escHtml(g.name)+'</b><small>'+n+' élève'+(n>1?"s":"")+'</small></div>'; }).join(""):"<div class='hint'>Aucun groupe créé.</div>")
@@ -15555,7 +16003,7 @@ function apPeekOpen(){
  let m=document.getElementById("apPeekModal");
  if(!m){ m=document.createElement("div"); m.id="apPeekModal"; m.className="modal"; m.style.zIndex=130; m.setAttribute("aria-hidden","true"); document.body.appendChild(m); }
  const cmp=(a,b)=>String(a.name).localeCompare(String(b.name),"fr",{numeric:true,sensitivity:"base"});
- const cls=DATA.classes.slice().sort(cmp), gs=grpEns().slice().sort(cmp), cur=AP.peek?AP.peek.id:"";
+ const cls=DATA.classes.slice().sort(cmp), gs=grpUi().slice().sort(cmp), cur=AP.peek?AP.peek.id:"";
  const opt=c=>'<option value="'+escHtml(c.id)+'"'+(c.id===cur?" selected":"")+'>'+escHtml(c.name)+'</option>';
  m.innerHTML='<div class="modal-card" style="width:440px"><div class="modal-header"><h3 style="margin:0">Appel libre</h3><button class="modal-close" type="button">×</button></div><div class="modal-body">'
   +'<p style="margin-top:0;color:#64748b">Choisissez une classe ou un groupe pour faire le point. Cet appel est indépendant de l\'emploi du temps : <b>rien n\'est transmis à la Vie scolaire</b>.</p>'
@@ -15645,7 +16093,7 @@ function renderVie(){
  const list=DATA.students.filter(s=>(!VS.cls||s.classId===VS.cls)&&(!VS.grp||(_vg&&(_vg.memberIds||[]).includes(s.id)))).sort(cmpStu);
  if(VS.tab==="hist"){ root.innerHTML=vsTabs()+histHtml(); holMark(root); return; }
  const prevList=root.querySelector(".vs-list"), keepTop=prevList?prevList.scrollTop:0, keepY=window.scrollY;
- root.innerHTML=vsTabs()+'<div class="vs-split"><div class="vs-side"><div class="filter-pair"><select id="vsCls" class="btn" style="flex:1 1 0;min-width:0"><option value="">Toutes les classes</option>'+DATA.classes.map(c=>'<option value="'+c.id+'"'+(c.id===VS.cls?" selected":"")+'>'+escHtml(c.name)+'</option>').join("")+'</select><select id="vsGrp" class="btn" style="flex:1 1 0;min-width:0"><option value="">Tous les groupes</option>'+grpEns().slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr",{numeric:true,sensitivity:"base"})).map(g=>'<option value="'+g.id+'"'+(g.id===VS.grp?" selected":"")+'>'+escHtml(g.name)+'</option>').join("")+'</select></div><div class="vs-list">'
+ root.innerHTML=vsTabs()+'<div class="vs-split"><div class="vs-side"><div class="filter-pair"><select id="vsCls" class="btn" style="flex:1 1 0;min-width:0"><option value="">Toutes les classes</option>'+DATA.classes.map(c=>'<option value="'+c.id+'"'+(c.id===VS.cls?" selected":"")+'>'+escHtml(c.name)+'</option>').join("")+'</select><select id="vsGrp" class="btn" style="flex:1 1 0;min-width:0"><option value="">Tous les groupes</option>'+grpUi().slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr",{numeric:true,sensitivity:"base"})).map(g=>'<option value="'+g.id+'"'+(g.id===VS.grp?" selected":"")+'>'+escHtml(g.name)+'</option>').join("")+'</select></div><div class="vs-list">'
   +list.map(s=>'<div class="vs-stu'+(s.id===VS.sid?" on":"")+'" data-sid="'+s.id+'"'+'>'+vsBands(s.id)+'<span>'+escHtml(s.last)+' '+escHtml(s.first)+'</span></div>').join("")+'</div></div><div class="vs-main">'
   +(VS.sid?vsContent(VS.sid):'<div class="pl-empty">Cliquez sur un élève pour voir sa vie scolaire.</div>')+'</div></div>';
  const newList=root.querySelector(".vs-list"); if(newList) newList.scrollTop=keepTop;
@@ -16108,7 +16556,7 @@ document.getElementById("schDelete").onclick=()=>{
    it.className="dr-item"+(b.classList.contains("active")?" active":"");
    const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
    const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
-   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.3v.1"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
+   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 9.4v5.3" stroke="#dc2626" stroke-width="2.7" stroke-linecap="round"/><circle cx="12" cy="18" r="1.55" fill="#dc2626"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
    it.querySelector(".dr-lbl").textContent=labelOf(b);
    it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
    body.appendChild(it);
@@ -16378,7 +16826,7 @@ function initials(id){ const s=stuById(id); return s?((s.first||"?")[0]+(s.last|
 function className(id){ const s=stuById(id); const c=s&&(DATA.classes||[]).find(x=>x.id===s.classId); return c?c.name:""; }
 function sortedStudents(){ return (DATA.students||[]).slice().sort((a,b)=>(a.last||"").localeCompare(b.last||"","fr")||(a.first||"").localeCompare(b.first||"","fr")); }
 function classMembers(c){ return (DATA.students||[]).filter(s=>s.classId===c.id||(c.memberIds||[]).includes(s.id)); }
-function groupsList(){ try{ return (typeof grpEns==="function"?grpEns():(DATA.groups||[]))||[]; }catch(e){ return DATA.groups||[]; } }
+function groupsList(){ try{ return ((typeof grpEns==="function"?grpEns():(DATA.groups||[]))||[]).filter(g=>!(typeof isSoloGrp==="function"&&isSoloGrp(g))); }catch(e){ return DATA.groups||[]; } }
 function profName(){ try{ return profFull()||"Mon professeur"; }catch(e){ return "Mon professeur"; } }
 function textOn(hex){
  const m=/^#?([0-9a-f]{6})$/i.exec(hex||""); if(!m) return "#0f172a";
@@ -16444,9 +16892,9 @@ function tlItems(){
    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
    const ts=new Date(iso+"T12:00:00").getTime();
    if(ts<lim||ts>Date.now()+864e5) return;
-   rows.push({k:"n"+i,type:"grade",act:"grade",ts,iso,today:iso===today,title:"Nouvelle évaluation de "+(n.subject||"—"),sub:n.label||"",outof:n.outof||20});
+   rows.push({idx:i,k:"n"+i,type:"grade",act:"grade",ts,iso,today:iso===today,title:"Nouvelle évaluation de "+(n.subject||"—"),sub:n.label||"",outof:n.outof||20});
   });
-  rows.sort((a,b)=>b.ts-a.ts).slice(0,10).forEach(r=>out.push(r));
+  rows.sort((a,b)=>(b.ts-a.ts)||(b.idx-a.idx)).slice(0,10).forEach(r=>out.push(r));
  }else{
   const subs=[];
   (DATA.homeworkSubmissions||[]).forEach(s=>{
@@ -16482,7 +16930,8 @@ function tlItems(){
    title:(l.length>1?l.length+" nouveaux messages de ":"Nouveau message de ")+who,
    sub:String(last.text||"").replace(/\s+/g," ").slice(0,70)});
  });
- return out.sort((a,b)=>b.ts-a.ts);
+ out.forEach(it=>{ if(!isFinite(it.ts)) it.ts=0; });
+ return out.sort((a,b)=>a.iso!==b.iso?(a.iso<b.iso?1:-1):(b.ts-a.ts));   // jours récents d'abord ; dans un jour : heure la plus récente en haut
 }
 function updateHomeBadges(items){
  const b=$("homeTabBtn"); if(!b) return;
