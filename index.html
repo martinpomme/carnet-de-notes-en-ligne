@@ -3046,7 +3046,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
      <div><label for="onlineBasicProps">Propositions par question</label><input id="onlineBasicProps" type="number" min="2" max="10" step="1" value="4"></div>
      <div><label for="onlineBasicPoints">Points par question</label><input id="onlineBasicPoints" type="number" min="0.25" step="0.25" value="1"></div>
     </div>
-    <div class="obt-hint">Les questions s’appellent « Question n°x » et les propositions sont de simples lettres ou chiffres. Question par question, tu peux changer le type (QCU / QCM / réponse à écrire), ajouter ou retirer une proposition, et cliquer sur la ou les bonnes réponses (facultatif : la correction reste manuelle).</div>
+    <div class="obt-hint">Les questions s’appellent « Question n°x » et les propositions sont de simples lettres ou chiffres. Question par question, tu peux changer le type (QCU / QCM / réponse à écrire), ajouter ou retirer une proposition, et cliquer sur la ou les bonnes réponses (facultatif). Sans bonne réponse cochée, tu corriges toi-même : pour chaque question (QCU, QCM ou réponse à écrire), un bouton glissant Correct / Incorrect t’attend dans la correction.</div>
     <div id="onlineBasicRows" class="obt-rows"></div>
     <button type="button" class="btn" id="onlineBasicAddRow">+ Ajouter une question</button>
     <div class="modal-actions">
@@ -13735,6 +13735,9 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const V=(review&&review.verdicts)||{}, q=d.question, nrm=normalizeOnlinePreviewText;
   if(q.type==="written" && !(d.expected||[]).length){
    d.manual=true; d.verdict=V[hwVerdictKey(q.id)]||""; d.correct=(d.verdict==="ok");
+  }else if((q.type==="qcu"||q.type==="qcm") && !(q.choices||[]).some(c=>c.correct)){
+   /* test basique : aucune bonne réponse cochée -> le professeur tranche avec le bouton glissant */
+   d.manual=true; d.verdict=V[hwVerdictKey(q.id)]||""; d.correct=(d.verdict==="ok");
   }else if(q.type==="fillblank"){
    const blanks=(q.segments||[]).filter(sg=>sg.type==="blank");
    if(blanks.some((b,i)=>!((d.expected||[])[i]||[]).length)){
@@ -13805,7 +13808,8 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
     inner='<div class="hwc-choices">'+(q.choices||[]).map(c=>{
      const picked=sel.has(c.id), good=!!c.correct;
      let cls="", tag="";
-     if(picked&&good){ cls="is-ok"; tag="Ta réponse ✓"; }
+     if(d.manual){ if(picked){ cls=ok?"is-ok":"is-ko"; tag=ok?"Ta réponse ✓":"Ta réponse ✗"; } }
+     else if(picked&&good){ cls="is-ok"; tag="Ta réponse ✓"; }
      else if(picked&&!good){ cls="is-ko"; tag="Ta réponse ✗"; }
      else if(!picked&&good){ cls=ok?"is-ok":"is-ko"; tag="Réponse attendue"; }
      return `<div class="hwc-choice ${cls}"><span class="hwc-mark ${q.type==="qcm"?"sq":""}">${picked?(q.type==="qcm"?"✓":'<i class="hwc-dot"></i>'):""}</span><span class="hwc-txt">${escHtml(c.text||"")}</span>${tag?`<b class="hwc-tag">${tag}</b>`:""}</div>`;
@@ -14712,6 +14716,15 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   if(v==="__total" || (g.dataset.custom==="1" && g.value===v)){ g.dataset.custom="0"; g.value=hwcFmt(hwcSum()); }
   else{ g.value=v; g.dataset.custom="1"; }
   hwcRefreshHint();
+ });
+ document.addEventListener("change",e=>{
+  const t=e.target;
+  if(!t || !t.matches || !t.matches("#homeworkCorrectionBody input[data-verdict-key]")) return;
+  const sec=t.closest(".homework-correction-question");
+  const pts=sec && sec.querySelector("input[data-question-id]");
+  if(!pts || pts.dataset.questionId!==t.dataset.verdictKey) return;   /* les trous d'un texte à trous restent à noter à la main */
+  pts.value=t.checked ? String(Number(pts.max)||0) : "0";
+  pts.dispatchEvent(new Event("input",{bubbles:true}));
  });
  function closeHomeworkCorrectionModal(){
   HOMEWORK_STATE.correction=null;
