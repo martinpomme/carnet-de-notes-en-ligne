@@ -13841,6 +13841,17 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   setModalOpen(m,true);
  }
  window.hwOpenCorrectif=hwOpenCorrectif;
+ /* Fil d'actualite : onglet Test en ligne > pop-up du test (soumissions) > correction de l'eleve */
+ window.hwOpenFeedCorrection=function(homeworkId,testId,studentId){
+  const test=getHomeworkTest(testId);
+  if(!getHomeworkById(homeworkId) || !test) return false;
+  if(test.options && test.options.trainingMode) return false;   /* test d'entrainement : pas de correction */
+  openHomeworkReviewModal(testId);
+  HOMEWORK_STATE.reviewSelectedKey=homeworkId+"::"+testId;
+  renderHomeworkReviewModal();
+  openHomeworkCorrection(homeworkId,testId,studentId);
+  return true;
+ };
  window.hwNoteCorrectifBtn=function(n,studentId){
   try{
    if(!n||!n.classCommon||!n.classNoteId) return "";
@@ -16919,7 +16930,7 @@ function tlItems(){
    subs.push({k:"s"+s.id,type:"sub",act:"sub",ts,iso,today:iso===today&&!s.validatedAt&&!s.manualOverride,
     title:"Rendu de "+stuName(s.studentId),
     sub:[test&&test.title||"Test en ligne",hw&&hw.subject].filter(Boolean).join(" · "),
-    ini:initials(s.studentId),todo:!s.validatedAt&&!s.manualOverride});
+    ini:initials(s.studentId),todo:!s.validatedAt&&!s.manualOverride,hwId:s.homeworkId||"",testId:s.testId||"",stuId:s.studentId||""});
   });
   subs.sort((a,b)=>b.ts-a.ts).slice(0,12).forEach(r=>out.push(r));
   /* Appels non faits (mêmes cas que le panneau d'attention) : disparaissent dès que l'appel est enregistré */
@@ -16973,7 +16984,7 @@ function renderTimeline(){
   else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'">'+esc(it.ini)+'</span>';
   else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
-  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'">'+dot
+  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'">'+dot
    +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
  });
  host.innerHTML=html+'</div>';
@@ -17552,7 +17563,10 @@ $("homeView").addEventListener("click",e=>{
  else if(act==="tl"){
   const k=b.dataset.kind;
   if(k==="grade") goTab("elevesView");
-  else if(k==="sub") goTab("onlineTestsView");
+  else if(k==="sub"){
+   goTab("onlineTestsView");
+   try{ if(window.hwOpenFeedCorrection) window.hwOpenFeedCorrection(b.dataset.hw,b.dataset.test,b.dataset.stu); }catch(x){ console.warn("rendu timeline:",x); }
+  }
   else if(k==="appel"){
    try{
     const ev=(schEns().events||[]).find(x=>x.id===b.dataset.ev);
