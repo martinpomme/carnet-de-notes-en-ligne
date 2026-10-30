@@ -1271,7 +1271,9 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
  .dr-item.active{ background:#08487f; color:#fff }
  .dr-item .dr-ico{ flex:0 0 auto; min-width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:19px }
  .dr-item .dr-ico svg{ display:block }
- .dr-item.active .dr-ico{ background:#fff }
+ .dr-item.active .dr-ico{ background:transparent }
+ .dr-item.active .dr-ico svg{ stroke:#fff }
+ .dr-item.active .dr-ico svg text{ fill:#fff }
  .dr-item .dr-lbl{ flex:1; min-width:0 }
  .dr-item .dr-bdg{ flex:0 0 auto; font-size:15px }
  .dr-sep{ height:1px; background:#e2e8f0; margin:8px 6px }
@@ -16607,7 +16609,7 @@ document.getElementById("schDelete").onclick=()=>{
  const body=drawer.querySelector("#drBody");
 
  const visible=b=>getComputedStyle(b).display!=="none";
- const labelOf=b=>b.dataset.label||b.textContent.trim();
+ const labelOf=b=>b.dataset.label||(b.querySelector(".tab-lbl")?b.querySelector(".tab-lbl").textContent.trim():b.textContent.trim());
  function buildItems(){
   body.innerHTML=""; let sepDone=false;
   Array.from(tabsEl.querySelectorAll(".tab-btn")).sort((a,b)=>(a.dataset.target?0:1)-(b.dataset.target?0:1)).forEach(b=>{
