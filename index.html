@@ -1512,6 +1512,7 @@ body.student-mode #homeNewPost{display:none}
 .tl-dot.new{border-color:var(--c);border-width:4px}
 .tl-dot.sub{--c:#0d9488}
 .tl-dot.msg{--c:#d97706}
+.tl-dot.hwt{--c:#7c3aed}
 .tl-dot svg{display:block}
 .tl-tx{min-width:0;display:flex;flex-direction:column;gap:2px}
 .tl-tx b{font-size:14px;font-weight:700;color:#0f172a;line-height:1.3}
@@ -13841,6 +13842,16 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   setModalOpen(m,true);
  }
  window.hwOpenCorrectif=hwOpenCorrectif;
+ window.hwMatchesStudent=function(h){ try{ return homeworkMatchesStudentClass(h); }catch(e){ return false; } };
+ /* Fil d'actualite eleve : onglet Devoirs sur le jour du devoir, puis pop-up du test */
+ window.hwOpenFeedTest=function(homeworkId,testId){
+  const hw=getHomeworkById(homeworkId); if(!hw||!getHomeworkTest(testId)) return false;
+  HOMEWORK_STATE.selectedDate=hw.dateISO;
+  const d=new Date(hw.dateISO+"T12:00:00"); HOMEWORK_STATE.currentMonth=new Date(d.getFullYear(), d.getMonth(), 1);
+  renderHomeworkView();
+  openHomeworkStudentTest(homeworkId,testId);
+  return true;
+ };
  /* Fil d'actualite : onglet Test en ligne > pop-up du test (soumissions) > correction de l'eleve */
  window.hwOpenFeedCorrection=function(homeworkId,testId,studentId){
   const test=getHomeworkTest(testId);
@@ -14821,6 +14832,9 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const name=stu ? `${stu.first} ${stu.last}` : "cet élève";
   if(!confirm(`Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`)) return;
   purgeHomeworkSubmission(hw,sub);
+  if(!Array.isArray(DATA.homeworkRedo)) DATA.homeworkRedo=[];
+  DATA.homeworkRedo=DATA.homeworkRedo.filter(r=>!(r.hw===homeworkId&&r.test===testId&&r.stu===studentId));
+  DATA.homeworkRedo.push({hw:homeworkId,test:testId,stu:studentId,at:new Date().toISOString()});
   syncHomeworkDirectGrades();
   saveData();
   try{ rebuildUI(); }catch(e){}
@@ -15240,6 +15254,7 @@ function handleHomeworkActionClick(btn){
   DATA.homeworkSubmissions.forEach(item=>{
    extra.push(["homeworkSubmission",item.id,item.homeworkId,item.testId,item.studentId,escapeCsv(JSON.stringify(item.answers||{})),escapeCsv(JSON.stringify(item.autoResult||null)),item.submittedAt||"",escapeCsv(JSON.stringify(item.review||{})),item.validatedAt||"",item.publishedAt||"",escapeCsv(item.manualOverride||""),item.noteId||""].join(";"));
   });
+  (DATA.homeworkRedo||[]).forEach(r=>{ extra.push(["homeworkRedo",r.hw,r.test,r.stu,r.at].join(";")); });
   return extra.length ? `${base}\n${extra.join("\n")}` : base;
  };
 
@@ -15258,6 +15273,7 @@ function handleHomeworkActionClick(btn){
   if(lines.length>0 && /^type;/.test(lines[0])) lines.shift();
   DATA.homework=[];
   DATA.homeworkSubmissions=[];
+  DATA.homeworkRedo=[];
   lines.forEach(line=>{
    const cols=parseCsvLine(line).map(s=>s.trim());
    if(cols[0]==="homework"){
@@ -15275,6 +15291,8 @@ function handleHomeworkActionClick(btn){
      createdAt: cols[9]||"",
      updatedAt: cols[10]||""
     }));
+   }else if(cols[0]==="homeworkRedo"){
+    DATA.homeworkRedo.push({hw:cols[1]||"",test:cols[2]||"",stu:cols[3]||"",at:cols[4]||""});
    }else if(cols[0]==="homeworkSubmission"){
     let answers={}; let autoResult=null; let review={};
     try{ answers=JSON.parse(unescapeCsv(cols[5]||"{}"))||{}; }catch(e){ answers={}; }
@@ -16919,6 +16937,26 @@ function tlItems(){
    rows.push({idx:i,k:"n"+i,type:"grade",act:"grade",ts,iso,today:iso===today,title:"Nouvelle évaluation de "+(n.subject||"—"),sub:n.label||"",outof:n.outof||20});
   });
   rows.sort((a,b)=>(b.ts-a.ts)||(b.idx-a.idx)).slice(0,10).forEach(r=>out.push(r));
+  /* Tests assignes en devoirs : "du jour" tant que le test n'est pas fait ; nouvelle notif si le prof annule la soumission (refaire) */
+  try{
+   const sid=AUTH.studentId, tl=[], lim2=Date.now()-45*864e5, redo=DATA.homeworkRedo||[];
+   (DATA.homework||[]).forEach(h=>{
+    if(!h||!h.dateISO||!window.hwMatchesStudent||!window.hwMatchesStudent(h)) return;
+    (h.testIds||[]).forEach(tid=>{
+     const t=(DATA.onlineTests||[]).find(x=>x.id===tid); if(!t||(t.options&&t.options.trainingMode)) return;
+     const sub=(DATA.homeworkSubmissions||[]).find(x=>x.homeworkId===h.id&&x.testId===tid&&x.studentId===sid);
+     const done=!!(sub&&sub.submittedAt);
+     let ts=new Date(h.createdAt||h.dateISO+"T12:00:00").getTime(); if(isNaN(ts)) ts=new Date(h.dateISO+"T12:00:00").getTime();
+     const r=redo.find(x=>x.hw===h.id&&x.test===tid&&x.stu===sid), rts=r?new Date(r.at).getTime():0;
+     if(!done&&rts>ts) ts=rts;
+     if(done&&ts<lim2) return;
+     const iso=isoOf(new Date(ts)), day=new Date(h.dateISO+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+     tl.push({k:"t"+h.id+"|"+tid,type:"hwt",act:"hwt",ts,iso,today:!done,todo:!done,tag:"À faire",hwId:h.id,testId:tid,stuId:sid,
+      title:"Test à faire pour le "+day,sub:[t.title||"Test en ligne",h.subject].filter(Boolean).join(" · ")});
+    });
+   });
+   tl.sort((a,b)=>b.ts-a.ts).slice(0,15).forEach(r=>out.push(r));
+  }catch(x){ console.warn("tests timeline:",x); }
  }else{
   const subs=[];
   (DATA.homeworkSubmissions||[]).forEach(s=>{
@@ -16960,7 +16998,7 @@ function tlItems(){
 function updateHomeBadges(items){
  const b=$("homeTabBtn"); if(!b) return;
  const msgs=unreadMessages().length;
- const others=(items||[]).filter(it=>it.type==="grade"?it.today:((it.type==="sub"||it.type==="appel")?it.todo:false)).length;
+ const others=(items||[]).filter(it=>it.type==="grade"?it.today:((it.type==="sub"||it.type==="appel"||it.type==="hwt")?it.todo:false)).length;
  const set=(cls,n)=>{
   let el=b.querySelector("."+cls);
   if(!n){ if(el) el.remove(); return; }
@@ -16982,6 +17020,7 @@ function renderTimeline(){
   let dot;
   if(it.type==="grade") dot='<span class="tl-dot'+(isNew?" new":"")+'">/'+esc(it.outof)+'</span>';
   else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'">'+esc(it.ini)+'</span>';
+  else if(it.type==="hwt") dot='<span class="tl-dot hwt'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg></span>';
   else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
   html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'">'+dot
@@ -17566,6 +17605,10 @@ $("homeView").addEventListener("click",e=>{
   else if(k==="sub"){
    goTab("onlineTestsView");
    try{ if(window.hwOpenFeedCorrection) window.hwOpenFeedCorrection(b.dataset.hw,b.dataset.test,b.dataset.stu); }catch(x){ console.warn("rendu timeline:",x); }
+  }
+  else if(k==="hwt"){
+   goTab("homeworkView");
+   try{ if(window.hwOpenFeedTest) window.hwOpenFeedTest(b.dataset.hw,b.dataset.test); }catch(x){ console.warn("test timeline:",x); }
   }
   else if(k==="appel"){
    try{
