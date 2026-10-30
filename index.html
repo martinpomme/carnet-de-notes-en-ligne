@@ -1269,7 +1269,9 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
  .dr-item{ display:flex; align-items:center; gap:12px; width:100%; min-height:50px; padding:10px 14px; margin:3px 0; border:none; border-radius:12px; background:transparent; color:#1e293b; font-size:16px; font-weight:600; text-align:left; cursor:pointer }
  .dr-item:active{ background:#dcedf8 }
  .dr-item.active{ background:#08487f; color:#fff }
- .dr-item .dr-ico{ flex:0 0 26px; text-align:center; font-size:19px }
+ .dr-item .dr-ico{ flex:0 0 auto; min-width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:19px }
+ .dr-item .dr-ico svg{ display:block }
+ .dr-item.active .dr-ico{ background:#fff }
  .dr-item .dr-lbl{ flex:1; min-width:0 }
  .dr-item .dr-bdg{ flex:0 0 auto; font-size:15px }
  .dr-sep{ height:1px; background:#e2e8f0; margin:8px 6px }
@@ -1324,7 +1326,6 @@ html{ -webkit-text-size-adjust:100%; touch-action:manipulation }
 
  .student-header-section > div{ flex-wrap:wrap }
  .student-header-section .btn{ flex:1 1 auto; min-height:42px }
- .notes-list{ gap:6px 15px }
  .note-pill{ min-height:34px; display:inline-flex; align-items:center }
  .period-tabs .period-btn, .subtabs .subtab-btn{ flex:1 1 auto; text-align:center }
 
@@ -1472,8 +1473,14 @@ header .brand img{height:38px;width:auto;display:block;flex:none}
 header .brand h1{min-width:0}
 @media(max-width:900px){header .brand img{height:28px}header .brand{gap:8px}}
 
+
+/* ═══ Icônes d'onglets : bleu uni, au-dessus du libellé (ordi) ═══ */
+.tabs .tab-btn:has(.tab-ico){display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.15;padding-top:9px}
+.tabs .tab-btn .tab-ico{display:block;width:20px;height:20px;flex:none}
+#homeTabBtn.tab-btn{padding-top:9px}
+.tabs .tab-btn .tab-ico.tab-ico-wide{width:73px;height:20px}
 /* ═══ Onglets : maison + Paramétrage ═══ */
-#homeTabBtn{display:inline-flex;align-items:center;justify-content:center;padding-left:22px;padding-right:22px}
+#homeTabBtn{display:inline-flex;align-items:center;justify-content:center;align-self:stretch;padding-left:22px;padding-right:22px}
 #homeTabBtn svg{display:block}
 #paramBtn.tab-btn{padding-left:22px;padding-right:22px}
 body.student-mode .tab-btn[data-target="homeView"]{order:0}
@@ -1792,17 +1799,17 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 <div class="topbar">
  <div class="tabs" id="mainTabs">
   <input type="file" id="importFileInput" accept=".xlsx,.xls,.ods,.csv" style="display:none">
-  <button class="tab-btn active" id="homeTabBtn" data-target="homeView" data-label="Accueil" title="Accueil" aria-label="Accueil"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0068aa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h4.5v-6h4v6h4.5V10"/></svg></button>
-  <button class="tab-btn" data-target="scheduleView">Emploi du temps</button>
-  <button class="tab-btn prof-only-tab" data-target="appelView">Feuille d'appel</button>
-  <button class="tab-btn" data-target="homeworkView">Devoirs</button>
-  <button class="tab-btn" data-target="elevesView">Notes Élèves</button>
-  <button class="tab-btn" data-target="classesView">Notes Communes</button>
-  <button class="tab-btn" data-target="appreciationsView">Appréciations</button>
-  <button class="tab-btn" data-target="vieView">Vie Scolaire</button>
-  <button class="tab-btn" data-target="onlineTestsView">Test en ligne</button>
-  <button class="tab-btn" id="paramBtn" type="button">Paramétrage</button>
-  <button class="tab-btn prof-only-tab" data-target="consultView">Consultation</button>
+  <button class="tab-btn active" id="homeTabBtn" data-target="homeView" data-label="Accueil" title="Accueil" aria-label="Accueil"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h4.5v-6h4v6h4.5V10"/></svg></button>
+  <button class="tab-btn" data-target="scheduleView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="tab-lbl">Emploi du temps</span></button>
+  <button class="tab-btn prof-only-tab" data-target="appelView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg><span class="tab-lbl">Feuille d'appel</span></button>
+  <button class="tab-btn" data-target="homeworkView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><defs><mask id="hwmt"><rect width="24" height="24" fill="#fff"/><path d="M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z" fill="#000" stroke="#000" stroke-width="4.5"/></mask></defs><g mask="url(#hwmt)"><path d="M3 6.5h15M3 11.5h12M3 16.5h8"/></g><path d="M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z"/></svg><span class="tab-lbl">Devoirs</span></button>
+  <button class="tab-btn" data-target="elevesView"><svg class="tab-ico" style="width:33px;height:20px" viewBox="0 0 40 24" width="33" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-4 0)"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></g><text x="28" y="9.6" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">18</text><path d="M21 12.6h14" stroke-width="2"/><text x="28" y="22.8" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">20</text></svg><span class="tab-lbl">Notes Élèves</span></button>
+  <button class="tab-btn" data-target="classesView"><svg class="tab-ico" style="width:38px;height:20px" viewBox="0 0 46 24" width="38" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/><text x="37" y="9.6" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">18</text><path d="M30 12.6h14" stroke-width="2"/><text x="37" y="22.8" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">20</text></svg><span class="tab-lbl">Notes Communes</span></button>
+  <button class="tab-btn" data-target="appreciationsView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="7.5" r="3.3"/><path d="M3.5 20.5v-1.2a5.2 5.2 0 0 1 5.2-5.2h3.6"/><path d="M19 11.2l2.4 2.4-7.3 7.3-3.4.9.9-3.4z"/></svg><span class="tab-lbl">Appréciations</span></button>
+  <button class="tab-btn" data-target="vieView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.2" r="6.8"/><path d="M12 9.6v4l2.6 1.6M4.2 4.6 2 7M19.8 4.6 22 7"/></svg><span class="tab-lbl">Vie Scolaire</span></button>
+  <button class="tab-btn" data-target="onlineTestsView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg><span class="tab-lbl">Test en ligne</span></button>
+  <button class="tab-btn prof-only-tab" data-target="consultView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="tab-lbl">Consultation</span></button>
+  <button class="tab-btn" id="paramBtn" type="button"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="tab-lbl">Paramétrage</span></button>
  </div>
  <div class="status-wrap" style="flex:1; display:flex; gap:8px; align-items:center;">
   <div id="importBanner" class="import-banner" style="margin:0;display:none;">
@@ -10686,14 +10693,16 @@ async function cloudPull(){
 }
 
 const USER_ICON_SVG='<svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.2"/><path d="M3.5 21c0-4.7 3.8-8 8.5-8s8.5 3.3 8.5 8z"/></svg>';
+const STU_TAB_SVG={elevesView:"<svg class=\"tab-ico\" style=\"width:20px;height:20px\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><text x=\"12\" y=\"9.6\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">18</text><path d=\"M5 12.6h14\" stroke-width=\"2\"/><text x=\"12\" y=\"22.8\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">20</text></svg>",appreciationsView:"<svg class=\"tab-ico\" style=\"width:20px;height:20px\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/><path d=\"M8 10h.01M12 10h.01M16 10h.01\" stroke-width=\"2.8\"/></svg>"};
+function setStudentTab(target,label){ const b=document.querySelector('.tab-btn[data-target="'+target+'"]'); if(b) b.innerHTML=STU_TAB_SVG[target]+'<span class="tab-lbl">'+label+'</span>'; }
 function applyStudentMode(){
  document.body.classList.add("student-mode");
  guardStudentDownloads();
  const sid=AUTH.studentId;
  const stu=DATA.students.find(s=>s.id===sid);
  const lab=document.getElementById("userLabel"); if(lab) lab.innerHTML=stu?(USER_ICON_SVG+"<span>"+escHtml(stu.first+" "+stu.last)+"</span>"):"";
- const t1=document.querySelector('.tab-btn[data-target="elevesView"]'); if(t1) t1.textContent="Notes";
- const t3=document.querySelector('.tab-btn[data-target="appreciationsView"]'); if(t3) t3.textContent="Bulletin";
+ setStudentTab("elevesView","Notes");
+ setStudentTab("appreciationsView","Bulletin");
  document.querySelector("#elevesView .card-header strong")?.replaceChildren(document.createTextNode("Notes"));
  document.querySelector("#appreciationsView .card-header strong")?.replaceChildren(document.createTextNode("Bulletin"));
  if(!stu){ document.getElementById("studentPlaceholder").textContent="Aucune donnée disponible pour ce compte."; return; }
@@ -13584,6 +13593,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
  function getHomeworkStudentSubmissionState(homework,test){
   if(test.options?.trainingMode) return { submission:null, label:"Entraînement · refaisable à volonté", status:"todo" };
   const submission=getHomeworkSubmission(homework.id,test.id,homeworkStudentId());
+  if(hwSpecialMark(homework,test,homeworkStudentId())==="X") return { submission:null, label:"Non accessible", status:"locked" };
   if(!submission) return { submission:null, label:"À faire", status:"todo" };
   if(submission.publishedAt) return { submission, label:"Correction disponible", status:"published" };
   if(submission.submittedAt) return { submission, label:"Rendu - correction en attente", status:"submitted" };
@@ -13842,6 +13852,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   setModalOpen(m,true);
  }
  window.hwOpenCorrectif=hwOpenCorrectif;
+ window.hwSpecialFor=function(h,t,sid){ try{ return hwSpecialMark(h,t,sid)||""; }catch(e){ return ""; } };
  window.hwMatchesStudent=function(h){ try{ return homeworkMatchesStudentClass(h); }catch(e){ return false; } };
  /* Fil d'actualite eleve : onglet Devoirs sur le jour du devoir, puis pop-up du test */
  window.hwOpenFeedTest=function(homeworkId,testId){
@@ -13936,7 +13947,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   HOMEWORK_STATE.quiz=null;
   setModalOpen(homeworkQuizModal,false);
  }
- function renderHomeworkQuizIntro(homework,test,submission){
+ function renderHomeworkQuizIntro(homework,test,submission,locked){
   const body=document.getElementById("homeworkQuizBody");
   if(!body) return;
   const total=fmt(getOnlineTestTotalPoints(test),2).replace(/\.00$/,"");
@@ -13956,12 +13967,13 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
       <div class="homework-quiz-badges">${badges.map(label=>`<span>${escHtml(label)}</span>`).join("")}</div>
      </div>
     </div>
+    ${locked ? `<p class="online-preview-note" style="color:#b91c1c;font-weight:600;">Vous n'avez pas accès à ce test. Adressez-vous à votre professeur.</p>` : ""}
     ${test.intro ? `<p class="online-preview-message">${escHtml(test.intro).replace(/\n/g,"<br>")}</p>` : ""}
     ${submission && !test.options?.trainingMode ? `<p class="online-preview-note">Ce test a déjà été rendu. ${test.options?.hideCorrection ? "La note" : "La correction"} sera disponible ici dès validation par l’enseignant.</p>` : ""}
     <div class="homework-quiz-actions" style="justify-content:flex-end;">
      ${submission && !test.options?.trainingMode
       ? `<button type="button" class="btn" data-hw-action="close-quiz">Fermer</button>`
-      : `<button type="button" class="btn btn-primary" data-hw-action="start-quiz">Démarrer</button>`}
+      : `<button type="button" class="btn btn-primary" data-hw-action="start-quiz"${locked ? ' disabled aria-disabled="true" title="Test inaccessible"' : ""}>Démarrer</button>`}
     </div>
    </div>
   `;
@@ -14281,6 +14293,13 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   const training=!!test.options?.trainingMode;
   const submission=training ? null : getHomeworkSubmission(homework.id,test.id,studentId);
   document.getElementById("homeworkQuizTitle").textContent=`${test.title||"Test"} · ${homework.subject}`;
+  /* Marque X par le professeur : test inaccessible (message dans le pop-up de demarrage, bouton Demarrer desactive) */
+  if(!training && hwSpecialMark(homework,test,studentId)==="X"){
+   HOMEWORK_STATE.quiz=null;
+   renderHomeworkQuizIntro(homework,test,null,true);
+   setModalOpen(homeworkQuizModal,true);
+   return;
+  }
   if(submission?.publishedAt){
    openHomeworkStudentResult(homework,test,submission);
    return;
@@ -15191,7 +15210,7 @@ function handleHomeworkActionClick(btn){
    return;
   }
   if(action==="open-student-test"){ openHomeworkStudentTest(btn.dataset.homeworkId,btn.dataset.testId); return; }
-  if(action==="start-quiz"){ startHomeworkQuiz(); return; }
+  if(action==="start-quiz"){ if(btn.disabled||!HOMEWORK_STATE.quiz) return; startHomeworkQuiz(); return; }
   if(action==="restart-quiz"){
    const q=HOMEWORK_STATE.quiz;
    if(q){ if(q.timerId) clearInterval(q.timerId); openHomeworkStudentTest(q.homework.id,q.test.id); }
@@ -15351,7 +15370,7 @@ function handleHomeworkActionClick(btn){
  applyStudentMode=function(){
   originalApplyStudentMode();
   const t=document.querySelector('.tab-btn[data-target="homeworkView"]');
-  if(t) t.textContent="Devoirs";
+  if(t){ const l=t.querySelector('.tab-lbl'); if(l) l.textContent="Devoirs"; }
  HOMEWORK_STATE.studentDatePinned=false;
  syncStudentHomeworkDate(true);
   renderHomeworkView();
@@ -16562,7 +16581,8 @@ document.getElementById("schDelete").onclick=()=>{
 /* ═══════════════ Menu mobile « appli » : bouton ☰ + volet latéral ═══════════════ */
 (function(){
  const mq=window.matchMedia("(max-width:900px)");
- const ICONS={scheduleView:"📅",appelView:"✅",homeworkView:"📝",elevesView:"🎓",classesView:"👥",appreciationsView:"💬",vieView:"🏫",onlineTestsView:"💻",homeView:"🏠",paramBtn:"⚙️",consultView:"🔎"};
+ const ICONS={"scheduleView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg>", "appelView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"5\" y=\"4\" width=\"14\" height=\"17\" rx=\"2.5\"/><path d=\"M9 4V3h6v1M9 13l2 2 4-4\"/></svg>", "homeworkView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><defs><mask id=\"hwmd\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z\" fill=\"#000\" stroke=\"#000\" stroke-width=\"4.5\"/></mask></defs><g mask=\"url(#hwmd)\"><path d=\"M3 6.5h15M3 11.5h12M3 16.5h8\"/></g><path d=\"M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z\"/></svg>", "elevesView": "<svg viewBox=\"0 0 40 24\" width=\"37\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><g transform=\"translate(-4 0)\"><circle cx=\"12\" cy=\"8\" r=\"3.6\"/><path d=\"M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z\"/></g><text x=\"28\" y=\"9.6\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">18</text><path d=\"M21 12.6h14\" stroke-width=\"2\"/><text x=\"28\" y=\"22.8\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">20</text></svg>", "classesView": "<svg viewBox=\"0 0 46 24\" width=\"42\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"3.2\"/><path d=\"M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z\"/><circle cx=\"4.2\" cy=\"9.5\" r=\"2.2\"/><path d=\"M1.5 21v-1.2a3 3 0 0 1 3-3\"/><circle cx=\"19.8\" cy=\"9.5\" r=\"2.2\"/><path d=\"M22.5 21v-1.2a3 3 0 0 0-3-3\"/><text x=\"37\" y=\"9.6\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">18</text><path d=\"M30 12.6h14\" stroke-width=\"2\"/><text x=\"37\" y=\"22.8\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">20</text></svg>", "appreciationsView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"7.5\" r=\"3.3\"/><path d=\"M3.5 20.5v-1.2a5.2 5.2 0 0 1 5.2-5.2h3.6\"/><path d=\"M19 11.2l2.4 2.4-7.3 7.3-3.4.9.9-3.4z\"/></svg>", "vieView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"13.2\" r=\"6.8\"/><path d=\"M12 9.6v4l2.6 1.6M4.2 4.6 2 7M19.8 4.6 22 7\"/></svg>", "onlineTestsView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M8 10l2.5 2.5L16 7\"/></svg>", "consultView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.5 15.5 21 21\"/></svg>", "paramBtn": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg>", "homeView": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10v9.5h4.5v-6h4v6h4.5V10\"/></svg>"};
+ const STU_ICONS={elevesView:"<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><text x=\"12\" y=\"9.6\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">18</text><path d=\"M5 12.6h14\" stroke-width=\"2\"/><text x=\"12\" y=\"22.8\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"800\" font-family=\"Arial,Helvetica,sans-serif\" fill=\"#0068aa\" stroke=\"none\">20</text></svg>",appreciationsView:"<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#0068aa\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/><path d=\"M8 10h.01M12 10h.01M16 10h.01\" stroke-width=\"2.8\"/></svg>"};
  const tabsEl=document.getElementById("mainTabs"), header=document.querySelector("header");
  if(!tabsEl||!header) return;
  const css=document.createElement("style");
@@ -16598,7 +16618,7 @@ document.getElementById("schDelete").onclick=()=>{
    it.className="dr-item"+(b.classList.contains("active")?" active":"");
    const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
    const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
-   it.innerHTML='<span class="dr-ico">'+(ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 9.4v5.3" stroke="#dc2626" stroke-width="2.7" stroke-linecap="round"/><circle cx="12" cy="18" r="1.55" fill="#dc2626"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
+   it.innerHTML='<span class="dr-ico">'+((document.body.classList.contains("student-mode")&&STU_ICONS[key])||ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 9.4v5.3" stroke="#dc2626" stroke-width="2.7" stroke-linecap="round"/><circle cx="12" cy="18" r="1.55" fill="#dc2626"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
    it.querySelector(".dr-lbl").textContent=labelOf(b);
    it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
    body.appendChild(it);
@@ -16741,15 +16761,15 @@ document.getElementById("schDelete").onclick=()=>{
  function saveLabels(){
   const q=(sel)=>document.querySelector(sel);
   return {
-   t1:q('.tab-btn[data-target="elevesView"]')?.textContent, t3:q('.tab-btn[data-target="appreciationsView"]')?.textContent,
+   t1:q('.tab-btn[data-target="elevesView"]')?.innerHTML, t3:q('.tab-btn[data-target="appreciationsView"]')?.innerHTML,
    h1:q("#elevesView .card-header strong")?.innerHTML, h3:q("#appreciationsView .card-header strong")?.innerHTML,
    ph:document.getElementById("studentPlaceholder")?.textContent
   };
  }
  function restoreLabels(L){
   const q=(sel)=>document.querySelector(sel);
-  if(L.t1!=null&&q('.tab-btn[data-target="elevesView"]')) q('.tab-btn[data-target="elevesView"]').textContent=L.t1;
-  if(L.t3!=null&&q('.tab-btn[data-target="appreciationsView"]')) q('.tab-btn[data-target="appreciationsView"]').textContent=L.t3;
+  if(L.t1!=null&&q('.tab-btn[data-target="elevesView"]')) q('.tab-btn[data-target="elevesView"]').innerHTML=L.t1;
+  if(L.t3!=null&&q('.tab-btn[data-target="appreciationsView"]')) q('.tab-btn[data-target="appreciationsView"]').innerHTML=L.t3;
   if(L.h1!=null&&q("#elevesView .card-header strong")) q("#elevesView .card-header strong").innerHTML=L.h1;
   if(L.h3!=null&&q("#appreciationsView .card-header strong")) q("#appreciationsView .card-header strong").innerHTML=L.h3;
  }
@@ -16945,7 +16965,7 @@ function tlItems(){
     (h.testIds||[]).forEach(tid=>{
      const t=(DATA.onlineTests||[]).find(x=>x.id===tid); if(!t||(t.options&&t.options.trainingMode)) return;
      const sub=(DATA.homeworkSubmissions||[]).find(x=>x.homeworkId===h.id&&x.testId===tid&&x.studentId===sid);
-     const done=!!(sub&&sub.submittedAt);
+     const done=!!(sub&&sub.submittedAt)||!!(window.hwSpecialFor&&window.hwSpecialFor(h,t,sid));   /* rendu, ou marque X/Abs/Disp/NE/EA par le prof = fait */
      let ts=new Date(h.createdAt||h.dateISO+"T12:00:00").getTime(); if(isNaN(ts)) ts=new Date(h.dateISO+"T12:00:00").getTime();
      const r=redo.find(x=>x.hw===h.id&&x.test===tid&&x.stu===sid), rts=r?new Date(r.at).getTime():0;
      if(!done&&rts>ts) ts=rts;
@@ -17018,10 +17038,10 @@ function renderTimeline(){
   if(it.iso!==lastDay){ html+='<div class="tl-day">'+esc(dayLabel(it.iso))+'</div>'; lastDay=it.iso; }
   const isNew=(it.type==="msg")?true:(it.type==="grade"?!!it.today:!!it.todo);
   let dot;
-  if(it.type==="grade") dot='<span class="tl-dot'+(isNew?" new":"")+'">/'+esc(it.outof)+'</span>';
+  if(it.type==="grade") dot='<span class="tl-dot'+(isNew?" new":"")+'"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="9.6" text-anchor="middle" font-size="10.5" font-weight="600" font-family="Arial,Helvetica,sans-serif" fill="currentColor">18</text><path d="M5 12.6h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="22.8" text-anchor="middle" font-size="10.5" font-weight="600" font-family="Arial,Helvetica,sans-serif" fill="currentColor">20</text></svg></span>';
   else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'">'+esc(it.ini)+'</span>';
   else if(it.type==="hwt") dot='<span class="tl-dot hwt'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg></span>';
-  else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
+  else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
   html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'">'+dot
    +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
