@@ -1806,6 +1806,13 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 }
 .note-pill.note-flash{ animation:noteFlashBlue 2.8s ease-out 2 both; border-radius:8px; position:relative; z-index:1 }
 </style>
+<style id="patch-notes-mobile">
+/* Mobile : lignes de notes plus rapprochées verticalement ; écart entre notes (24px) et taille des notes identiques au PC */
+@media (max-width:900px){
+ .notes-list, #classesView .notes-list{ column-gap:24px; row-gap:6px }
+ .note-pill{ min-height:0 }
+}
+</style>
 </head>
 <body class="auth-pending">
 <header>
@@ -16684,7 +16691,7 @@ document.getElementById("schDelete").onclick=()=>{
  }
  function apply(){
   pend=false;
-  var D=window.innerWidth<=900?3.5:7;
+  var D=7; /* débord identique sur mobile et sur ordinateur */
   document.querySelectorAll(".note-pill.today").forEach(function(p){
    var b=p.getBoundingClientRect(); if(!b.width) return;
    var dpr=window.devicePixelRatio||1;
