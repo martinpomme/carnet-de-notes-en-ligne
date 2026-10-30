@@ -1781,6 +1781,31 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 #hwcGeneralComment{ overflow:auto!important; width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:10px; font:inherit; resize:vertical!important; box-sizing:border-box }
 .hwc-general{ margin:10px 0 }
 </style>
+<style id="patch-stats-groupes-notifs">
+/* ── Pop-up statistiques : onglets Classe / Groupes ── */
+.st-tabs{ display:flex; gap:6px; padding:4px; margin:0 0 14px; background:#eef4fa; border-radius:12px }
+.st-tab{ flex:1; padding:8px 10px; border:0; border-radius:9px; background:transparent; color:#475569; font:700 13.5px Arial,Helvetica,sans-serif; cursor:pointer }
+.st-tab:hover{ background:rgba(255,255,255,.6) }
+.st-tab.on{ background:#fff; color:#0068aa; box-shadow:0 1px 3px rgba(15,23,42,.15) }
+.st-pane[hidden], .st-gb[hidden]{ display:none!important }
+.st-grp{ border:1px solid #d6edf9; border-radius:12px; margin:0 0 8px; background:#fff; overflow:hidden }
+.st-gh{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; padding:11px 13px; border:0; background:#f7fbfe; color:#0f172a; font:700 14px Arial,Helvetica,sans-serif; text-align:left; cursor:pointer }
+.st-gh:hover{ background:#eef7fd }
+.st-gn{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.st-chev{ flex:none; color:#0068aa; transition:transform .2s ease }
+.st-gh[aria-expanded="true"] .st-chev{ transform:rotate(90deg) }
+.st-gb{ padding:12px; border-top:1px solid #d6edf9 }
+.st-empty{ margin:18px 4px; text-align:center; color:#64748b; font-style:italic }
+/* ── Accueil : maison un peu plus grande ── */
+#homeTabBtn .tab-ico{ width:25px; height:25px }
+/* ── Clignotement d'une évaluation depuis une notification ── */
+@keyframes noteFlashBlue{
+ 0%{ background-color:#fff; box-shadow:0 0 0 6px rgba(179,214,245,0) }
+ 7%{ background-color:#b3d6f5; box-shadow:0 0 0 6px #b3d6f5 }
+ 100%{ background-color:#fff; box-shadow:0 0 0 6px rgba(179,214,245,0) }
+}
+.note-pill.note-flash{ animation:noteFlashBlue 2.8s ease-out 2 both; border-radius:8px; position:relative; z-index:1 }
+</style>
 </head>
 <body class="auth-pending">
 <header>
@@ -2746,7 +2771,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 <div id="statsModal" class="modal" aria-hidden="true">
  <div class="modal-card" style="width:400px;">
   <div class="modal-header">
-   <h3>Résultats de la classe</h3>
+   <h3>Statistiques</h3>
    <button class="modal-close" id="statsClose">×</button>
   </div>
   <div class="modal-body">
@@ -6098,6 +6123,7 @@ function renderEleveViewForPeriod(studentId,periodKey){
     const n=item; const ownRes=(typeof n.note==='number'&&!isNaN(n.note))||isSpecial(n); const empty=!ownRes&&!hasAnyResult(n,null,studentId);
     const btn=document.createElement("button"); btn.type="button";
     btn.className="note-pill"+(empty?" empty-eval":"");
+    try{ btn.dataset.nday=n.isoDate||(typeof normDateISO==="function"?normDateISO(n.dateJJMMAA):"")||""; btn.dataset.nsubj=n.subject||"—"; }catch(x){}
     const isToday=isTodayDate(n.dateJJMMAA, n.isoDate);
     if(!!n.important) btn.classList.add("important");
     if(isToday) btn.classList.add("today");
@@ -10388,50 +10414,42 @@ function handleProfBatchAction(action, studentIdArg){
  }
 }
 
-function openSubjectStats(studentId, subject, periodKey){
- const stu = DATA.students.find(s => s.id === studentId);
- if(!stu) return;
- const cls = DATA.classes.find(c => c.id === stu.classId);
- if(!cls) return;
- const averages = cls.memberIds.map(sid => {
-  const notes = (DATA.notes[sid]||[]).filter(n => n.subject === subject && (periodKey === "YEAR" || (n.period||"YEAR") === periodKey) && !isSpecial(n));
-  let sum = 0, coefSum = 0;
-  notes.forEach(n => { sum += (n.note/n.outof*20)*n.coef; coefSum += n.coef; });
-  return coefSum > 0 ? sum / coefSum : null;
- }).filter(a => a !== null).sort((a,b) => b-a);
-
- if(averages.length === 0) return;
- const myAvg = averages.find((a, i) => {
-  const notes = (DATA.notes[studentId]||[]).filter(n => n.subject === subject && (periodKey === "YEAR" || (n.period||"YEAR") === periodKey) && !isSpecial(n));
-  let sum = 0, coefSum = 0;
-  notes.forEach(n => { sum += (n.note/n.outof*20)*n.coef; coefSum += n.coef; });
-  const val = coefSum > 0 ? sum / coefSum : null;
-  return val !== null && Math.abs(a - val) < 0.001;
- });
-
- const modal = document.getElementById("statsModal");
- const body = document.getElementById("statsBody");
- if(!modal || !body) return;
- 
- const sum = averages.reduce((a, b) => a + b, 0);
- const classAvg = sum / averages.length;
- const rank = myAvg !== undefined ? averages.indexOf(myAvg) + 1 : "-";
- const myAvgDisplay = myAvg !== undefined ? fmt(myAvg, 2) + "/20" : "--/20";
-
- body.innerHTML = `
+/* ── Statistiques (pop-up) : onglet Classe + onglet Groupes ── */
+function statsSubjAvg(sid, subject, periodKey){
+ const notes=(DATA.notes[sid]||[]).filter(n=>n.subject===subject&&(periodKey==="YEAR"||(n.period||"YEAR")===periodKey)&&!isSpecial(n));
+ let sum=0, coefSum=0;
+ notes.forEach(n=>{ sum+=(n.note/n.outof*20)*n.coef; coefSum+=n.coef; });
+ return coefSum>0?sum/coefSum:null;
+}
+function statsGenAvg(sid, periodKey){
+ const all=DATA.notes[sid]||[];
+ const notes=periodKey==="YEAR"?all:all.filter(n=>(n.period||"YEAR")===periodKey);
+ const bySub={};
+ notes.forEach(n=>{ if(!isSpecial(n)){ if(!bySub[n.subject]) bySub[n.subject]={sum:0,coef:0}; bySub[n.subject].sum+=(n.note/n.outof*20)*n.coef; bySub[n.subject].coef+=n.coef; } });
+ let gSum=0, gCoef=0;
+ Object.entries(bySub).forEach(([sub,d])=>{ if(d.coef>0){ const sc=getSubjectCoef(sub); gSum+=(d.sum/d.coef)*sc; gCoef+=sc; } });
+ return gCoef>0?gSum/gCoef:null;
+}
+/* Bloc de statistiques (identique pour la classe et pour chaque groupe) */
+function statsBlockHtml(title, who, averages, myVal, isGeneral){
+ const classAvg=averages.reduce((a,b)=>a+b,0)/averages.length;
+ const idx=myVal!==null?averages.findIndex(a=>Math.abs(a-myVal)<0.001):-1;
+ const rank=idx>=0?idx+1:"-";
+ const myDisp=myVal!==null?fmt(myVal,2)+"/20":"--/20";
+ return `
   <div style="padding:10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
-    <h4 style="margin:0 0 10px 0; color:#08487f; border-bottom:1px solid #b9e0f5; padding-bottom:8px;">📊 ${subject}</h4>
+    <h4 style="margin:0 0 10px 0; color:#08487f; border-bottom:1px solid #b9e0f5; padding-bottom:8px;">📊 ${escHtml(title)}</h4>
     <p style="margin:5px 0;">Élèves évalués : <strong>${averages.length}</strong></p>
   </div>
-  
+
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
     <div style="padding:10px; background:#ecf7fd; border-radius:8px; border:1px solid #b9e0f5; text-align:center;">
-      <div style="font-size:0.85em; color:#1a8ad0;">Moyenne Classe</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#00508f;">${fmt(classAvg, 2)}/20</div>
+      <div style="font-size:0.85em; color:#1a8ad0;">Moyenne ${who}</div>
+      <div style="font-weight:bold; font-size:1.2em; color:#00508f;">${fmt(classAvg,2)}/20</div>
     </div>
     <div style="padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0; text-align:center;">
       <div style="font-size:0.85em; color:#22c55e;">Meilleure Moyenne</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#166534;">${fmt(averages[0], 2)}/20</div>
+      <div style="font-weight:bold; font-size:1.2em; color:#166534;">${fmt(averages[0],2)}/20</div>
     </div>
     <div style="padding:10px; background:#faf5ff; border-radius:8px; border:1px solid #e9d5ff; text-align:center;">
       <div style="font-size:0.85em; color:#a855f7;">Classement</div>
@@ -10439,86 +10457,60 @@ function openSubjectStats(studentId, subject, periodKey){
     </div>
     <div style="padding:10px; background:#fef2f2; border-radius:8px; border:1px solid #fecaca; text-align:center;">
       <div style="font-size:0.85em; color:#ef4444;">Moyenne Mini</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#991b1b;">${fmt(averages[averages.length-1], 2)}/20</div>
+      <div style="font-weight:bold; font-size:1.2em; color:#991b1b;">${fmt(averages[averages.length-1],2)}/20</div>
     </div>
   </div>
 
   <div style="padding:12px; background:#fff7ed; border-radius:8px; border:1px solid #ffedd5; text-align:center;">
-    <div style="font-size:0.9em; color:#f97316; margin-bottom:4px;">Votre Moyenne</div>
-    <div style="font-weight:bold; font-size:1.4em; color:#9a3412;">${myAvgDisplay}</div>
+    <div style="font-size:0.9em; color:#f97316; margin-bottom:4px;">${isGeneral?"Votre Moyenne Générale":"Votre Moyenne"}</div>
+    <div style="font-weight:bold; font-size:1.4em; color:#9a3412;">${myDisp}</div>
+  </div>`;
+}
+function openStatsPopup(studentId, kind, subject, periodKey){
+ const stu=DATA.students.find(s=>s.id===studentId); if(!stu) return;
+ const cls=DATA.classes.find(c=>c.id===stu.classId); if(!cls) return;
+ const isGen=kind==="general";
+ const avgOf=sid=>isGen?statsGenAvg(sid,periodKey):statsSubjAvg(sid,subject,periodKey);
+ const build=ids=>(ids||[]).map(avgOf).filter(a=>a!==null).sort((a,b)=>b-a);
+ const clsAvgs=build(cls.memberIds);
+ if(!clsAvgs.length) return;
+ const modal=document.getElementById("statsModal"), body=document.getElementById("statsBody");
+ if(!modal||!body) return;
+ const myVal=avgOf(studentId);
+ const title=isGen?"Général":subject;
+
+ /* Groupes auxquels l'élève appartient (hors groupes « solo » techniques) */
+ const relevant=g=>isGen||!Array.isArray(g.subjectsSel)||g.subjectsSel.includes(subject)||(g.evals||[]).some(e=>e.subject===subject);
+ const grps=(typeof grpEns==="function"?grpEns():(DATA.groups||[]))
+  .filter(g=>!(typeof isSoloGrp==="function"&&isSoloGrp(g))&&(g.memberIds||[]).includes(studentId)&&relevant(g))
+  .map(g=>({g,avgs:build(g.memberIds)})).filter(x=>x.avgs.length);
+
+ const chev='<svg class="st-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+ const groupsHtml=grps.length
+  ? grps.map(({g,avgs})=>`<div class="st-grp"><button type="button" class="st-gh" aria-expanded="false"><span class="st-gn">${escHtml(g.name||"Groupe")}</span>${chev}</button><div class="st-gb" hidden>${statsBlockHtml(title,"Groupe",avgs,myVal,isGen)}</div></div>`).join("")
+  : `<p class="st-empty">${isGen?"Vous n’appartenez à aucun groupe.":"Aucun groupe pour cette matière."}</p>`;
+
+ body.innerHTML=`<div class="st-tabs" role="tablist">
+   <button type="button" class="st-tab on" role="tab" aria-selected="true" data-st="classe">Classe</button>
+   <button type="button" class="st-tab" role="tab" aria-selected="false" data-st="groupes">Groupes</button>
   </div>
- `;
+  <div class="st-pane" data-pane="classe">${statsBlockHtml(title,"Classe",clsAvgs,myVal,isGen)}</div>
+  <div class="st-pane" data-pane="groupes" hidden>${groupsHtml}</div>`;
  modal.classList.add("open");
 }
-
-function openGeneralStats(studentId, periodKey){
- const stu = DATA.students.find(s => s.id === studentId);
- if(!stu) return;
- const cls = DATA.classes.find(c => c.id === stu.classId);
- if(!cls) return;
- const averages = cls.memberIds.map(sid => {
-  const allNotes = DATA.notes[sid]||[];
-  const notes = periodKey === "YEAR" ? allNotes : allNotes.filter(n => (n.period||"YEAR") === periodKey);
-  const bySub = {};
-  notes.forEach(n => { if(!isSpecial(n)){ if(!bySub[n.subject]) bySub[n.subject] = {sum:0, coef:0}; bySub[n.subject].sum += (n.note/n.outof*20)*n.coef; bySub[n.subject].coef += n.coef; } });
-  let gSum = 0, gCoef = 0;
-  Object.entries(bySub).forEach(([sub, data]) => { if(data.coef > 0){ const sAvg = data.sum / data.coef; const sCoef = getSubjectCoef(sub); gSum += sAvg * sCoef; gCoef += sCoef; } });
-  return gCoef > 0 ? gSum / gCoef : null;
- }).filter(a => a !== null).sort((a,b) => b-a);
-
- if(averages.length === 0) return;
- const myAvg = averages.find((a, i) => {
-  const allNotes = DATA.notes[studentId]||[];
-  const notes = periodKey === "YEAR" ? allNotes : allNotes.filter(n => (n.period||"YEAR") === periodKey);
-  const bySub = {};
-  notes.forEach(n => { if(!isSpecial(n)){ if(!bySub[n.subject]) bySub[n.subject] = {sum:0, coef:0}; bySub[n.subject].sum += (n.note/n.outof*20)*n.coef; bySub[n.subject].coef += n.coef; } });
-  let gSum = 0, gCoef = 0;
-  Object.entries(bySub).forEach(([sub, data]) => { if(data.coef > 0){ const sAvg = data.sum / data.coef; const sCoef = getSubjectCoef(sub); gSum += sAvg * sCoef; gCoef += sCoef; } });
-  const val = gCoef > 0 ? gSum / gCoef : null;
-  return val !== null && Math.abs(a - val) < 0.001;
- });
-
- const modal = document.getElementById("statsModal");
- const body = document.getElementById("statsBody");
- if(!modal || !body) return;
-
- const sum = averages.reduce((a, b) => a + b, 0);
- const classAvg = sum / averages.length;
- const rank = myAvg !== undefined ? averages.indexOf(myAvg) + 1 : "-";
- const myAvgDisplay = myAvg !== undefined ? fmt(myAvg, 2) + "/20" : "--/20";
-
- body.innerHTML = `
-  <div style="padding:10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
-    <h4 style="margin:0 0 10px 0; color:#08487f; border-bottom:1px solid #b9e0f5; padding-bottom:8px;">📊 Général</h4>
-    <p style="margin:5px 0;">Élèves évalués : <strong>${averages.length}</strong></p>
-  </div>
-  
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-    <div style="padding:10px; background:#ecf7fd; border-radius:8px; border:1px solid #b9e0f5; text-align:center;">
-      <div style="font-size:0.85em; color:#1a8ad0;">Moyenne Classe</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#00508f;">${fmt(classAvg, 2)}/20</div>
-    </div>
-    <div style="padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0; text-align:center;">
-      <div style="font-size:0.85em; color:#22c55e;">Meilleure Moyenne</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#166534;">${fmt(averages[0], 2)}/20</div>
-    </div>
-    <div style="padding:10px; background:#faf5ff; border-radius:8px; border:1px solid #e9d5ff; text-align:center;">
-      <div style="font-size:0.85em; color:#a855f7;">Classement</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#6b21a8;">${rank} / ${averages.length}</div>
-    </div>
-    <div style="padding:10px; background:#fef2f2; border-radius:8px; border:1px solid #fecaca; text-align:center;">
-      <div style="font-size:0.85em; color:#ef4444;">Moyenne Mini</div>
-      <div style="font-weight:bold; font-size:1.2em; color:#991b1b;">${fmt(averages[averages.length-1], 2)}/20</div>
-    </div>
-  </div>
-
-  <div style="padding:12px; background:#fff7ed; border-radius:8px; border:1px solid #ffedd5; text-align:center;">
-    <div style="font-size:0.9em; color:#f97316; margin-bottom:4px;">Votre Moyenne Générale</div>
-    <div style="font-weight:bold; font-size:1.4em; color:#9a3412;">${myAvgDisplay}</div>
-  </div>
- `;
- modal.classList.add("open");
-}
+function openSubjectStats(studentId, subject, periodKey){ openStatsPopup(studentId,"subject",subject,periodKey); }
+function openGeneralStats(studentId, periodKey){ openStatsPopup(studentId,"general",null,periodKey); }
+document.getElementById("statsBody")?.addEventListener("click", e=>{
+ const t=e.target.closest("[data-st]");
+ if(t){
+  const root=document.getElementById("statsBody");
+  root.querySelectorAll(".st-tab").forEach(b=>{ const on=b===t; b.classList.toggle("on",on); b.setAttribute("aria-selected",on?"true":"false"); });
+  root.querySelectorAll(".st-pane").forEach(p=>{ p.hidden=p.dataset.pane!==t.dataset.st; });
+  return;
+ }
+ const h=e.target.closest(".st-gh");
+ if(h){ const open=h.getAttribute("aria-expanded")==="true"; h.setAttribute("aria-expanded",open?"false":"true"); if(h.nextElementSibling) h.nextElementSibling.hidden=open; }
+});
 
 document.getElementById("statsClose")?.addEventListener("click", () => document.getElementById("statsModal").classList.remove("open"));
 
@@ -16948,20 +16940,31 @@ const ICON_MAIL='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" str
 function tlItems(){
  ensure(); const out=[], today=isoOf(new Date());
  if(isStu()){
-  const lim=Date.now()-45*864e5, rows=[];
+  const rows=[];
   ((DATA.notes&&DATA.notes[AUTH.studentId])||[]).forEach((n,i)=>{
    if(!n||n.hideFromStudent) return;
    let iso=n.isoDate||"";
    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)&&typeof normDateISO==="function") iso=normDateISO(n.dateJJMMAA)||"";
    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
    const ts=new Date(iso+"T12:00:00").getTime();
-   if(ts<lim||ts>Date.now()+864e5) return;
-   rows.push({idx:i,k:"n"+i,type:"grade",act:"grade",ts,iso,today:iso===today,title:"Nouvelle évaluation de "+(n.subject||"—"),sub:n.label||"",outof:n.outof||20});
+   if(ts>Date.now()+864e5) return;
+   rows.push({idx:i,iso,ts,subject:n.subject||"—",label:n.label||"",period:n.period||"YEAR"});
   });
-  rows.sort((a,b)=>(b.ts-a.ts)||(b.idx-a.idx)).slice(0,10).forEach(r=>out.push(r));
+  /* Toutes les notes depuis le début : une seule notification par jour et par matière */
+  const byKey={};
+  rows.forEach(r=>{ const k=r.iso+"|"+r.subject; (byKey[k]||(byKey[k]=[])).push(r); });
+  Object.keys(byKey).map(k=>{ const l=byKey[k].sort((a,b)=>a.idx-b.idx); return {l,last:l[l.length-1]}; })
+   .sort((a,b)=>(b.last.ts-a.last.ts)||(b.last.idx-a.last.idx))
+   .forEach(({l,last})=>{
+    const multi=l.length>1;
+    out.push({k:"n"+last.iso+"|"+last.subject,type:"grade",act:"grade",ts:last.ts,iso:last.iso,today:last.iso===today,
+     subject:last.subject,period:last.period,
+     title:(multi?"Nouvelles évaluations de ":"Nouvelle évaluation de ")+last.subject,
+     sub:multi?"":l[0].label, lines:multi?l.map(r=>r.label||"Évaluation"):null});
+   });
   /* Tests assignes en devoirs : "du jour" tant que le test n'est pas fait ; nouvelle notif si le prof annule la soumission (refaire) */
   try{
-   const sid=AUTH.studentId, tl=[], lim2=Date.now()-45*864e5, redo=DATA.homeworkRedo||[];
+   const sid=AUTH.studentId, tl=[], redo=DATA.homeworkRedo||[];
    (DATA.homework||[]).forEach(h=>{
     if(!h||!h.dateISO||!window.hwMatchesStudent||!window.hwMatchesStudent(h)) return;
     (h.testIds||[]).forEach(tid=>{
@@ -16971,13 +16974,12 @@ function tlItems(){
      let ts=new Date(h.createdAt||h.dateISO+"T12:00:00").getTime(); if(isNaN(ts)) ts=new Date(h.dateISO+"T12:00:00").getTime();
      const r=redo.find(x=>x.hw===h.id&&x.test===tid&&x.stu===sid), rts=r?new Date(r.at).getTime():0;
      if(!done&&rts>ts) ts=rts;
-     if(done&&ts<lim2) return;
      const iso=isoOf(new Date(ts)), day=new Date(h.dateISO+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
      tl.push({k:"t"+h.id+"|"+tid,type:"hwt",act:"hwt",ts,iso,today:!done,todo:!done,tag:"À faire",hwId:h.id,testId:tid,stuId:sid,
       title:"Test à faire pour le "+day,sub:[t.title||"Test en ligne",h.subject].filter(Boolean).join(" · ")});
     });
    });
-   tl.sort((a,b)=>b.ts-a.ts).slice(0,15).forEach(r=>out.push(r));
+   tl.sort((a,b)=>b.ts-a.ts).forEach(r=>out.push(r));
   }catch(x){ console.warn("tests timeline:",x); }
  }else{
   const subs=[];
@@ -16992,7 +16994,7 @@ function tlItems(){
     sub:[test&&test.title||"Test en ligne",hw&&hw.subject].filter(Boolean).join(" · "),
     ini:initials(s.studentId),todo:!s.validatedAt&&!s.manualOverride,hwId:s.homeworkId||"",testId:s.testId||"",stuId:s.studentId||""});
   });
-  subs.sort((a,b)=>b.ts-a.ts).slice(0,12).forEach(r=>out.push(r));
+  subs.sort((a,b)=>b.ts-a.ts).forEach(r=>out.push(r));
   /* Appels non faits (mêmes cas que le panneau d'attention) : disparaissent dès que l'appel est enregistré */
   try{
    const mm=(typeof vsMissing==="function")?vsMissing():{now:[],past:[]}, vus={}, miss=[];
@@ -17045,12 +17047,38 @@ function renderTimeline(){
   else if(it.type==="hwt") dot='<span class="tl-dot hwt'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg></span>';
   else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
-  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'">'+dot
-   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</span></button>';
+  html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'" data-day="'+esc(it.type==="grade"?it.iso:"")+'" data-subj="'+esc(it.type==="grade"?(it.subject||""):"")+'" data-per="'+esc(it.type==="grade"?(it.period||""):"")+'">'+dot
+   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+((it.lines&&it.lines.length)?it.lines.map(l=>'<small>'+esc(l)+'</small>').join(""):(it.sub?'<small>'+esc(it.sub)+'</small>':""))+'</span></button>';
  });
  host.innerHTML=html+'</div>';
 }
 function goTab(target){ document.querySelector('#mainTabs .tab-btn[data-target="'+target+'"]')?.click(); }
+/* Clignotement des évaluations de la notification : bleu fin qui s'estompe très lentement, 3 fois */
+function flashNotes(day,subj,per){
+ let tries=0, switched=false;
+ const find=()=>[...document.querySelectorAll(".note-pill[data-nday]")].filter(p=>p.dataset.nday===day&&p.dataset.nsubj===subj&&p.offsetParent!==null);
+ const step=()=>{
+  const pills=find();
+  if(pills.length){
+   document.querySelectorAll(".note-pill.note-flash").forEach(x=>x.classList.remove("note-flash"));
+   void document.body.offsetWidth;
+   pills.forEach(p=>{
+    p.classList.add("note-flash");
+    p.addEventListener("animationend",()=>p.classList.remove("note-flash"),{once:true});
+    setTimeout(()=>p.classList.remove("note-flash"),9000);
+   });
+   try{ pills[0].scrollIntoView({block:"center",behavior:"smooth"}); }catch(x){ pills[0].scrollIntoView(); }
+   return;
+  }
+  tries++;
+  if(tries===4&&!switched&&per){   /* l'évaluation est dans une autre période : on bascule dessus */
+   const pb=[...document.querySelectorAll(".period-btn")].find(b=>b.dataset.period===per&&b.offsetParent!==null&&!b.classList.contains("active"));
+   if(pb){ switched=true; pb.click(); }
+  }
+  if(tries<30) setTimeout(step,100);
+ };
+ setTimeout(step,60);
+}
 
 /* ───────── Sélecteur d’élèves (posts + messages) ───────── */
 function audLabel(all,ids){
@@ -17623,7 +17651,7 @@ $("homeView").addEventListener("click",e=>{
  }
  else if(act==="tl"){
   const k=b.dataset.kind;
-  if(k==="grade") goTab("elevesView");
+  if(k==="grade"){ goTab("elevesView"); flashNotes(b.dataset.day,b.dataset.subj,b.dataset.per); }
   else if(k==="sub"){
    goTab("onlineTestsView");
    try{ if(window.hwOpenFeedCorrection) window.hwOpenFeedCorrection(b.dataset.hw,b.dataset.test,b.dataset.stu); }catch(x){ console.warn("rendu timeline:",x); }
