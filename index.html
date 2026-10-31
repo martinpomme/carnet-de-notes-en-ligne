@@ -1833,8 +1833,10 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
 .dr-sublist{ display:none; margin:0 0 4px 22px; padding-left:8px; border-left:2px solid #d3dff3 }
 .dr-sublist.open{ display:block }
 .dr-sublist .dr-item{ min-height:44px; font-size:15px }
-/* Icône 18/20 des onglets de notes : plus grande, sans agrandir la hauteur de l'onglet */
-.tabs #carnetBtn .tab-ico, .tabs .tab-btn[data-target="elevesView"] .tab-ico{ width:30px !important; height:30px !important; margin:-5px 0 -5px }
+/* Icône 18/20 des onglets de notes : à peine plus grande, même épaisseur de trait */
+.tabs #carnetBtn .tab-ico, .tabs .tab-btn[data-target="elevesView"] .tab-ico{ width:23px !important; height:23px !important; margin:-1.5px 0 }
+.tabs #carnetBtn .tab-ico text, .tabs .tab-btn[data-target="elevesView"] .tab-ico text{ font-weight:700 }
+.tabs #carnetBtn .tab-ico path, .tabs .tab-btn[data-target="elevesView"] .tab-ico path{ stroke-width:1.75 }
 </style>
 </head>
 <body class="auth-pending">
