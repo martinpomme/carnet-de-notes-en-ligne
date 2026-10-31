@@ -11115,6 +11115,7 @@ const _renderAppreciationUI=window.renderAppreciationUI;
 window.renderAppreciationUI=function(){
  _renderAppreciationUI.apply(this,arguments);
  if(AUTH.role!=="eleve") return;
+ document.querySelectorAll("#appreciationContent tbody tr").forEach(tr=>{ const td=tr.children; if(td.length<3||td[0].textContent.trim()==="Appréciation Générale") return; if(td[1].textContent.trim()==="-") tr.remove(); });
  const labels={T1:"Trimestre 1",T2:"Trimestre 2",T3:"Trimestre 3",T4:"Trimestre 4",YEAR:"Année"};
  const locked=periodLocked(CURRENT_APP_PERIOD);
  const h=document.querySelector("#appreciationContent h3"); if(h) h.textContent=labels[CURRENT_APP_PERIOD]||"";
@@ -17846,6 +17847,9 @@ body.admin-mode .topbar,body.admin-mode .container,body.admin-mode #locksBar,bod
 .ad-act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .ad-act select{padding:7px;border:1px solid var(--border);border-radius:8px}
 .ad-pub{background:#dcfce7;color:#166534;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600}
+.ad-by{display:inline-block;border-radius:4px;padding:1px 6px;margin-right:6px;font-size:11px;font-weight:700;letter-spacing:.3px;vertical-align:middle}
+.ad-by-admin{background:#dbeafe;color:#1e40af}
+.ad-by-prof{background:#fef3c7;color:#92400e}
 .ad-etab{margin:14px 0}
 .ad-lab{display:block;margin:10px 0 4px;font-weight:600}
 .ad-err{margin-top:10px;padding:8px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:14px}
@@ -17946,7 +17950,7 @@ function etabView(e){
  if(S.sub==="etab") return st+'<h3 class="ad-h">Nom de l\'établissement</h3><div class="ad-row"><input class="ad-in" data-f="name" value="'+E(d.name)+'" style="min-width:320px"><button type="button" class="btn btn-primary" data-a="save">Enregistrer</button></div><h3 class="ad-h" style="margin-top:28px;color:#b91c1c">Zone dangereuse</h3><p class="ad-note">Supprime l\'établissement, tous ses professeurs, élèves, données et sauvegardes. Action irréversible.</p><button type="button" class="btn btn-danger" data-a="delEtab">Supprimer cet établissement</button>';
  const sn=S.snaps.filter(s=>s.etabId===e.id);
  return st+'<h3 class="ad-h">Sauvegardes de '+E(e.name)+'</h3><div class="ad-row"><input class="ad-in" id="adSnapName" placeholder="Nom de la sauvegarde" style="min-width:280px"><button type="button" class="btn btn-primary" data-a="snapSave">Sauvegarder toutes les données maintenant</button></div>'+
- (sn.length?'<div style="overflow-x:auto"><table class="ad-t"><thead><tr><th>Nom</th><th>Date</th><th>Type</th><th>Actions</th></tr></thead><tbody>'+sn.map(s=>'<tr><td>'+E(s.name)+(e.publiee===s.id?' <span class="ad-pub">version publiée</span>':"")+'</td><td>'+fmt(s.date)+'</td><td>'+(KIND[s.kind]||s.kind)+'</td><td class="ad-act"><button type="button" class="btn btn-primary" data-a="publish" data-id="'+s.id+'" title="Remplace les données en ligne par cette version">Publier / revenir à cette version</button> <select data-s="'+s.id+'">'+e.profs.map(p=>'<option value="'+E(p.pid)+'">'+E((p.civ==="Madame"?"Mme ":"M. ")+p.last)+'</option>').join("")+'</select><button type="button" class="btn" data-a="csnap" data-id="'+s.id+'">Consulter</button><button type="button" class="btn btn-danger" data-a="snapDel" data-id="'+s.id+'">Supprimer</button></td></tr>').join("")+"</tbody></table></div>":'<p class="ad-note">Aucune sauvegarde pour le moment.</p>')+
+ (sn.length?'<div style="overflow-x:auto"><table class="ad-t"><thead><tr><th>Nom</th><th>Date</th><th>Type</th><th>Actions</th></tr></thead><tbody>'+sn.map(s=>'<tr><td>'+(s.kind==="annee"?'<span class="ad-by ad-by-prof" title="Sauvegarde créée par le professeur lors d\'une réinitialisation">Prof</span>':'<span class="ad-by ad-by-admin" title="Sauvegarde créée par l\'administrateur">Admin</span>')+E(s.name)+(e.publiee===s.id?' <span class="ad-pub">version publiée</span>':"")+'</td><td>'+fmt(s.date)+'</td><td>'+(KIND[s.kind]||s.kind)+'</td><td class="ad-act"><button type="button" class="btn btn-primary" data-a="publish" data-id="'+s.id+'" title="Remplace les données en ligne par cette version">Publier / revenir à cette version</button> <select data-s="'+s.id+'">'+e.profs.map(p=>'<option value="'+E(p.pid)+'">'+E((p.civ==="Madame"?"Mme ":"M. ")+p.last)+'</option>').join("")+'</select><button type="button" class="btn" data-a="csnap" data-id="'+s.id+'">Consulter</button><button type="button" class="btn btn-danger" data-a="snapDel" data-id="'+s.id+'">Supprimer</button></td></tr>').join("")+"</tbody></table></div>":'<p class="ad-note">Aucune sauvegarde pour le moment.</p>')+
  '<p class="ad-note">« Publier » sauvegarde d\'abord l\'état actuel (type « Automatique »), puis remplace les données en ligne de tous les professeurs de l\'établissement. « Consulter » ouvre la version en lecture seule, depuis le compte du professeur choisi.</p>';
 }
 function consultView(){
@@ -17997,7 +18001,7 @@ document.addEventListener("click",async ev=>{
  const tabs=$("paramTabs"); if(!tabs) return;
  const btn=document.createElement("button"); btn.type="button"; btn.className="subtab-btn"; btn.dataset.p="year"; btn.textContent="Nouvelle année"; tabs.appendChild(btn);
  const pane=document.createElement("div"); pane.id="paramPane_year"; pane.hidden=true;
- const opts=[["schedule","Emploi du temps","Supprime tous les cours et les feuilles d'appel."],["groups","Groupes","Supprime les groupes et leurs notes globales. Les élèves sont conservés."],["classes","Classes","Supprime chaque classe en entier : élèves, notes, appréciations et toutes données associées."],["tests","Tests en ligne","Supprime les tests et les rendus des élèves."],["subjects","Matières","Vide le registre des matières."],["comps","Compétences","Supprime la hiérarchie des compétences et les évaluations de compétences."]];
+ const opts=[["schedule","Emploi du temps","Supprime tous les cours et les feuilles d'appel."],["groups","Groupes","Supprime les groupes et leurs notes globales. Les élèves sont conservés."],["classes","Classes","Supprime chaque classe en entier : élèves, notes, appréciations et toutes données associées."],["tests","Tests en ligne","Supprime les tests et les rendus des élèves."],["subjects","Matières","Vide le registre des matières."],["comps","Compétences","Supprime la hiérarchie des compétences et les évaluations de compétences."],["absences","Absences","Efface toutes les absences enregistrées dans les feuilles d'appel (les appels restent, sans absent)."],["retards","Retards","Efface tous les retards enregistrés dans les feuilles d'appel."],["sanctions","Sanctions","Supprime toutes les sanctions (retenues, travaux à rendre…)."],["notes","Toutes les notes","Supprime toutes les notes et toutes les évaluations (classes et groupes). Les élèves, classes et groupes sont conservés."],["appreciations","Appréciations","Supprime toutes les appréciations par matière et générales."],["homework","Devoirs","Supprime tous les devoirs du cahier de textes et les rendus associés."]];
  pane.innerHTML='<p class="ad-note" style="margin-top:0">Cochez ce que vous souhaitez réinitialiser. Une sauvegarde nommée est créée avant toute suppression.</p>'+opts.map(o=>'<label class="ad-chk"><input type="checkbox" value="'+o[0]+'"><span><strong>'+o[1]+'</strong><br><small>'+o[2]+'</small></span></label>').join("")+'<div class="ad-row"><button type="button" class="btn btn-danger" id="yearGo">Réinitialiser…</button></div>';
  tabs.parentNode.appendChild(pane);
  tabs.addEventListener("click",e=>{ const b=e.target.closest("[data-p]"); if(!b) return; const y=b.dataset.p==="year"; pane.hidden=!y; if(y){ tabs.querySelectorAll("[data-p]").forEach(x=>x.classList.toggle("active",x===b)); ["subj","comp","imp"].forEach(k=>{ const p=$("paramPane_"+k); if(p) p.hidden=true; }); } },true);
@@ -18011,7 +18015,8 @@ document.addEventListener("click",async ev=>{
   if(!name) return;
   if(!confirm("Réinitialiser : "+Object.keys(o).map(k=>opts.find(x=>x[0]===k)[1]).join(", ")+" ?\nUne sauvegarde « "+name+" » est créée avant.")) return;
   try{ if(typeof IS_MODIFIED!=="undefined"&&IS_MODIFIED) await cloudPush(); }catch(x){}
-  try{ const j=await api("resetYear",{opts:o,name:name}); if(!j.ok){ alert(j.error||"Erreur"); return; } alert("Sauvegarde « "+name+" » créée. Réinitialisation effectuée."); location.reload(); }
+  try{ const j=await api("resetYear",{opts:o,name:name}); if(!j.ok){ alert(j.error||"Erreur"); return; }
+   alert("Sauvegarde « "+name+" » créée. Réinitialisation effectuée."); location.reload(); }
   catch(x){ alert("Échec : "+(x.message||x)); }
  });
 })();
