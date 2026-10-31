@@ -1767,7 +1767,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
 .obt-del{ padding:4px 10px }
 @media (max-width:640px){ .obt-grid{ grid-template-columns:1fr } }
 /* ── Correction : note finale + commentaire général ── */
-.hwc-top{ position:sticky; top:0; z-index:3; background:#fff; border:1px solid #bfe0f3; border-radius:12px; padding:12px 14px; margin-bottom:14px; box-shadow:0 2px 6px rgba(15,23,42,.06) }
+.hwc-top{ position:static; background:#fff; border:1px solid #bfe0f3; border-radius:12px; padding:12px 14px; margin-bottom:14px; box-shadow:0 2px 6px rgba(15,23,42,.06) }
 .hwc-top label{ display:block; font-weight:700; color:#005c9a; margin:0 0 4px }
 .hwc-top-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px }
 .hwc-top-row label{ margin:0 }
@@ -1841,7 +1841,7 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
 </head>
 <body class="auth-pending">
 <header>
- <div class="hdr-left"><div class="brand"><img src="data:image/png;base64,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" alt="Logo Ecole Directe"><h1>Ecole Directe</h1></div><div id="saveStatusBanner" class="save-status-banner"></div><div class="save-actions" id="saveActions"><button type="button" class="icon-btn sa-btn" id="manualSaveBtn" title="Enregistrer maintenant" aria-label="Enregistrer maintenant"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button><button type="button" class="icon-btn sa-btn" id="refreshSiteBtn" title="Actualiser les données (sans recharger la page)" aria-label="Actualiser les données"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button></div></div>
+ <div class="hdr-left"><div class="brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAACECAYAAADVwmSJAAAbz0lEQVR42u2debRdVX3HP+e++/KG5CWPzMkLYSYMQQhSQONAsU6oFdQqrdXailOtU+vQdq06LGmLLVqptnWodVVqhYq2KoiigEMICgJqBMRAhEyEJC/hJXnJG+/pH7/f9ux7cu589rnnnnv2Wmfde9+97wx7/76/+ffbnu/75CMf+YgexXwKEh1eG66Zc8AcIB0BBL/NxOrlAMoB0k7C8ywQVCK6Hj3mAH362g8M6Gfzt4K+mvez1nlnrcN8PgwcAib0mASmgRk9SjWA4FnP4efAyQESJyeOIqghYFCJfx6wFDhej8XAAv1+QH/TbwGi1wJSUa9nCLxkgaJkfbYBcgQYBw7q8SQwCuwGngDG9Pfmt0eAqQhAeLmkyQHSDBj8CKmwQol/BbAaOBVYCSwEhhUQAwqWOQnde0mlyLQCYEKBMQ4cUKCMAlv1eAJ4HHgU2K8gpNtB4+VerKpEEJ6cPiX2pcDpCopjgZP0/RL9vjcFOn8th4Ctsh1RabNbAfIosA14ANgM7FNQlboNLDlAaoNikUqF44BzgXNCYBioQYSNEK2L4TcJnsMqYXYAvwY2Afdb4HmygTnMAZIhUPQDy4F1wBnAU1RajFRQkfwmOXgahl/n/KBS5kkFxybgl8Av9P0+/T5s9PudDpZuBIhXRUqcAZyv4DhZVameGoTlZXSeaj3jYWCXSpeHgbuB+/Tz/oj/9XOApF9a2A87HzhNwXChqk+rVG3qSZmalHbAzKgNs02BcgfwE7VfJqzfFTpNqmQdIGFg9CoILgCeDzwVOEFVp26TEK4AU1IJ8hBwF3AL8DPEQ+Z3mlTJIkCiJn+xSohnAs9Sm2JJhQX3YiaeuA3otAI3av6mEPfxL4DbgI3AT1U96wjDPksACQOjoHbFRcDzgKchLtmemKSE3wZC9kPGr1eDyNrtNfNCRv5jwA+AW4ENwM4atmEOEEdq1Brgd4CXAGerEd6qpGiF+Ex0+wgSTziEBPDsaLgh9oIevQQpKYOqBs7Vz14C9xw3qO3Pu1SSfF0Bs1nnI3VA6WSAhIHRp2B4sUqMs5SwmpEWfsT7Qug3kxbRT6va8CiwBYkfmHyoaQWEOfYj7tJJgpwq24jtsQDSr88whETk5ytohhQsBSRafyLicVukfy9a4KqkBvkJAyZqDQ4CD6qd8nXECzaTJhulUwFic5l+JFbxEuAS4EyLMPwmQFHpt+NqaO5XANwN3KM69rQSvCH+wwktrqcAGka8b0MKouPVAbFaQbNcba6BCK4ep+3VrFSZQKL2/wt8WQ38VBjznQYQL6RKnQ28VIFxeogA6ll0v4JEMn/frp6YrYgL8+eqDhwgSPKrZXd4Ldgv1Z6hlrvUJEIeg6TCnIJ48NYgXrzllkoXh00Wh2F/ELgX+B/gJrVZ2gqUTgGIDYweBcPLVGqc1YTEiFIvxoE9CooNCoadytn2NEG8SaqZ9V6/gGQEnKaAWYekzowAy0JqZJKSJXytA7oG1wLfIkhrSdw+6QSA2JNyqkqLV+jCzm1gMaM45IxKhvsQF+QGgmzWqRQBwRV4BhEX+PmIt+8cYK2qaV4KgLIL+BrweVVpS0mDJM0AsSdiWI3v1wBPJwjsNQIM+zcHkODVLcCPkHyiJyK4rf3/WfCHRxV32c97ChIvei7wDLVbhqtI3SSAMqNS/NPADUjGcWLSJK0Asb0sZwKvA16lOnSzwJhQj8m9Coy7kEzV6SqesayPSjGUYSR7+QKVLBciGQdJq182KPcCNwKfUabmJwGStAHEJtBh4EXAFbpQA3UsTNT3Y2pPfBP4NhLVnQ5xzrzMtDJYFiAZCJcg6TnHUR5sTQIktjS5B/gE8FV1lDgFSZoAYj/oU1RqvEwXpNHFMLbF3QoMY1vMdqmkiAMsA2qj/C7wApXsvQkDxdDIdrVLPq2OFGcgSQtAzAMOKad6verAjUqNcbUtvgPcjkRrx2pwyHzUXhtTFw8ShDTOksuVmSUJFDMOAv8HXK0aghOm126A2Mg/GXgT8EokwFVrwsPfbQL+SyXGg7m0cKr+mrFWHSe/h+S5FROWJtNIqspHlClmSoIYcBSA9cA7gRc2IDXMd3vUePt3NbxncmAkCpZexPP1WmVuixOSJvb5NylIridIVfE7GSDmAQaBSxUc56rxV6/UGEOirdcD30Nctzkwkh0FS/Xq17X8M3WqFHHv7bLP/whwFfAFJIYVC0iSBohNvMeoIf42yl2ItThGCQnsfVIBsidCXWuXQduu0W5mEA7mvhr4A1Wbk7RNfq0g+U8kN45OBIiPeKbeqMb4sgakxh4kT+c/kHiG4WKuyzi9Kh6eNEiqanUhSae9GLX5WaoZPF+lS1Iq1zbg74DPqY3SEuNsh4q1DvhzFcfz6gTHJHAn4ta7ST0YLqVGIz2fTAdF0zbU1G/MJWgp2kvQMbFIUPMRThYsqQ5t0uBNw7cxVSEn9PspPUxK/WSdz+InyARR5vdm4E+RdPykQLIVuBJxBc+kXYLYxvhFwF8Cz1ZiqjRh9t93AV8C/hXpnpEEMKIKjeaqAWpSxxfpsUIX/xjETT1PgTFHwWADwgaGzfXDfX1L1nsDiMNIYGwSqSvZhyTxjen7vfq6B0mb2Y24vUtVCDiJde8DLgPeh8RRXKtc5tyPAh9GEh6bliRJSZAeJLj0V0gulVcHOEpIoO8TiL97PEEDfB4SyV+FBMRORlqJrtDXJUhCX28EsSdtexgAzKiU2YsEz7YjqTS/QmJDuxRMR9pkmzwD+BDw2yTnBt4CfBD4b2ue/LQAxExOPxJ9fa96quoJ+I0ihTPXIA3KkuJ8yxXAL0B6ZC1RqTHM0RWF7TSWG8ko2K8SZSeSpvFt4MeUt+NJCignAR9A4iau7RJz7s3Ae5CsYC8tADEP3Qf8odocp1WRHDY4NiPR0euUIyYlNS5EXJQXE90wzo+BYJP2XoXva0rn9yp1dkyRnMplXMIrlFm+ThmPK5DYNLUBeDvi/WzoeV1KkB7g5SpWT6sD6TNIw7GPKJdLIvffnP9M4KNILXsUIDu5N1ZULOLHwFtVoiTpHjcgWQi8C3gL5Q01XI2S2iLvURut7mcuOCA41DC9VA2zU6vcjAHHIdUT3wHcnDA4BoA/UQcCHN1lpNMbx9nPYJ7N9BxOepSU5vYB/wh8XNVplxqCcRBdBvwRQd6Y1w6AmNSDlwPvV5ujUMMYH1Vb431qTCalUpnrrENSXPqsOclqN0UDlgH1uHltAomn6vM1wMeUBlx6Jn11qlyhKnTd1ynETGwFJba/RmrFa0mO7cDfq1q1K2Fxb+7hAqSSrpvGjHq02hXkNHN/EHHfX0sQy3EJkjWqpayu1/aJW4JcjMQ5zqrjhh9U++STOlFJgsNca4l6rYoZsDUaGeOq5rTbwVBAYjlXq5dpNgHt4SIkFWZOPc9fiJHY1iNxjgsoD4AR4UnZoFLm88o52pVHtdwCczclNz5J+RYF7RpG3dqhzHKjQ8Ca8/arLXJBPWveKkBMHtQpwLuR/JtCFXBMIEG/d+vrbJvAYa53CkF6djeNx1SlTQNjMKrOA6pqb3ZMEx6SHPtatUuqSpFCixcqIW66tyC9cIsRD2Y+H0Y6530QcTPS5gXqQQp+5nYhQB5BukSmzYHwHSRd3aXK7at69VzgObWuUWjhYUw9x2uQ1OaoxEPzeQr4BpJA9mCbdX1z7TlICkl/l9kfJYI8rbQMQ6TTqnbfhrsAoqHd1UgoYmG1a7WqYl2i0mNZFXBMIB0oPqxiNC3du4eQjoLdYn/YnqNtIWJJy/0V1B75lEo5l2vjIU6lp8UtQcykrkPSmE+tAA7UxviWqlX3p2xBTkJSSrptjCLxprSCGKThxrcob8/kYixDvFr9leiy0CQ4ViB5S+upHuu4E/hbpFt3WsBhgHycTlC7CCGOo5nn3otU3qVZyk0iuWJbHNGNOWdRaXhVJTW7GQnSg4TtX0plX7KnXOpKks/3qZdLrSRoq5kUEOz5ieOodZ3w97O6HmMpl3IeUurgOifPU01ifaUfFJtA3fnAHyPeq0rGzcNIrs2tKZx4o+uuIP42NfXs6DSji25vnmOS+AwxGPe5+V1B79XOWChE/L3SfZhnfhgpI5ggpVueRdiuL6G+ngXN0sJitUNuIKg58hsFiPmnYfVYravy2zHg3/SCMyldiMUOJ90eZkepffr+cbUBDiHBOrMdm6kWPEL5jlOGsE3u1DzEdz8P8SAOIpWMZncp89ofcV9bkYzljSkGR3iYPspvcniNgtLzGSq1mgKIGRcjxU/h9jw26q9FmipMp3ghlhFv/pXh/hNIoOt+JBi3Q4/N+jqlACi1aEvYR48C6Fgk1+h4xIV5OpIpMI1UFX4FcbVPdgAwbI/bzYg7tlZzj1bGaTpfdzejYhkiH0FyWColes2o5+GflDumERzmnsy2ZHGNw8qZr0XaYD7WoJ7vVbjPajaNPe+TOueb9G+9qkIuVDBuVynWibGejWo3XeLwGoNIvfwNupa/mf96JUgB6bT+7Cpo/wnwDw49D3FypjWqssRxvlEk+vtxgviCzen9OmyVWp8bARcqNbbqUQt0aZYi6Px+D3HHDsYsRTzL8fRbqnpvbcSLZSb1RKRR8aIKqtXDCo47U7wQdoHU2QT1H16LYLsd6cO0jfKuJUSoUi76aEWdP7yldKeBw16zEtJSdswhED2l8cVRkqEeFF+EFD9FnXgnkmR2YxPcrx1jUF17hRbu1Tz7OPB95XK2J6rdDeXs9kElOj9TYBfus4/nEjRNrwsghguanJX5Ienhqb72WeCLuI96xjWWEqSYtDr2k744TxbHqDo6XI4eIjybhRrqiIf4oddzdCnsDJKy/lmCnX46YZyKuEbjWrhdOTic24yjyF4vzdho9dohfUgBXdn5a6lYxyI9ooZD0qOEpKxfg7gvCx1EJCfSegTdzMMWgq7y+XBrO+7GbR+tXmWcZdWltQByoVr3YUTvQGqJf0L57kNpn2QQ92cr3hB7P8MHLYDkUsTtGMddDMfQ7xChfmiFKsS0EPE9Lwl9N4GkK3yjA4ARHvOJL0GxhKRkz9A9tSTtHIdx3w3SNBqvChDDCc9BGhqE1acfqt2RdKOFOFSiVcSXYnKAoCovB0gyAHHdV7hIKDZYqEBIPUiT4dWh7x5HNif5JZ3puVmJpGLEMXYRND3Lh/thtnpIgpFSy0hfjWQ49llqVAlJJflmB0/yCPE1aXhMDcfc/khmzCak0pfqAcjZSEMDG1mPILlG+ztQepRUtzyFoIal2WGeew/B9m/5cD/8BAAyWwsgZsOTcwiaCpumC19GXLudpm+b+12AZG0WYrAbfAXHeE63iY0kWsJWBYi5+CLgPMpT2u9VgBzuYJViPpJi0sr9m/qMcYKktjyKnswoEvIwOWCi4XqcSBVrhGAvD5A06uuBX9DZ3prVxNekYQ9Bank+khlDuOthZpjcgbAjoBChW6+1CMlDMim/SrAZYqdxS3O/T0Eq8eIYTxDsfJWPZNZvGfGUKFQ6/xTidCmrgQ/r40U10A0h7Ue6S2zrUFXCdlufZD2X1yKneYL0Nz7IwrDXaTGNV8A2an9sjzJ87DGoKpa5sTuQksdO17GHkCBhHDljJSQe1KkStRMlyCCSFwju8rHGCZrVlRk+9lhIECfYi5Qg7swAIazUo9WFshPnZnG/53c+ZCxCsrBdjh0WrVcEyEqC4vjbCYKCnVyRZvqwjsRIuD3qUZlxfO85UAL7Y7Xjed5CsGfKUQCxmxnMVx37OpUiWXBjjtC6B8vuSfV8JHHuISQFwrh/e0JAsoNbpnGb8bWHjxnEjX5A7Zt9Hc6c4pSi5+Nmmwp7g9OfEtFspBihqxfU9vgBbvPvk5rgonKfvpjO2YPEiU5TvdUnujdxtWYNJQs8vgWaKaRP1jaV3l+P4mpdZKCbvQUvisHBUu06u5FuNKWwnVoMLVy//vgrGZAedrO7Eyt4RloZ84jPbRweFyLJomuRNko7uli9Oo+gUWHcDNuc7yGCuFYZvRciLPk7lHtlJYV7AUGKux/z5Lo8FgNvRHqRddseinZz6edY6+c5us4DSPIplWwQQzj3IU2nD2RI710co4GOA0lUaZRU5b0M6RiTpr1Vkhpnqb3X41B67ER2torcDjAsQX6FRIizsAjmGeJs0tAOLroGN32E0752vUib27UO5xel942VflTI+ET3IikmAx2sapjG1XGriGl+ZpQxvFidKy6dRXeovR05v4WMT/IAQQ1Ip3rkJnFfapq2dTN70JzpSJ01QNiJ7Ic4XQkLWZcgI47sjyRVjb0ElYvdYKT7qlZdqgzO1U63PpJGdVc16VzM+GSfQespJpW4j0uD3SxgAdhAkDmcZRXLbuB2qSU9XICjgNTzXE+om3s3AMQm1pOJPwKbFBcvIPuMfJHOLHNulnjXA69yZHvY201/WZlP1VHM8ET3IRmgcdofsxzdRb2H6lnCdhvXalu0GTejaYJ9N7Ij1O1dYnv4Ku3fTLBzsqtrPaSM50gtxpNlFWsJ8Sa4md2jNlFeejxL5QZ8HtF1/36IMExQbBbJw3oE6T92P+WdHLOsWvUCr0Va3bqMexxCWldtqkcqZxkgS4knfmAmdjvwN8rRjSQphYg9LBW8Gue033sW4CbpruErMK5AXNquPI6zSI7hddTZETPLAFkWk4FuJvFBJKCURLPqbkl1N+rkOuAvkJw5F+Aw59wFfEaZXV02XVYB4iEVhIMxTSxICs5Yg8TbiASJUsGybneUlIm9g/ItNlyA4wiShHtrI9cpZnDSTYnm6YQ6dbfo+diOpKMbrtfI/9b6rtvqPew9yt+FuHXj3rM+DJA7gX9WG6Ruj2BWA4VzFSC9NTh5vYu5l+5OOXcBjmHgvcAbkIxrV+AoIHtoXq3Oj4bc5VkFyALL/oiDO28Bfp3Tdmzg6FOD/Apdq5JDybEH+Bfgu81cI6s2yCpa30XKnuQdBJ0U8xrx1sAxD3g98FYky9p3yKinkGj5p5HgYMPB1qwC5BTlTHEsKuR9eONUq94GvAXZ6cuVO9dH3Lg3ItuTH6HJTIRiBhcBxF3Yqj/d/O+0Gugl8j68razLUuCdSJXkIsfg8JEs3Q/QYtPDLEqQPiQGUohJtz1EhXLMfNQlfX2kq+W7kPLhYdyWHkwjWQjvR/pJN+J17AqAHEP51g2tjiM5QFqS5ucjQcAXId5Fl+CYsiTHXXFI/CwCZBnx1oBMkG+U0ww45iKbwL4d6dJS7DRwZNUGWUZ8O9kaAz1vVN2YSnU88Dok+fCEkE3nYhxB3LgfRrKgY7MVswQQu03+opgWvKRG3uGc/usCRg/S5O1twHMp34/eFTgmkcrAK5GuPLFeJ4upJitovYuiWdRZpNNLJ++slZStsQwpdHoDQScSl54qD3G9fw24ijrT17sVILbeuyLGRZlFimumyF28UfNtAn8XA7+P9LA6hqNLAFyAYwwperoayXJwsj5ZkyDzkBiIF9MCHaS8YYKfA+M3RFpQSfEa4JUExWkubQ1z7sPAF1St2u1ybbIGkCHguBgXar8eucQoVzFXIRm4lwNPRXo6u5YaWJLjU0g58h7XjCtrAFlIPDlYZhwg6EnldzE4zLMvViP81Uhz7QUJSg2QnLhrFCAHk5DqWQGIzdni7KLYq3PkdZmKZUsMX4HwLOAVSDPpkQjO7hIc08CPgI8BNxE0eiu5noisxUFOoPUqQnsci9SV3MvRteNRAHVBpPUyBxeqVB+y/cDlSBvQ1ZR3cHEJDHP+UWS3gY8iVZ3m76UkiKqYEWAYH/xxFkC8GAhlGEmu24X0cJ2oQZBeTISRpEoXlhaoxFiLNI9+EdInt5iAOhU+/0PAZ9Ugt+2NxCR5liTIHCRj1IjeOGoMCsDTkVLN25A2PI+oLrxP7ZNJJLW6FBNXM1u5FVTFG0ACn8vVxpqr308oR91Mc3slRtXWLwGeDTxPbY3jdF6TUqfM+Q8BtyCFTj+kyVqOHCDlY0gJKO5FLCItTM9A3Iu7kb3sxtSIf1LB8oS+H9fjiBLxhC5wyVLR7CbNfUr0g4ibelgBsQiJKSxUjj5ff9On4JlAgpifQLZqq0fqREmLASQ15JnAC1WlWhXB0ZOSGluAzwGfR7bbpp32X5YAsgB3W6KZxRlUYgqPKT2MJPEp35xz1jpHwVp0uzOjkRxFyzlQa32Wqvp3q3LdSoAIqyYFJPJ9ngLjYiQlfTgCaElIDNN15GakLc9tIanRNudIlmwQw2ld6+lR382xVBEXRFRpGCD1hOYifL+2bbEaadL2TOBcpHbfS0iNipIYs0jdxrXAlwj2Kk+F1zBLEmQp7neS8lrwJDVq3Naj1vgqOYz6VghJK5RxnK7H05HA3gkEm/IkDQxznVmka/2NwA2Ip7BEyprmZQkgK3Gzl3YrwInTw1XpnCvVuD6oRIfOw1qCHWLPQ1zW/RUIMElggJQw36TeqbssJ0PqYk1ZAIidTdpL9wTzjEQ6FylKul058BrgGcj+GiMcHThNSlpEGfjbge8rMH5E0Ma17bZGVgFi91lanCBHTMuzG9XyCiSb1riF+6uof0lJC5PQWEJaJt2CtP68g6BDTOp7EGdFxZpLvDlYnQaUuXrQBvWpkmTykDT076nxvbGTgJE1gMwJGZ3dNpKWEtWAOIW0+tygEmMjgQu6QIc1584KQHrI/n6LSTsA6pEUtiR4HMk0uBnZg2MTwT4n5nelTpvYrBDVLBJZzkdyoADJj3oAcdF+H/FIPR4B3I51nGQFIOMElX9mQbycrmNX2UpIWs0WVZ02KDi2EriYO1KVyipADBAOEmxws6DNennWpATKfB5GuoZ8F/g5EvGeqCAtSlmZlCzFQW5CIsSXIzGR/hpcsZtBU20ufLUdxlR9ulOB8TOkw+RUhfnLZPzJ8/1MPdcQEihbj6Rrr0KyYpdRuZDKzzhg6pGk00jt/eNI+vx9wD1IPca2kPqUeVBkFSBeSE0YQPKQ1iDR5tP1/QlIzGQOR2/R5rIYKkkAVAO92Ul3FKlr2azq02bgp8CjatPNRNgUXQGKLEuQal6TISRvaSVSCLQWqfEYIWj2MK8JgkwKPLUkQZRjoqTq0iEkrWOXGtT3ILv27kDSP0ZrPFPXtjvKGkBqEZA95iBFSAuBk1XCrLAANIJkB88NGa+1MnpbVdmq7btOBABM/ckMUlNxSI3qx1Rl2qevm/RvB4jeyjoHRJcBpNLiV0uM81SKjKgqtlzfn6SfFyhg+pG8pz5V5XqJZ0fdSiCYVTthSl/H1Yh+UgGwQ1WjUcuWeFS/m6nwnF4VYOejywDSrJQxvxlSYPSp5DGlsSuQAqQl+tnkRBnA9FpHkaBc1oDUVBxOWcRv/mbKdQ8r0Y8iZb1bkF13TVnvpP5mvMXnzEcOkLoBE1W7Xc//FkOAmBM6Bgj6bJlzT1uEPqmfZ/TVHLNN3nsOiBwgbZE0JKyiRKmI9TgP8pEDJNUgqtdY91v8Ph+ORjGfgtiGnxN49sb/A2O4pmP01a/hAAAAAElFTkSuQmCC" alt="Logo Ecole Directe"><div class="brand-t"><h1>Ecole Directe</h1><small id="etabName"></small></div></div><div id="saveStatusBanner" class="save-status-banner"></div><div class="save-actions" id="saveActions"><button type="button" class="icon-btn sa-btn" id="manualSaveBtn" title="Enregistrer maintenant" aria-label="Enregistrer maintenant"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button><button type="button" class="icon-btn sa-btn" id="refreshSiteBtn" title="Actualiser les données (sans recharger la page)" aria-label="Actualiser les données"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button></div></div>
   <div class="locks" id="locksBar">
   <div class="lock-item"><span class="lock-label">Trimestre 1</span><button class="lock-btn" data-lock="T1" title="Verrouiller / déverrouiller le trimestre 1"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
   <div class="lock-item"><span class="lock-label">Trimestre 2</span><button class="lock-btn" data-lock="T2" title="Verrouiller / déverrouiller le trimestre 2"><svg class="lk-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg></button></div>
@@ -1897,7 +1897,7 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
  <section id="elevesView" class="view">
   <div class="card">
    <div class="card-header">
-    <div class="hdr-left"><strong>Gestion des élèves</strong><button class="import-btn" id="importSheetBtn" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button></div>
+    <div class="hdr-left"><strong>Gestion des élèves</strong></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteStudentBtn">Supprimer élève</button>
     </div>
@@ -1953,7 +1953,7 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
  <section id="classesView" class="view">
   <div class="card">
    <div class="card-header">
-    <div class="hdr-left"><strong>Gestion des classes et des matières</strong><button class="import-btn" id="importSheetBtn2" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button></div>
+    <div class="hdr-left"><strong>Gestion des classes et des matières</strong></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteClassBtn">Supprimer classe</button>
     </div>
@@ -2750,6 +2750,7 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
    <div class="subtabs" id="paramTabs">
     <button type="button" class="subtab-btn active" data-p="subj">Matières</button>
     <button type="button" class="subtab-btn" data-p="comp">Compétences</button>
+    <button type="button" class="subtab-btn" data-p="imp">Importation</button>
    </div>
    <div id="paramPane_subj">
    <div id="subjectsEmptyInside" class="import-banner" style="display:none;">
@@ -2764,6 +2765,9 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
     <thead><tr><th>Matière</th><th>Coef</th><th>Actions</th><th>Couleur</th></tr></thead>
     <tbody id="manageSubjectsTbody"></tbody>
    </table>
+   </div>
+   <div id="paramPane_imp" hidden>
+    <button class="btn btn-primary" id="importParamBtn" type="button" title="Importer des classes et des élèves (tableur)" aria-label="Importer des classes et des élèves depuis un tableur" style="display:inline-flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>Importer</button>
    </div>
    <div id="paramPane_comp" hidden>
    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
@@ -10613,11 +10617,12 @@ async function gzipB64(str){
 }
 // Délai maximal + nouvelles tentatives automatiques (serveur occupé, réseau coupé, requête trop longue)
 async function api(action,extra){
- let payload=JSON.stringify(Object.assign({action,user:AUTH.user,pass:AUTH.pass},extra||{}));
+ const EDX=(typeof EDC!=="undefined"&&EDC&&EDC.ro)?{ro:1,snap:EDC.snap||""}:{};
+ let payload=JSON.stringify(Object.assign({action,user:AUTH.user,pass:AUTH.pass},EDX,extra||{}));
  if(extra && payload.length>12000 && typeof CompressionStream!=="undefined"){
   try{
    const z=await gzipB64(JSON.stringify(extra));
-   const small=JSON.stringify({action,user:AUTH.user,pass:AUTH.pass,gz:z});
+   const small=JSON.stringify(Object.assign({action,user:AUTH.user,pass:AUTH.pass,gz:z},EDX));
    if(small.length<payload.length*0.8) payload=small;
   }catch(e){ /* on envoie sans compression */ }
  }
@@ -10708,6 +10713,8 @@ async function cloudPull(){
  if(pf && pf.u===AUTH.user && pf.p===AUTH.pass && Date.now()-pf.t<60000){ j=await pf.promise; }
  if(!j||!j.ok) j=await api("load");
  if(!j.ok) throw new Error(j.error||"erreur");
+ if(j.role==="admin"){ AUTH.role="admin"; window.edAdminBoot&&edAdminBoot(j); return j; }
+ if(window.edSetEtab) edSetEtab(j.etabName);
  CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
@@ -10748,7 +10755,7 @@ async function tryLogin(user,pass,remember){
  AUTH.user=user; AUTH.pass=pass; AUTH.role="";
  try{
   await cloudPull();
-  CLOUD.ready=!!AUTH.role; IS_MODIFIED=false;
+  CLOUD.ready=!!AUTH.role&&AUTH.role!=="admin"; IS_MODIFIED=false;
   authSave(user,pass,remember);
   ["carnet_notes_data","carnet_notes_subjects","carnet_notes_locks","cloud_token"].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
   document.body.classList.remove("auth-pending");
@@ -10987,7 +10994,7 @@ function loadData(){ /* les données viennent uniquement du serveur après conne
  const findClass=n=>DATA.classes.find(c=>c.name.trim().toLowerCase()===n.trim().toLowerCase());
  let SLIDES=[], idx=0, seen=new Set();
  function closeImp(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");SLIDES=[];}
- document.querySelectorAll(".import-btn").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".import-btn, #importParamBtn").forEach(b=>b.addEventListener("click",()=>{
   if(AUTH.role!=="prof") return;
   if(typeof XLSX==="undefined"){alert("Le module d'import n'a pas pu être chargé. Vérifiez votre connexion internet puis rechargez la page.");return;}
   fileIn.value=""; fileIn.click();
@@ -17783,7 +17790,7 @@ document.addEventListener("keydown",e=>{
 
 /* ───────── Paramétrage : Matières + Compétences ───────── */
 function paramShow(w){
- ["subj","comp"].forEach(k=>{
+ ["subj","comp","imp"].forEach(k=>{
   const pane=$("paramPane_"+k); if(pane) pane.hidden=(k!==w);
   document.querySelector('#paramTabs [data-p="'+k+'"]')?.classList.toggle("active",k===w);
  });
@@ -17816,6 +17823,200 @@ $("paramTabs")?.addEventListener("click",e=>{ const b=e.target.closest("[data-p]
  mo.observe(document.body,{attributes:true,attributeFilter:["class"]});
  sync();
 })();
+</script>
+<div id="adminRoot"></div>
+<style id="ed-admin-css">
+.brand-t{display:flex;flex-direction:column;justify-content:center;line-height:1.1}
+#etabName{font-size:12px;font-weight:500;opacity:.88;letter-spacing:.01em;margin-top:2px}
+#etabName:empty{display:none}
+#adminRoot{display:none}
+body.admin-mode #adminRoot{display:block}
+body.admin-mode .topbar,body.admin-mode .container,body.admin-mode #locksBar,body.admin-mode #settingsBtn,body.admin-mode #saveActions,body.admin-mode #saveStatusBanner,body.admin-mode #carnetSub{display:none!important}
+.ad-wrap{max-width:1200px;margin:18px auto;padding:0 12px}
+.ad-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ad-tab{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:#08487f;cursor:pointer;font-weight:600}
+.ad-tab.on{background:#08487f;color:#fff;border-color:#08487f}
+.ad-new{border-style:dashed;margin-left:auto}
+.ad-h{margin:6px 0 12px;color:#08487f;font-size:18px}
+.ad-note{color:var(--muted);font-size:13px;margin:10px 0}
+.ad-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.ad-in,.ad-t input,.ad-t select{padding:8px;border:1px solid var(--border);border-radius:8px;font:inherit}
+.ad-t input{width:100%;min-width:110px}
+.ad-t th,.ad-t td{padding:6px 8px;text-align:left}
+.ad-act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ad-act select{padding:7px;border:1px solid var(--border);border-radius:8px}
+.ad-pub{background:#dcfce7;color:#166534;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600}
+.ad-etab{margin:14px 0}
+.ad-lab{display:block;margin:10px 0 4px;font-weight:600}
+.ad-err{margin-top:10px;padding:8px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:14px}
+.ad-chk{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.ad-chk input{margin-top:4px}
+.ad-frame{width:100%;height:calc(100vh - 190px);min-height:480px;border:1px solid var(--border);border-radius:10px;background:#fff}
+#adStage{margin-top:14px}
+.ad-ov{position:fixed;inset:0;z-index:350;background:var(--bg);display:flex;flex-direction:column}
+.ad-ovbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border)}
+.ad-ovbox{flex:1;padding:10px}.ad-ovbox .ad-frame{height:100%}
+.ed-ro-flag{position:fixed;bottom:10px;left:10px;z-index:500;background:#92400e;color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;pointer-events:none;opacity:.92}
+</style>
+<script id="ed-admin">
+(function(){
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ── nom de l'établissement sous « Ecole Directe » ── */
+window.edSetEtab=function(n){ const el=$("etabName"); if(el) el.textContent=n||""; };
+
+/* ── œil « évaluations masquées » aussi sur les sous-onglets Élèves / Classes & groupes ── */
+(function(){
+ const map={eleves:["elevesView","Évaluations masquées pour l'élève"],classes:["classesView","Évaluations masquées pour la classe ou le groupe"]};
+ function sync(){ Object.keys(map).forEach(k=>{
+  const real=document.querySelector('.tab-btn[data-target="'+map[k][0]+'"]'), sub=document.querySelector('#carnetSub [data-carnet="'+k+'"]');
+  if(!real||!sub) return; const on=real.classList.contains("has-hidden-eval");
+  sub.classList.toggle("has-hidden-eval",on); if(on) sub.title=map[k][1]; else sub.removeAttribute("title"); }); }
+ const t=$("mainTabs"); if(t) new MutationObserver(sync).observe(t,{attributes:true,subtree:true,attributeFilter:["class"]}); sync();
+})();
+
+/* ── consultation en lecture seule (iframe) ── */
+if(typeof EDC!=="undefined"&&EDC&&EDC.ro){
+ document.body.classList.add("consult-ro");
+ try{ cloudPush=async function(){}; }catch(e){}
+ const b=document.createElement("div"); b.className="ed-ro-flag"; b.textContent=EDC.snap?"Version sauvegardée — lecture seule":"Consultation — lecture seule"; document.body.appendChild(b);
+}
+function mountFrame(box,p,snap){
+ box.innerHTML=""; const f=document.createElement("iframe");
+ f.name="ED_CONSULT:"+JSON.stringify({u:p.user,p:p.pass,ro:1,snap:snap||""});
+ f.className="ad-frame"; f.src=location.href.split("#")[0]; box.appendChild(f);
+}
+
+/* ── fenêtres ── */
+function modal(title,body,okLabel,onOk,wide){
+ const m=document.createElement("div"); m.className="modal open"; m.style.zIndex=400;
+ m.innerHTML='<div class="modal-card" style="width:'+(wide||520)+'px"><div class="modal-header"><h3>'+E(title)+'</h3><button type="button" class="modal-close" data-x>×</button></div><div class="modal-body">'+body+'<div class="ad-err" hidden></div></div><div class="pm-foot"><span class="sp"></span><button type="button" class="btn" data-x>Annuler</button><button type="button" class="btn btn-primary" data-ok>'+E(okLabel)+'</button></div></div>';
+ const close=()=>m.remove(), err=m.querySelector(".ad-err");
+ m.addEventListener("click",async e=>{
+  if(e.target.closest("[data-x]")||e.target===m) return close();
+  if(e.target.closest("[data-ok]")){ const r=await onOk(m); if(r) { err.textContent=r; err.hidden=false; } else close(); } });
+ document.body.appendChild(m); return m;
+}
+function ask(title,label,def,ok){ return new Promise(res=>{
+ let done=false; const m=modal(title,'<label class="ad-lab">'+E(label)+'</label><input class="ad-in" id="adAsk" value="'+E(def||"")+'" style="width:100%">',ok||"Valider",m=>{ const v=m.querySelector("#adAsk").value.trim(); if(!v) return "Un nom est obligatoire."; done=true; res(v); return ""; });
+ m.addEventListener("click",()=>{ setTimeout(()=>{ if(!done&&!document.body.contains(m)) res(null); },0); });
+ setTimeout(()=>m.querySelector("#adAsk").focus(),30); }); }
+
+/* ── éditeur de professeurs (commun : onglet, création) ── */
+function profTable(arr){
+ return '<div style="overflow-x:auto"><table class="ad-t"><thead><tr><th>Civilité</th><th>Nom</th><th>Prénom</th><th>Identifiant</th><th>Mot de passe</th><th></th></tr></thead><tbody>'+
+ arr.map((p,i)=>'<tr><td><select data-f="civ" data-i="'+i+'"><option'+(p.civ==="Monsieur"?" selected":"")+'>Monsieur</option><option'+(p.civ==="Madame"?" selected":"")+'>Madame</option></select></td>'+
+ ["last","first","user","pass"].map(f=>'<td><input data-f="'+f+'" data-i="'+i+'" value="'+E(p[f])+'" autocomplete="off"></td>').join("")+
+ '<td><button type="button" class="btn btn-danger" data-a="delprof" data-i="'+i+'" title="Retirer ce professeur (et ses données)">✕</button></td></tr>').join("")+'</tbody></table></div>';
+}
+const blank=()=>({civ:"Monsieur",first:"",last:"",user:"",pass:""});
+
+/* ── console administrateur ── */
+const S={reg:null,snaps:[],tab:"",sub:"profs",draft:{}};
+const dr=e=>S.draft[e.id]||(S.draft[e.id]={name:e.name,profs:clone(e.profs)});
+const fmt=d=>{ try{ return new Date(d).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}); }catch(x){ return d; } };
+const KIND={manuelle:"Manuelle",annee:"Nouvelle année",auto:"Automatique"};
+
+window.edAdminBoot=function(j){
+ document.body.classList.add("admin-mode"); document.body.classList.remove("auth-pending");
+ S.reg=j.registry; S.snaps=j.snaps||[]; S.tab=(S.reg.etabs[0]||{}).id||"#c";
+ const lab=$("userLabel"); if(lab) lab.innerHTML="<span>Administrateur</span>";
+ edSetEtab("Administration"); render();
+};
+async function call(a,x){
+ try{ const j=await api(a,x); if(!j.ok){ alert(j.error==="busy"?"Serveur occupé, réessayez.":(j.error||"Erreur")); return null; }
+  if(j.registry){ S.reg=j.registry; S.snaps=j.snaps||[]; } return j; }
+ catch(e){ alert("Erreur réseau : "+(e.message||e)); return null; }
+}
+function render(){
+ const root=$("adminRoot"); if(!root||!S.reg) return;
+ const cur=S.reg.etabs.find(e=>e.id===S.tab);
+ if(!cur&&S.tab!=="#c") S.tab=(S.reg.etabs[0]||{}).id||"#c";
+ const tabs='<div class="ad-tabs">'+S.reg.etabs.map(e=>'<button type="button" class="ad-tab'+(S.tab===e.id?" on":"")+'" data-a="tab" data-id="'+e.id+'">'+E(e.name)+'</button>').join("")+
+  '<button type="button" class="ad-tab'+(S.tab==="#c"?" on":"")+'" data-a="tab" data-id="#c">🔍 Consultation</button><button type="button" class="ad-tab ad-new" data-a="new">+ Nouvel établissement</button></div>';
+ root.innerHTML='<div class="ad-wrap">'+tabs+'<div class="card"><div class="card-body" id="adBody">'+(S.tab==="#c"?consultView():etabView(S.reg.etabs.find(e=>e.id===S.tab)))+'</div></div></div>';
+}
+function etabView(e){
+ if(!e) return "<p>Aucun établissement. Créez-en un avec « + Nouvel établissement ».</p>";
+ const d=dr(e);
+ const st='<div class="subtabs">'+[["profs","Professeurs"],["etab","Établissement"],["sauv","Sauvegardes"]].map(([k,l])=>'<button type="button" class="subtab-btn'+(S.sub===k?" active":"")+'" data-a="sub" data-k="'+k+'">'+l+'</button>').join("")+"</div>";
+ if(S.sub==="profs") return st+'<h3 class="ad-h">Professeurs de '+E(e.name)+'</h3>'+profTable(d.profs)+'<div class="ad-row"><button type="button" class="btn" data-a="addprof">+ Ajouter un professeur</button><button type="button" class="btn btn-primary" data-a="save">Enregistrer</button></div><p class="ad-note">Retirer un professeur supprime définitivement son carnet (une sauvegarde préalable est conseillée).</p>';
+ if(S.sub==="etab") return st+'<h3 class="ad-h">Nom de l\'établissement</h3><div class="ad-row"><input class="ad-in" data-f="name" value="'+E(d.name)+'" style="min-width:320px"><button type="button" class="btn btn-primary" data-a="save">Enregistrer</button></div><h3 class="ad-h" style="margin-top:28px;color:#b91c1c">Zone dangereuse</h3><p class="ad-note">Supprime l\'établissement, tous ses professeurs, élèves, données et sauvegardes. Action irréversible.</p><button type="button" class="btn btn-danger" data-a="delEtab">Supprimer cet établissement</button>';
+ const sn=S.snaps.filter(s=>s.etabId===e.id);
+ return st+'<h3 class="ad-h">Sauvegardes de '+E(e.name)+'</h3><div class="ad-row"><input class="ad-in" id="adSnapName" placeholder="Nom de la sauvegarde" style="min-width:280px"><button type="button" class="btn btn-primary" data-a="snapSave">Sauvegarder toutes les données maintenant</button></div>'+
+ (sn.length?'<div style="overflow-x:auto"><table class="ad-t"><thead><tr><th>Nom</th><th>Date</th><th>Type</th><th>Actions</th></tr></thead><tbody>'+sn.map(s=>'<tr><td>'+E(s.name)+(e.publiee===s.id?' <span class="ad-pub">version publiée</span>':"")+'</td><td>'+fmt(s.date)+'</td><td>'+(KIND[s.kind]||s.kind)+'</td><td class="ad-act"><button type="button" class="btn btn-primary" data-a="publish" data-id="'+s.id+'" title="Remplace les données en ligne par cette version">Publier / revenir à cette version</button> <select data-s="'+s.id+'">'+e.profs.map(p=>'<option value="'+E(p.pid)+'">'+E((p.civ==="Madame"?"Mme ":"M. ")+p.last)+'</option>').join("")+'</select><button type="button" class="btn" data-a="csnap" data-id="'+s.id+'">Consulter</button><button type="button" class="btn btn-danger" data-a="snapDel" data-id="'+s.id+'">Supprimer</button></td></tr>').join("")+"</tbody></table></div>":'<p class="ad-note">Aucune sauvegarde pour le moment.</p>')+
+ '<p class="ad-note">« Publier » sauvegarde d\'abord l\'état actuel (type « Automatique »), puis remplace les données en ligne de tous les professeurs de l\'établissement. « Consulter » ouvre la version en lecture seule, depuis le compte du professeur choisi.</p>';
+}
+function consultView(){
+ return '<h3 class="ad-h">Consultation des comptes professeurs</h3><p class="ad-note">Ouvre le compte d\'un professeur tel qu\'il le voit, en lecture seule (rien ne peut être modifié).</p>'+
+ S.reg.etabs.map(e=>'<div class="ad-etab"><strong>'+E(e.name)+'</strong><div class="ad-row">'+e.profs.map(p=>'<button type="button" class="btn" data-a="consult" data-e="'+e.id+'" data-p="'+E(p.pid)+'">'+E((p.civ==="Madame"?"Mme ":"M. ")+p.last+" "+p.first)+'</button>').join("")+'</div></div>').join("")+'<div id="adStage"></div>';
+}
+function findProf(eid,pid){ const e=S.reg.etabs.find(x=>x.id===eid); return e&&e.profs.find(p=>p.pid===pid); }
+function overlay(p,snap,title){
+ const o=document.createElement("div"); o.className="ad-ov";
+ o.innerHTML='<div class="ad-ovbar"><strong>'+E(title)+'</strong><button type="button" class="btn" data-x>Fermer</button></div><div class="ad-ovbox"></div>';
+ o.addEventListener("click",e=>{ if(e.target.closest("[data-x]")) o.remove(); });
+ document.body.appendChild(o); mountFrame(o.querySelector(".ad-ovbox"),p,snap);
+}
+function newEtab(){
+ const nw={name:"",profs:[blank()]};
+ const m=modal("Nouvel établissement",'<label class="ad-lab">Nom de l\'établissement</label><input class="ad-in" id="adNName" style="width:100%"><label class="ad-lab" style="margin-top:14px">Professeurs (au moins un)</label><div id="adNProfs"></div><div class="ad-row"><button type="button" class="btn" id="adNAdd">+ Ajouter un professeur</button></div>',"Créer l'établissement",async()=>{
+  nw.name=m.querySelector("#adNName").value.trim();
+  if(!nw.name) return "Le nom de l'établissement est obligatoire.";
+  if(!nw.profs.length||nw.profs.some(p=>!p.last.trim()||!p.user.trim()||!p.pass)) return "Chaque professeur doit avoir un nom, un identifiant et un mot de passe.";
+  const j=await call("adminAddEtab",{name:nw.name,profs:nw.profs}); if(!j) return "Création impossible (voir le message ci-dessus).";
+  S.tab=S.reg.etabs[S.reg.etabs.length-1].id; S.sub="profs"; render(); return ""; },900);
+ const draw=()=>{ m.querySelector("#adNProfs").innerHTML=profTable(nw.profs); };
+ m.addEventListener("input",e=>{ const t=e.target; if(t.dataset.f&&t.closest("#adNProfs")) nw.profs[t.dataset.i][t.dataset.f]=t.value; });
+ m.addEventListener("change",e=>{ const t=e.target; if(t.dataset.f&&t.closest("#adNProfs")) nw.profs[t.dataset.i][t.dataset.f]=t.value; });
+ m.addEventListener("click",e=>{ if(e.target.id==="adNAdd"){ nw.profs.push(blank()); draw(); } const d=e.target.closest('[data-a="delprof"]'); if(d&&nw.profs.length>1){ nw.profs.splice(+d.dataset.i,1); draw(); } });
+ draw();
+}
+document.addEventListener("input",e=>{ const t=e.target; if(!t.dataset||!t.dataset.f||!t.closest("#adBody")) return; const e0=S.reg.etabs.find(x=>x.id===S.tab); if(!e0) return; const d=dr(e0); if(t.dataset.i!=null) d.profs[t.dataset.i][t.dataset.f]=t.value; else d[t.dataset.f]=t.value; });
+document.addEventListener("click",async ev=>{
+ const b=ev.target.closest("#adminRoot [data-a]"); if(!b) return;
+ const a=b.dataset.a, e=S.reg.etabs.find(x=>x.id===S.tab);
+ if(a==="tab"){ S.tab=b.dataset.id; render(); }
+ else if(a==="sub"){ S.sub=b.dataset.k; render(); }
+ else if(a==="new") newEtab();
+ else if(a==="addprof"){ dr(e).profs.push(blank()); render(); }
+ else if(a==="delprof"){ const d=dr(e); if(d.profs.length<2){ alert("Un établissement doit garder au moins un professeur."); return; } if(confirm("Retirer ce professeur ? Son carnet sera supprimé à l'enregistrement.")){ d.profs.splice(+b.dataset.i,1); render(); } }
+ else if(a==="save"){ const d=dr(e); const j=await call("adminSaveEtab",{id:e.id,name:d.name,profs:d.profs}); if(j){ delete S.draft[e.id]; render(); } }
+ else if(a==="delEtab"){ if(confirm("Supprimer « "+e.name+" » et TOUTES ses données (professeurs, élèves, sauvegardes) ? Irréversible.")&&confirm("Dernière confirmation : supprimer définitivement « "+e.name+" » ?")){ const j=await call("adminDelEtab",{id:e.id}); if(j){ delete S.draft[e.id]; S.tab=""; render(); } } }
+ else if(a==="snapSave"){ const n=($("adSnapName").value||"").trim(); if(!n){ alert("Donnez un nom à la sauvegarde."); return; } if(await call("adminSnapSave",{etabId:e.id,name:n})) render(); }
+ else if(a==="snapDel"){ if(confirm("Supprimer cette sauvegarde ?")&&await call("adminSnapDel",{id:b.dataset.id})) render(); }
+ else if(a==="publish"){ const s=S.snaps.find(x=>x.id===b.dataset.id); if(confirm("Publier la version « "+s.name+" » ?\nLes données actuelles de tous les professeurs de l'établissement seront remplacées (l'état actuel est sauvegardé avant).")&&await call("adminSnapRestore",{id:s.id})){ delete S.draft[e.id]; render(); alert("Version publiée."); } }
+ else if(a==="csnap"){ const s=S.snaps.find(x=>x.id===b.dataset.id), sel=b.parentNode.querySelector("select"), p=e.profs.find(x=>x.pid===sel.value); overlay(p,s.id,"Version « "+s.name+" » — "+p.last); }
+ else if(a==="consult"){ const p=findProf(b.dataset.e,b.dataset.p); const st=$("adStage"); if(p&&st) mountFrame(st,p,""); }
+});
+
+/* ── Paramétrage > Nouvelle année (compte professeur) ── */
+(function(){
+ const tabs=$("paramTabs"); if(!tabs) return;
+ const btn=document.createElement("button"); btn.type="button"; btn.className="subtab-btn"; btn.dataset.p="year"; btn.textContent="Nouvelle année"; tabs.appendChild(btn);
+ const pane=document.createElement("div"); pane.id="paramPane_year"; pane.hidden=true;
+ const opts=[["schedule","Emploi du temps","Supprime tous les cours et les feuilles d'appel."],["groups","Groupes","Supprime les groupes et leurs notes globales. Les élèves sont conservés."],["classes","Classes","Supprime chaque classe en entier : élèves, notes, appréciations et toutes données associées."],["tests","Tests en ligne","Supprime les tests et les rendus des élèves."],["subjects","Matières","Vide le registre des matières."],["comps","Compétences","Supprime la hiérarchie des compétences et les évaluations de compétences."]];
+ pane.innerHTML='<p class="ad-note" style="margin-top:0">Cochez ce que vous souhaitez réinitialiser. Une sauvegarde nommée est créée avant toute suppression.</p>'+opts.map(o=>'<label class="ad-chk"><input type="checkbox" value="'+o[0]+'"><span><strong>'+o[1]+'</strong><br><small>'+o[2]+'</small></span></label>').join("")+'<div class="ad-row"><button type="button" class="btn btn-danger" id="yearGo">Réinitialiser…</button></div>';
+ tabs.parentNode.appendChild(pane);
+ tabs.addEventListener("click",e=>{ const b=e.target.closest("[data-p]"); if(!b) return; const y=b.dataset.p==="year"; pane.hidden=!y; if(y){ tabs.querySelectorAll("[data-p]").forEach(x=>x.classList.toggle("active",x===b)); ["subj","comp","imp"].forEach(k=>{ const p=$("paramPane_"+k); if(p) p.hidden=true; }); } },true);
+ $("paramBtn")?.addEventListener("click",()=>{ pane.hidden=true; });
+ $("yearGo").addEventListener("click",async()=>{
+  if(typeof EDC!=="undefined"&&EDC&&EDC.ro) return;
+  const o={}; pane.querySelectorAll("input:checked").forEach(c=>{ o[c.value]=true; });
+  if(!Object.keys(o).length){ alert("Cochez au moins un élément."); return; }
+  const y=new Date().getFullYear(), m=new Date().getMonth()<7?y-1:y;
+  const name=await ask("Renommer cette sauvegarde","Nom de la sauvegarde créée avant la réinitialisation","Année "+m+"-"+(m+1),"Sauvegarder et réinitialiser");
+  if(!name) return;
+  if(!confirm("Réinitialiser : "+Object.keys(o).map(k=>opts.find(x=>x[0]===k)[1]).join(", ")+" ?\nUne sauvegarde « "+name+" » est créée avant.")) return;
+  try{ if(typeof IS_MODIFIED!=="undefined"&&IS_MODIFIED) await cloudPush(); }catch(x){}
+  try{ const j=await api("resetYear",{opts:o,name:name}); if(!j.ok){ alert(j.error||"Erreur"); return; } alert("Sauvegarde « "+name+" » créée. Réinitialisation effectuée."); location.reload(); }
+  catch(x){ alert("Échec : "+(x.message||x)); }
+ });
+})();
+})();
+
 </script>
 </body>
 </html>
