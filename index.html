@@ -1812,6 +1812,27 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
  .notes-list, #classesView .notes-list{ column-gap:24px; row-gap:13px }
  .note-pill{ min-height:0 }
 }
+
+/* ═══ Carnet de notes : onglet unique pour le prof (Élèves + Classes & groupes) ═══ */
+body:not(.student-mode) .tab-btn[data-target="elevesView"],
+body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !important }
+.tab-btn.carnet-on{
+ background:#fff; color:#00508f; border-color:var(--border); font-weight:700;
+ padding-bottom:14px; margin-bottom:-1px; z-index:3;
+ box-shadow:inset 0 4px 0 #0068aa, 0 -3px 8px rgba(0,80,143,.08);
+}
+.carnet-sub{ max-width:1400px; margin:10px auto 0; padding:0 12px; position:relative; z-index:2 }
+.carnet-sub .subtabs{ margin-bottom:0 }
+.carnet-sub .subtab-btn{ display:inline-flex; align-items:center; gap:8px }
+.carnet-sub .subtab-btn svg{ display:block; flex:none }
+@media (max-width:900px){ .carnet-sub{ display:none !important } }
+.dr-grp-head .dr-chev{ flex:0 0 auto; display:inline-flex; transition:transform .2s }
+.dr-grp-head .dr-chev svg{ display:block }
+.dr-grp-head.open .dr-chev{ transform:rotate(180deg) }
+.dr-grp-head.dr-parent-on{ background:#dcedf8; color:#08487f }
+.dr-sublist{ display:none; margin:0 0 4px 22px; padding-left:8px; border-left:2px solid #d3dff3 }
+.dr-sublist.open{ display:block }
+.dr-sublist .dr-item{ min-height:44px; font-size:15px }
 </style>
 </head>
 <body class="auth-pending">
@@ -1837,6 +1858,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
   <button class="tab-btn" data-target="scheduleView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span class="tab-lbl">Emploi du temps</span></button>
   <button class="tab-btn prof-only-tab" data-target="appelView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg><span class="tab-lbl">Feuille d'appel</span></button>
   <button class="tab-btn" data-target="homeworkView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><defs><mask id="hwmt"><rect width="24" height="24" fill="#fff"/><path d="M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z" fill="#000" stroke="#000" stroke-width="4.5"/></mask></defs><g mask="url(#hwmt)"><path d="M3 6.5h15M3 11.5h12M3 16.5h8"/></g><path d="M17.8 3.8l2.4 2.4L10 16.4l-3.6 1 1-3.6z"/></svg><span class="tab-lbl">Devoirs</span></button>
+  <button class="tab-btn prof-only-tab" id="carnetBtn" type="button" data-label="Carnet de notes" aria-haspopup="true"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><text x="12" y="9.6" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">18</text><path d="M5 12.6h14"/><text x="12" y="22.8" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">20</text></svg><span class="tab-lbl">Carnet de notes</span></button>
   <button class="tab-btn" data-target="elevesView"><svg class="tab-ico" style="width:33px;height:20px" viewBox="0 0 40 24" width="33" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-4 0)"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></g><text x="28" y="9.6" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">18</text><path d="M21 12.6h14" stroke-width="2"/><text x="28" y="22.8" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">20</text></svg><span class="tab-lbl">Notes Élèves</span></button>
   <button class="tab-btn" data-target="classesView"><svg class="tab-ico" style="width:38px;height:20px" viewBox="0 0 46 24" width="38" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/><text x="37" y="9.6" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">18</text><path d="M30 12.6h14" stroke-width="2"/><text x="37" y="22.8" text-anchor="middle" font-size="10.5" font-weight="800" font-family="Arial,Helvetica,sans-serif" fill="#0068aa" stroke="none">20</text></svg><span class="tab-lbl">Notes Communes</span></button>
   <button class="tab-btn" data-target="appreciationsView"><svg class="tab-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="7.5" r="3.3"/><path d="M3.5 20.5v-1.2a5.2 5.2 0 0 1 5.2-5.2h3.6"/><path d="M19 11.2l2.4 2.4-7.3 7.3-3.4.9.9-3.4z"/></svg><span class="tab-lbl">Appréciations</span></button>
@@ -1851,6 +1873,7 @@ header .lock-btn{ background:rgba(255,255,255,.15); border:1px solid rgba(255,25
   </div>
  </div>
 </div>
+<div class="carnet-sub" id="carnetSub" style="display:none"><div class="subtabs" role="tablist" aria-label="Carnet de notes"><button type="button" class="subtab-btn" data-carnet="eleves" role="tab"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></svg><span>Élèves</span></button><button type="button" class="subtab-btn" data-carnet="classes" role="tab"><svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/></svg><span>Classes &amp; groupes</span></button></div></div>
 <div class="container">
 <section id="homeView" class="view active">
  <div class="home-grid">
@@ -16608,19 +16631,42 @@ document.getElementById("schDelete").onclick=()=>{
  const body=drawer.querySelector("#drBody");
 
  const visible=b=>getComputedStyle(b).display!=="none";
- const labelOf=b=>b.dataset.label||(b.querySelector(".tab-lbl")?b.querySelector(".tab-lbl").textContent.trim():b.textContent.trim());
+ const labelOf=b=>((b.dataset.target==="elevesView"||b.dataset.target==="classesView")&&!document.body.classList.contains("student-mode"))?"Carnet de notes":b.dataset.label||(b.querySelector(".tab-lbl")?b.querySelector(".tab-lbl").textContent.trim():b.textContent.trim());
+ let carnetOpen=null;
+ const CARNET_ICO_1='<circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/>', CARNET_ICO_N='<circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/>';
  function buildItems(){
-  body.innerHTML=""; let sepDone=false;
-  Array.from(tabsEl.querySelectorAll(".tab-btn")).sort((a,b)=>(a.dataset.target?0:1)-(b.dataset.target?0:1)).forEach(b=>{
+  body.innerHTML=""; let sepDone=false; carnetOpen=null;
+  Array.from(tabsEl.querySelectorAll(".tab-btn")).sort((a,b)=>((a.dataset.target||a.id==="carnetBtn")?0:1)-((b.dataset.target||b.id==="carnetBtn")?0:1)).forEach(b=>{
    if(!visible(b)) return;
-   const key=b.dataset.target||b.id;
-   if(!b.dataset.target && !sepDone){ const sp=document.createElement("div"); sp.className="dr-sep"; body.appendChild(sp); sepDone=true; }
+   const isCarnet=b.id==="carnetBtn", key=isCarnet?"carnetBtn":(b.dataset.target||b.id);
+   if(!b.dataset.target && !isCarnet && !sepDone){ const sp=document.createElement("div"); sp.className="dr-sep"; body.appendChild(sp); sepDone=true; }
    const it=document.createElement("button"); it.type="button";
    it.className="dr-item"+(b.classList.contains("active")?" active":"");
    const warn=b.classList.contains("has-miss-call")||b.classList.contains("has-empty-eval");
    const hid=b.classList.contains("has-hidden-eval")&&!document.body.classList.contains("student-mode");
-   it.innerHTML='<span class="dr-ico">'+((document.body.classList.contains("student-mode")&&STU_ICONS[key])||ICONS[key]||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 9.4v5.3" stroke="#dc2626" stroke-width="2.7" stroke-linecap="round"/><circle cx="12" cy="18" r="1.55" fill="#dc2626"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
+   it.innerHTML='<span class="dr-ico">'+((document.body.classList.contains("student-mode")&&STU_ICONS[key])||(isCarnet?STU_ICONS.elevesView:ICONS[key])||"•")+'</span><span class="dr-lbl"></span>'+(warn?'<span class="dr-bdg dr-pas dr-pas-warn" title="À traiter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2.8 1.6 20.6c-.4.8.1 1.6 1 1.6h18.8c.9 0 1.4-.8 1-1.6L12 2.8z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 9.4v5.3" stroke="#dc2626" stroke-width="2.7" stroke-linecap="round"/><circle cx="12" cy="18" r="1.55" fill="#dc2626"/></svg></span>':"")+(hid?'<span class="dr-bdg dr-pas dr-pas-eye" title="Évaluations masquées"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#0a7fbf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span>':"")+(b.dataset.pendingCount?'<span class="dr-bdg dr-cnt" title="Copies à corriger">'+b.dataset.pendingCount+'</span>':"");
    it.querySelector(".dr-lbl").textContent=labelOf(b);
+   if(isCarnet){
+    const eB=tabsEl.querySelector('.tab-btn[data-target="elevesView"]'), cB=tabsEl.querySelector('.tab-btn[data-target="classesView"]');
+    const on=b.classList.contains("carnet-on");
+    if(carnetOpen===null) carnetOpen=on;
+    it.className="dr-item dr-grp-head"+(on?" dr-parent-on":"")+(carnetOpen?" open":"");
+    it.setAttribute("aria-expanded",carnetOpen?"true":"false");
+    it.insertAdjacentHTML("beforeend",'<span class="dr-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>');
+    const list=document.createElement("div"); list.className="dr-sublist"+(carnetOpen?" open":"");
+    const mk=(lbl,svg,real)=>{
+     const si=document.createElement("button"); si.type="button";
+     si.className="dr-item dr-sub"+(real&&real.classList.contains("active")?" active":"");
+     si.innerHTML='<span class="dr-ico">'+svg+'</span><span class="dr-lbl">'+lbl+'</span>';
+     si.addEventListener("click",()=>{ close(); if(real) real.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
+     list.appendChild(si);
+    };
+    mk("Élèves",'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+CARNET_ICO_1+'</svg>',eB);
+    mk("Classes &amp; groupes",'<svg viewBox="0 0 24 24" width="24" height="22" fill="none" stroke="#0068aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+CARNET_ICO_N+'</svg>',cB);
+    it.addEventListener("click",()=>{ carnetOpen=!carnetOpen; it.classList.toggle("open",carnetOpen); list.classList.toggle("open",carnetOpen); it.setAttribute("aria-expanded",carnetOpen?"true":"false"); });
+    body.appendChild(it); body.appendChild(list);
+    return;
+   }
    it.addEventListener("click",()=>{ close(); b.click(); setTimeout(()=>window.scrollTo({top:0}),0); });
    body.appendChild(it);
   });
@@ -17050,7 +17096,7 @@ function renderTimeline(){
   const isNew=(it.type==="msg")?true:(it.type==="grade"?!!it.today:!!it.todo);
   let dot;
   if(it.type==="grade") dot='<span class="tl-dot'+(isNew?" new":"")+'"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="9.6" text-anchor="middle" font-size="10.5" font-weight="600" font-family="Arial,Helvetica,sans-serif" fill="currentColor">18</text><path d="M5 12.6h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="22.8" text-anchor="middle" font-size="10.5" font-weight="600" font-family="Arial,Helvetica,sans-serif" fill="currentColor">20</text></svg></span>';
-  else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'">'+esc(it.ini)+'</span>';
+  else if(it.type==="sub") dot='<span class="tl-dot sub'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg></span>';
   else if(it.type==="hwt") dot='<span class="tl-dot hwt'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 10l2.5 2.5L16 7"/></svg></span>';
   else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
@@ -17743,6 +17789,29 @@ $("paramBtn")?.addEventListener("click",()=>{ openManageSubjectsModal(); paramSh
 $("paramTabs")?.addEventListener("click",e=>{ const b=e.target.closest("[data-p]"); if(b) paramShow(b.dataset.p); });
 })();
 
+/* ═══ Carnet de notes (prof) : un seul onglet, deux sous-onglets (Élèves / Classes & groupes) ═══ */
+(function(){
+ const car=document.getElementById("carnetBtn"), sub=document.getElementById("carnetSub");
+ const bE=document.querySelector('#mainTabs .tab-btn[data-target="elevesView"]'), bC=document.querySelector('#mainTabs .tab-btn[data-target="classesView"]');
+ if(!car||!bE||!bC) return;
+ const isStu=()=>document.body.classList.contains("student-mode");
+ function sync(){
+  const eA=bE.classList.contains("active"), cA=bC.classList.contains("active");
+  const on=!isStu()&&(eA||cA);
+  car.classList.toggle("carnet-on",on);
+  if(sub){
+   sub.style.display=on?"":"none";
+   sub.querySelectorAll("[data-carnet]").forEach(b=>{ const a=b.dataset.carnet==="eleves"?eA:cA; b.classList.toggle("active",a); b.setAttribute("aria-selected",a?"true":"false"); });
+  }
+  ["has-empty-eval","has-hidden-eval"].forEach(c=>car.classList.toggle(c,bE.classList.contains(c)||bC.classList.contains(c)));
+ }
+ car.addEventListener("click",()=>{ if(!(bE.classList.contains("active")||bC.classList.contains("active"))) bE.click(); sync(); });
+ if(sub) sub.querySelectorAll("[data-carnet]").forEach(b=>b.addEventListener("click",()=>(b.dataset.carnet==="eleves"?bE:bC).click()));
+ const mo=new MutationObserver(sync);
+ [bE,bC].forEach(b=>mo.observe(b,{attributes:true,attributeFilter:["class"]}));
+ mo.observe(document.body,{attributes:true,attributeFilter:["class"]});
+ sync();
+})();
 </script>
 </body>
 </html>
