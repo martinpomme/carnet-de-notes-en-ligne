@@ -17810,7 +17810,7 @@ document.addEventListener("keydown",e=>{
 
 /* ───────── Paramétrage : Matières + Compétences ───────── */
 function paramShow(w){
- ["subj","comp","imp","lock"].forEach(k=>{
+ ["subj","comp","imp","lock","year"].forEach(k=>{
   const pane=$("paramPane_"+k); if(pane) pane.hidden=(k!==w);
   document.querySelector('#paramTabs [data-p="'+k+'"]')?.classList.toggle("active",k===w);
  });
