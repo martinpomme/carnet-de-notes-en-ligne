@@ -17301,14 +17301,13 @@ function smsCollect(){
 function smsNotifyCheck(){
  try{
   if(!SMS_CFG.enabled||typeof AUTH==="undefined"||AUTH.role!=="prof") return;
-  const KEY="sms_seen_tl3", raw=localStorage.getItem(KEY), first=(raw===null);
+  const KEY="sms_seen_tl4", raw=localStorage.getItem(KEY), first=(raw===null);
   const seen=new Set(first?[]:JSON.parse(raw||"[]"));
   const items=smsCollect();
   const fresh=items.filter(it=>!seen.has(it.k));
   if(!first && !fresh.length) return;
   items.forEach(it=>seen.add(it.k));
   localStorage.setItem(KEY,JSON.stringify([...seen].slice(-1500)));
-  if(first){ smsSend("✅ Alertes timeline activées ("+fresh.length+" notifications existantes ignorées)"); return; }
   fresh.slice(0,15).forEach((it,i)=>setTimeout(()=>smsSend(it.txt),i*700));
  }catch(e){ console.warn("sms:",e); }
 }
