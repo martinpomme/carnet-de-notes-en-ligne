@@ -17248,10 +17248,49 @@ function updateHomeBadges(items){
  set("hb-red",others); set("hb-blue",msgs);
  b.setAttribute("aria-label","Accueil"+(msgs?", "+msgs+" message"+(msgs>1?"s":"")+" non lu"+(msgs>1?"s":""):"")+(others?", "+others+" notification"+(others>1?"s":""):""));
 }
+/* ═══ SMS : alerte à chaque nouvelle notification de la timeline (prof) ═══ */
+const SMS_CFG={
+ enabled:true,
+ phone:"0633176305",
+ provider:"ntfy",          // "freemobile" (ton propre numéro Free) ou "webhook" (Twilio, OVH, Brevo… via une URL à toi)
+ freeUser:"",                    // Free Mobile : identifiant (n° abonné à 8 chiffres)
+ freeKey:"",                     // Free Mobile : clé d'identification SMS
+ webhookUrl:""                   // reçoit un POST JSON {to, message},
+ ntfyTopic:"ecoledirecte-martinpomme-sms-notification"   // nom secret de ton canal ntfy (mets le tien, long et unique)
+};
+function smsSend(msg){
+ try{
+  if(SMS_CFG.provider==="ntfy"){
+   if(!SMS_CFG.ntfyTopic) return;
+   fetch("https://ntfy.sh/"+encodeURIComponent(SMS_CFG.ntfyTopic),{method:"POST",mode:"no-cors",body:msg}).catch(()=>{});
+  }else if(SMS_CFG.provider==="freemobile"){
+   if(!SMS_CFG.freeUser||!SMS_CFG.freeKey) return;
+   fetch("https://smsapi.free-mobile.fr/sendmsg?user="+encodeURIComponent(SMS_CFG.freeUser)+"&pass="+encodeURIComponent(SMS_CFG.freeKey)+"&msg="+encodeURIComponent(msg),{mode:"no-cors"}).catch(()=>{});
+  }else if(SMS_CFG.webhookUrl){
+   fetch(SMS_CFG.webhookUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({to:"+33"+SMS_CFG.phone.replace(/^0/,""),message:msg})}).catch(()=>{});
+  }
+ }catch(e){}
+}
+function smsNotifyCheck(items){
+ try{
+  if(!SMS_CFG.enabled||typeof AUTH==="undefined"||AUTH.role!=="prof") return;
+  const KEY="sms_seen_tl", raw=localStorage.getItem(KEY), first=(raw===null);
+  const seen=new Set(first?[]:JSON.parse(raw||"[]"));
+  const fresh=(items||[]).filter(it=>it&&it.k&&(it.type==="msg"||it.todo)&&!seen.has(it.k));
+  if(!fresh.length) return;
+  fresh.forEach(it=>seen.add(it.k));
+  localStorage.setItem(KEY,JSON.stringify([...seen].slice(-800)));
+  if(first) return;               // 1er chargement : on mémorise l'existant sans envoyer de SMS
+  const lines=fresh.slice(0,3).map(it=>"• "+it.title+(it.sub?" ("+it.sub+")":""));
+  if(fresh.length>3) lines.push("… +"+(fresh.length-3)+" autres");
+  smsSend("Timeline prof – "+fresh.length+" nouveauté"+(fresh.length>1?"s":"")+" :\n"+lines.join("\n"));
+ }catch(e){ console.warn("sms:",e); }
+}
 function renderTimeline(){
  const host=$("homeTl"); if(!host) return;
  const items=tlItems();
  updateHomeBadges(items);
+ smsNotifyCheck(items);
  if(!items.length){ host.innerHTML='<p class="home-empty">Rien de nouveau pour le moment.</p>'; return; }
  let html='<div class="tl-list">', lastDay="";
  items.forEach(it=>{
