@@ -17255,7 +17255,7 @@ const SMS_CFG={
  provider:"ntfy",          // "freemobile" (ton propre numéro Free) ou "webhook" (Twilio, OVH, Brevo… via une URL à toi)
  freeUser:"",                    // Free Mobile : identifiant (n° abonné à 8 chiffres)
  freeKey:"",                     // Free Mobile : clé d'identification SMS
- webhookUrl:""                   // reçoit un POST JSON {to, message},
+ webhookUrl:"",                  // reçoit un POST JSON {to, message}
  ntfyTopic:"ecoledirecte-martinpomme-sms-notification"   // nom secret de ton canal ntfy (mets le tien, long et unique)
 };
 function smsSend(msg){
