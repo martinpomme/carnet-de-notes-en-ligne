@@ -89,6 +89,21 @@ h1{margin:0; font-size:24px; font-weight:700; letter-spacing:-.01em }
 .subtab-btn{ padding:8px 12px; border:1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer }
 .subtab-btn.active{ background:var(--grad); color:#fff; border-color:#00508f }
 .subtab-view{ display:none }
+.bys-table{ border-collapse:separate; border-spacing:0; font-size:13px; table-layout:fixed }
+.bys-table th,.bys-table td{ border:1px solid var(--border); padding:0; background:#fff }
+.bys-head{ padding:5px 2px !important; overflow:hidden; background:#ecf7fd !important; text-align:center; cursor:pointer; position:sticky; top:0; z-index:2 }
+.bys-head:hover{ background:#d8eefb !important }
+.bys-label{ font-weight:700; color:#08487f; font-size:12px; line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere }
+.bys-meta{ font-weight:400; font-size:10px; line-height:1.25; color:#64748b; overflow:hidden; overflow-wrap:anywhere }
+.bys-stu{ padding:6px 10px !important; white-space:nowrap; overflow:hidden; position:sticky; left:0; z-index:1; background:#f8fafc !important; font-weight:600 }
+.bys-corner{ z-index:3; top:0 }
+.bys-input{ width:100%; min-width:0; box-sizing:border-box; border:0; padding:7px 2px; font-variant-numeric:tabular-nums; text-align:center; font:inherit; background:transparent }
+.bys-input:focus{ outline:2px solid #1a8ad0; outline-offset:-2px; background:#fff }
+.bys-input[readonly]{ background:#f1f5f9; cursor:pointer }
+.bys-avg{ position:sticky; z-index:1; background:#f8fafc !important; text-align:center; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:6px 2px !important }
+.bys-avg-head{ position:sticky; top:0; z-index:3; background:#ecf7fd !important; text-align:center; font-weight:700; color:#08487f; padding:5px 2px !important; font-size:12px; cursor:default }
+.bys-bad{ background:#fee2e2 !important }
+.bys-over{ color:#dc2626; font-weight:700 }
 .subtab-view.active{ display:block }
 .period-tabs{ display:flex; gap:8px; margin-bottom:12px }
 .period-btn{ padding:6px 10px; border: 1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer; color:#1f2937 }
@@ -8641,8 +8656,13 @@ function openClass(clsId){
   <div style="color:#64748b;">Élèves: ${(cls.memberIds||[]).length}</div>
  </div>
  <div class="subtabs">
-  <button class="subtab-btn" data-sub="classGestion">Gestion</button>
+  <button class="subtab-btn" data-sub="classGestion">Gestion générale</button>
+  <button class="subtab-btn" data-sub="classBySubject">Gestion par matière</button>
   <button class="subtab-btn" data-sub="classPreview">Aperçu</button>
+ </div>
+ <div id="classBySubject" class="subtab-view">
+  <div id="classBySubjectTabs" class="period-tabs" style="margin-bottom:12px; gap:8px; overflow-x:auto; padding-bottom:8px; border-bottom:1px solid #e2e8f0;"></div>
+  <div id="classBySubjectContent"></div>
  </div>
  <div id="classGestion" class="subtab-view active">
   <div class="period-tabs">
@@ -8675,6 +8695,7 @@ function openClass(clsId){
    const target = content.querySelector(`#${btn.dataset.sub}`);
    target.classList.add("active");
    if(btn.dataset.sub==="classPreview") renderClassPreview(clsId);
+   if(btn.dataset.sub==="classBySubject") renderClassBySubject(clsId);
   });
  });
  content.querySelectorAll(".subtab-view").forEach(v=>v.classList.toggle("active",v.id===previousSub));
@@ -8707,6 +8728,117 @@ function openClass(clsId){
 
  ["T1","T2","T3","T4"].forEach(period=>renderClassPeriod(clsId,period));
  if(previousSub==="classPreview") renderClassPreview(clsId);
+ if(previousSub==="classBySubject") renderClassBySubject(clsId);
+}
+
+// ── GESTION PAR MATIÈRE : tableau type tableur (élèves × évaluations) ─────────
+let CLASS_BYSUBJECT_ACTIVE={};   // classId -> matière affichée
+function fmtGrade2(n){
+ if(typeof n!=="number"||isNaN(n)) return "";
+ return n.toFixed(2);   // 7 -> "7.00", 12.5 -> "12.50", 20 -> "20.00"
+}
+function renderClassBySubject(classId){
+ const cls=classLike(classId); if(!cls) return;
+ const tabsHost=document.getElementById("classBySubjectTabs");
+ const host=document.getElementById("classBySubjectContent");
+ if(!tabsHost||!host) return;
+ const subjects=(cls.subjects||[]).filter(s=>s!=="Compétences");
+ if(!subjects.length){ tabsHost.innerHTML=""; host.innerHTML='<div style="color:#64748b;">Aucune matière.</div>'; return; }
+ let active=CLASS_BYSUBJECT_ACTIVE[classId];
+ if(!subjects.includes(active)) active=CLASS_BYSUBJECT_ACTIVE[classId]=subjects[0];
+ tabsHost.innerHTML=subjects.map(s=>`<button class="period-btn${s===active?" active":""}" data-bysubj="${escHtml(s)}">${escHtml(s)}</button>`).join("");
+ tabsHost.querySelectorAll("button[data-bysubj]").forEach(b=>b.addEventListener("click",()=>{
+  CLASS_BYSUBJECT_ACTIVE[classId]=b.dataset.bysubj; renderClassBySubject(classId);
+ }));
+
+ const evals=(cls.evals||[]).filter(ev=>ev.subject===active).sort((a,b)=>dateKey(a)-dateKey(b));
+ const students=(cls.memberIds||[]).map(id=>DATA.students.find(s=>s.id===id)).filter(Boolean)
+   .sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first));
+ if(!evals.length){ host.innerHTML='<div style="color:#64748b;">Aucune évaluation dans cette matière.</div>'; return; }
+ if(!students.length){ host.innerHTML='<div style="color:#64748b;">Aucun élève dans cette classe.</div>'; return; }
+
+ const findNote=(sid,ev)=>(DATA.notes[sid]||[]).find(m=>m.classCommon&&m.classId===classId&&m.classNoteId===ev.id);
+ const cellValue=(sid,ev)=>{
+  const n=findNote(sid,ev); if(!n) return "";
+  if(isSpecial(n)) return n.noteText;
+  return typeof n.note==="number"?fmtGrade2(n.note):"";
+ };
+ const isLockedEv=ev=>ev.period!=="YEAR"&&!!LOCKED_PERIODS[ev.period];
+
+ // Largeurs : colonne des noms = nom le plus long ; toutes les autres colonnes = largeur FIXE
+ const COL_W=64;
+ const _cv=document.createElement("canvas").getContext("2d");
+ _cv.font="600 13px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
+ const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+24;
+ const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
+ const avgOf=sid=>getStudentAverageForSubject(sid,active,"YEAR");
+
+ const head=evals.map((ev,ci)=>`<th class="bys-head" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Ouvrir l'évaluation">
+   <div class="bys-label">${escHtml(ev.label||"(sans libellé)")}${ev.hideFromStudent?" 👁️":""}</div>
+   <div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
+   <div class="bys-meta">/${fmt(ev.outof)}</div>
+   <div class="bys-meta">${formatDateAAAA(ev.dateJJMMAA)}</div>
+  </th>`).join("");
+
+ const rows=students.map((stu,ri)=>{
+  const cells=evals.map((ev,ci)=>{
+   const hasBar=ev.bareme?.criteria?.length>0;
+   const ro=hasBar||isLockedEv(ev);
+   return `<td class="bys-cell"><input type="text" class="bys-input" inputmode="decimal" autocomplete="off" data-stu="${stu.id}" data-ev="${ev.id}" data-r="${ri}" data-c="${ci}" value="${escHtml(cellValue(stu.id,ev))}" ${ro?`readonly ${hasBar?'title="Évaluation avec barème : cliquer pour saisir par critère"':'title="Période verrouillée"'}`:""}></td>`;
+  }).join("");
+  return `<tr><td class="bys-stu" style="width:${NAME_W}px">${escHtml(stu.last)} ${escHtml(stu.first)}</td><td class="bys-avg" data-avg-stu="${stu.id}" style="left:${NAME_W}px;width:${COL_W}px">${fmtAvg(avgOf(stu.id))}</td>${cells}</tr>`;
+ }).join("");
+
+ host.innerHTML=`<div style="overflow:auto;max-height:70vh;"><table class="bys-table" style="width:${NAME_W+COL_W*(evals.length+1)}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${COL_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moy.</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>
+  <div style="margin-top:8px;color:#64748b;font-size:12px;">Cliquez sur une case pour saisir la note (Entrée = élève suivant). Valeurs spéciales : Abs, Disp, NE, NR, EA, X.</div>`;
+
+ host.querySelectorAll("th.bys-head").forEach(th=>th.addEventListener("click",()=>{
+  const ev=evals.find(e=>e.id===th.dataset.evid); if(ev) openEvalTableModal(classId,ev);
+ }));
+
+ const inputs=Array.from(host.querySelectorAll("input.bys-input"));
+ const aliases={a:"Abs",d:"Disp",ne:"NE",nr:"NR",ea:"EA",x:"X",abs:"Abs",disp:"Disp"};
+ inputs.forEach(inp=>{
+  const ev=evals.find(e=>e.id===inp.dataset.ev);
+  if(inp.readOnly){
+   if(ev&&ev.bareme?.criteria?.length) inp.addEventListener("click",()=>openEvalTableModal(classId,ev));
+   return;
+  }
+  inp.addEventListener("focus",()=>inp.select());
+  const commit=()=>{
+   let raw=inp.value.trim();
+   const al=aliases[raw.toLowerCase()]; if(al) raw=al;
+   if(CLASS_SPECIAL_VALUES.has(raw)){
+    autosaveClassNote(inp.dataset.stu,classId,ev,raw,!!(findNote(inp.dataset.stu,ev)?.important??ev.defaultImportant));
+    inp.value=raw; inp.classList.remove("bys-bad");
+   } else if(raw===""){
+    autosaveClassNote(inp.dataset.stu,classId,ev,"",!!ev.defaultImportant);
+    inp.value=""; inp.classList.remove("bys-bad");
+   } else {
+    const n=parseFloat(raw.replace(",","."));
+    if(isNaN(n)){ inp.classList.add("bys-bad"); inp.value=cellValue(inp.dataset.stu,ev); setTimeout(()=>inp.classList.remove("bys-bad"),800); return; }
+    autosaveClassNote(inp.dataset.stu,classId,ev,String(n),!!(findNote(inp.dataset.stu,ev)?.important??ev.defaultImportant));
+    inp.value=fmtGrade2(n);
+    inp.classList.toggle("bys-over",typeof ev.outof==="number"&&n>ev.outof);
+   }
+   const _ac=host.querySelector(`td[data-avg-stu="${inp.dataset.stu}"]`);
+   if(_ac) _ac.textContent=fmtAvg(avgOf(inp.dataset.stu));
+   saveData();
+  };
+  inp.addEventListener("change",commit);
+  inp.addEventListener("keydown",e=>{
+   const r=+inp.dataset.r,c=+inp.dataset.c;
+   const go=(rr,cc)=>{ const t=host.querySelector(`input.bys-input[data-r="${rr}"][data-c="${cc}"]`); if(t){t.focus();return true;} return false; };
+   if(e.key==="Enter"){
+    e.preventDefault(); commit();
+    // colonne suivante : élève suivant ; en bas de colonne, on reste sur place
+    for(let rr=r+1;rr<students.length;rr++){ const t=host.querySelector(`input.bys-input[data-r="${rr}"][data-c="${c}"]`); if(t&&!t.readOnly){t.focus();return;} }
+   } else if(e.key==="ArrowDown"){ e.preventDefault(); commit(); go(r+1,c); }
+   else if(e.key==="ArrowUp"){ e.preventDefault(); commit(); go(r-1,c); }
+   else if(e.key==="Escape"){ inp.value=cellValue(inp.dataset.stu,ev); inp.blur(); }
+  });
+  if(ev&&typeof ev.outof==="number"){ const n=parseFloat(inp.value); if(!isNaN(n)&&n>ev.outof) inp.classList.add("bys-over"); }
+ });
 }
 
 function renderClassPeriod(classId,periodKey){
