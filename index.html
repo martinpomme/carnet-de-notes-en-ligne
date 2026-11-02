@@ -17271,21 +17271,48 @@ function smsSend(msg){
   }
  }catch(e){}
 }
-function smsNotifyCheck(items){
+const smsP2=n=>String(n).padStart(2,"0");
+function smsDate(d){ return smsP2(d.getDate())+"/"+smsP2(d.getMonth()+1)+" à "+smsP2(d.getHours())+"h"+smsP2(d.getMinutes()); }
+function smsHeure(h){ const m=String(h||"").match(/^(\d{1,2}):(\d{2})/); return m?smsP2(m[1])+"h"+m[2]:String(h||""); }
+function smsCollect(){
+ ensure(); const out=[];
+ /* 1) Messages reçus : 1 notification par message */
+ unreadMessages().forEach(m=>{
+  const d=new Date(m.at); const who=stuName(m.sid);
+  out.push({k:"m"+m.id,ts:d.getTime()||0,txt:"NOUVEAU MESSAGE - "+who+"\n"+String(m.text||"").trim()+"\nReçu le "+(isNaN(d)?"":smsDate(d))});
+ });
+ /* 2) Tests rendus à corriger */
+ (DATA.homeworkSubmissions||[]).forEach(r=>{
+  if(!r||!r.submittedAt||!stuById(r.studentId)||r.validatedAt||r.manualOverride) return;
+  const d=new Date(r.submittedAt); if(isNaN(d)) return;
+  const test=(DATA.onlineTests||[]).find(t=>t.id===r.testId);
+  out.push({k:"s"+r.id,ts:d.getTime(),txt:"TEST RENDU par "+stuName(r.studentId)+"\n"+((test&&test.title)||"Test en ligne")+" - Rendu le "+smsDate(d)});
+ });
+ /* 3) Appels non effectués */
+ try{
+  const mm=vsMissing(), vus={};
+  mm.now.concat(mm.past).forEach(e=>{
+   const k="a"+e.id+"|"+e.date; if(vus[k]) return; vus[k]=1;
+   out.push({k,ts:new Date(e.date+"T"+(e.start||"12:00")+":00").getTime()||0,txt:"RAPPEL : Appel non effectué\nCours de "+(e.subject||"—")+" de "+smsHeure(e.start)+" à "+smsHeure(e.end)});
+  });
+ }catch(e){}
+ return out.sort((a,b)=>a.ts-b.ts);
+}
+function smsNotifyCheck(){
  try{
   if(!SMS_CFG.enabled||typeof AUTH==="undefined"||AUTH.role!=="prof") return;
-  const KEY="sms_seen_tl2", raw=localStorage.getItem(KEY), first=(raw===null);
+  const KEY="sms_seen_tl3", raw=localStorage.getItem(KEY), first=(raw===null);
   const seen=new Set(first?[]:JSON.parse(raw||"[]"));
-  const fresh=(items||[]).filter(it=>it&&it.k&&(it.type==="msg"||it.todo)&&!seen.has(it.k));
-  if(!fresh.length){ if(first){ localStorage.setItem(KEY,"[]"); smsSend("✅ Alertes timeline activées"); } return; }
-  fresh.forEach(it=>seen.add(it.k));
-  localStorage.setItem(KEY,JSON.stringify([...seen].slice(-800)));
+  const items=smsCollect();
+  const fresh=items.filter(it=>!seen.has(it.k));
+  if(!first && !fresh.length) return;
+  items.forEach(it=>seen.add(it.k));
+  localStorage.setItem(KEY,JSON.stringify([...seen].slice(-1500)));
   if(first){ smsSend("✅ Alertes timeline activées ("+fresh.length+" notifications existantes ignorées)"); return; }
-  const lines=fresh.slice(0,3).map(it=>"• "+it.title+(it.sub?" ("+it.sub+")":""));
-  if(fresh.length>3) lines.push("… +"+(fresh.length-3)+" autres");
-  smsSend("Timeline prof – "+fresh.length+" nouveauté"+(fresh.length>1?"s":"")+" :\n"+lines.join("\n"));
+  fresh.slice(0,15).forEach((it,i)=>setTimeout(()=>smsSend(it.txt),i*700));
  }catch(e){ console.warn("sms:",e); }
 }
+setInterval(smsNotifyCheck,30000);   // vérifie aussi en arrière-plan, sans dépendre de l'affichage
 function renderTimeline(){
  const host=$("homeTl"); if(!host) return;
  const items=tlItems();
