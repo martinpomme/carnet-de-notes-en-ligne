@@ -10866,7 +10866,7 @@ async function cloudPull(){
  if(!j.ok) throw new Error(j.error||"erreur");
  if(j.role==="admin"){ AUTH.role="admin"; window.edAdminBoot&&edAdminBoot(j); return j; }
  if(window.edSetEtab) edSetEtab(j.etabName);
- CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||""; window.SRV_NOTIF=!!j.notif; window.SRV_NOTIF_ERR=j.notifErr||""; window.SRV_VER=j.ver||"";
+ CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
   importCSV(j.lines.join("\n"));
@@ -17248,92 +17248,10 @@ function updateHomeBadges(items){
  set("hb-red",others); set("hb-blue",msgs);
  b.setAttribute("aria-label","Accueil"+(msgs?", "+msgs+" message"+(msgs>1?"s":"")+" non lu"+(msgs>1?"s":""):"")+(others?", "+others+" notification"+(others>1?"s":""):""));
 }
-/* ═══ SMS : alerte à chaque nouvelle notification de la timeline (prof) ═══ */
-const SMS_CFG={
- enabled:true,
- phone:"0633176305",
- provider:"ntfy",          // "freemobile" (ton propre numéro Free) ou "webhook" (Twilio, OVH, Brevo… via une URL à toi)
- freeUser:"",                    // Free Mobile : identifiant (n° abonné à 8 chiffres)
- freeKey:"",                     // Free Mobile : clé d'identification SMS
- webhookUrl:"",                  // reçoit un POST JSON {to, message}
- ntfyTopic:"ecoledirecte-martinpomme-sms-notification"   // nom secret de ton canal ntfy (mets le tien, long et unique)
-};
-function smsSend(msg){
- try{
-  if(SMS_CFG.provider==="ntfy"){
-   if(!SMS_CFG.ntfyTopic) return;
-   fetch("https://ntfy.sh/"+encodeURIComponent(SMS_CFG.ntfyTopic),{method:"POST",mode:"no-cors",body:msg}).catch(()=>{});
-  }else if(SMS_CFG.provider==="freemobile"){
-   if(!SMS_CFG.freeUser||!SMS_CFG.freeKey) return;
-   fetch("https://smsapi.free-mobile.fr/sendmsg?user="+encodeURIComponent(SMS_CFG.freeUser)+"&pass="+encodeURIComponent(SMS_CFG.freeKey)+"&msg="+encodeURIComponent(msg),{mode:"no-cors"}).catch(()=>{});
-  }else if(SMS_CFG.webhookUrl){
-   fetch(SMS_CFG.webhookUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({to:"+33"+SMS_CFG.phone.replace(/^0/,""),message:msg})}).catch(()=>{});
-  }
- }catch(e){}
-}
-const smsP2=n=>String(n).padStart(2,"0");
-function smsDate(d){ return smsP2(d.getDate())+"/"+smsP2(d.getMonth()+1)+" à "+smsP2(d.getHours())+"h"+smsP2(d.getMinutes()); }
-function smsHeure(h){ const m=String(h||"").match(/^(\d{1,2}):(\d{2})/); return m?smsP2(m[1])+"h"+m[2]:String(h||""); }
-function smsCollect(){
- ensure(); const out=[];
- /* 1) Messages reçus : 1 notification par message */
- unreadMessages().forEach(m=>{
-  const d=new Date(m.at); const who=stuName(m.sid);
-  out.push({k:"m"+m.id,ts:d.getTime()||0,txt:"💬 NOUVEAU MESSAGE - "+who+"\n"+String(m.text||"").trim()+"\nReçu le "+(isNaN(d)?"":smsDate(d))});
- });
- /* 2) Tests rendus à corriger */
- (DATA.homeworkSubmissions||[]).forEach(r=>{
-  if(!r||!r.submittedAt||!stuById(r.studentId)||r.validatedAt||r.manualOverride) return;
-  const d=new Date(r.submittedAt); if(isNaN(d)) return;
-  const test=(DATA.onlineTests||[]).find(t=>t.id===r.testId);
-  out.push({k:"s"+r.id,ts:d.getTime(),txt:"✏️ TEST RENDU par "+stuName(r.studentId)+"\n"+((test&&test.title)||"Test en ligne")+" - Rendu le "+smsDate(d)});
- });
- /* 3) Appels non effectués */
- try{
-  const mm=vsMissing(), vus={};
-  mm.now.concat(mm.past).forEach(e=>{
-   const k="a"+e.id+"|"+e.date; if(vus[k]) return; vus[k]=1;
-   out.push({k,ts:new Date(e.date+"T"+(e.start||"12:00")+":00").getTime()||0,txt:"⚠️ RAPPEL : Appel non effectué\nCours de "+(e.subject||"—")+" de "+smsHeure(e.start)+" à "+smsHeure(e.end)});
-  });
- }catch(e){}
- return out.sort((a,b)=>a.ts-b.ts);
-}
-function smsBanner(msg){
- try{
-  const d=document.createElement("div"); d.textContent=msg;
-  d.style.cssText="position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;background:#7c2d12;color:#fff;padding:12px 14px;border-radius:10px;font:14px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.35);cursor:pointer";
-  d.onclick=()=>d.remove(); document.body.appendChild(d); setTimeout(()=>{try{d.remove()}catch(e){}},30000);
- }catch(e){}
-}
-function smsServerCheck(){
- if(window.__srvChk) return; window.__srvChk=1;
- let m="";
- if(!window.SRV_VER) m="⚠️ Le script serveur n'est pas à jour : redéployez-le (Déployer > Gérer les déploiements > Nouvelle version).";
- else if(!window.SRV_NOTIF) m="⚠️ Notifications serveur inactives : "+(window.SRV_NOTIF_ERR||"aucun envoi réussi pour l'instant (autorisations Google à accorder ?)");
- else if(window.SRV_NOTIF_ERR) m="ℹ️ Notifications serveur : "+window.SRV_NOTIF_ERR;
- if(m){ console.warn(m); setTimeout(()=>smsBanner(m),1500); }
-}
-function smsNotifyCheck(){
- try{
-  if(!SMS_CFG.enabled||typeof AUTH==="undefined"||AUTH.role!=="prof") return;
-  smsServerCheck();
-  const KEY="sms_seen_tl4", raw=localStorage.getItem(KEY), first=(raw===null);
-  const seen=new Set(first?[]:JSON.parse(raw||"[]"));
-  const items=smsCollect();
-  const fresh=items.filter(it=>!seen.has(it.k));
-  if(!first && !fresh.length) return;
-  items.forEach(it=>seen.add(it.k));
-  localStorage.setItem(KEY,JSON.stringify([...seen].slice(-1500)));
-  if(window.SRV_NOTIF) return;     // le serveur (Apps Script) envoie déjà les notifications : la page ne double pas
-  fresh.slice(0,15).forEach((it,i)=>setTimeout(()=>smsSend(it.txt),i*700));
- }catch(e){ console.warn("sms:",e); }
-}
-setInterval(smsNotifyCheck,30000);   // vérifie aussi en arrière-plan, sans dépendre de l'affichage
 function renderTimeline(){
  const host=$("homeTl"); if(!host) return;
  const items=tlItems();
  updateHomeBadges(items);
- smsNotifyCheck();
  if(!items.length){ host.innerHTML='<p class="home-empty">Rien de nouveau pour le moment.</p>'; return; }
  let html='<div class="tl-list">', lastDay="";
  items.forEach(it=>{
