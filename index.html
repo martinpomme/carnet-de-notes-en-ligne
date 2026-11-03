@@ -10866,7 +10866,7 @@ async function cloudPull(){
  if(!j.ok) throw new Error(j.error||"erreur");
  if(j.role==="admin"){ AUTH.role="admin"; window.edAdminBoot&&edAdminBoot(j); return j; }
  if(window.edSetEtab) edSetEtab(j.etabName);
- CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||"";
+ CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||""; window.SRV_NOTIF=!!j.notif;
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
   importCSV(j.lines.join("\n"));
@@ -17250,7 +17250,7 @@ function updateHomeBadges(items){
 }
 /* ═══ SMS : alerte à chaque nouvelle notification de la timeline (prof) ═══ */
 const SMS_CFG={
- enabled:false,
+ enabled:true,
  phone:"0633176305",
  provider:"ntfy",          // "freemobile" (ton propre numéro Free) ou "webhook" (Twilio, OVH, Brevo… via une URL à toi)
  freeUser:"",                    // Free Mobile : identifiant (n° abonné à 8 chiffres)
@@ -17279,21 +17279,21 @@ function smsCollect(){
  /* 1) Messages reçus : 1 notification par message */
  unreadMessages().forEach(m=>{
   const d=new Date(m.at); const who=stuName(m.sid);
-  out.push({k:"m"+m.id,ts:d.getTime()||0,txt:"NOUVEAU MESSAGE - "+who+"\n"+String(m.text||"").trim()+"\nReçu le "+(isNaN(d)?"":smsDate(d))});
+  out.push({k:"m"+m.id,ts:d.getTime()||0,txt:"💬 NOUVEAU MESSAGE - "+who+"\n"+String(m.text||"").trim()+"\nReçu le "+(isNaN(d)?"":smsDate(d))});
  });
  /* 2) Tests rendus à corriger */
  (DATA.homeworkSubmissions||[]).forEach(r=>{
   if(!r||!r.submittedAt||!stuById(r.studentId)||r.validatedAt||r.manualOverride) return;
   const d=new Date(r.submittedAt); if(isNaN(d)) return;
   const test=(DATA.onlineTests||[]).find(t=>t.id===r.testId);
-  out.push({k:"s"+r.id,ts:d.getTime(),txt:"TEST RENDU par "+stuName(r.studentId)+"\n"+((test&&test.title)||"Test en ligne")+" - Rendu le "+smsDate(d)});
+  out.push({k:"s"+r.id,ts:d.getTime(),txt:"✏️ TEST RENDU par "+stuName(r.studentId)+"\n"+((test&&test.title)||"Test en ligne")+" - Rendu le "+smsDate(d)});
  });
  /* 3) Appels non effectués */
  try{
   const mm=vsMissing(), vus={};
   mm.now.concat(mm.past).forEach(e=>{
    const k="a"+e.id+"|"+e.date; if(vus[k]) return; vus[k]=1;
-   out.push({k,ts:new Date(e.date+"T"+(e.start||"12:00")+":00").getTime()||0,txt:"RAPPEL : Appel non effectué\nCours de "+(e.subject||"—")+" de "+smsHeure(e.start)+" à "+smsHeure(e.end)});
+   out.push({k,ts:new Date(e.date+"T"+(e.start||"12:00")+":00").getTime()||0,txt:"⚠️ RAPPEL : Appel non effectué\nCours de "+(e.subject||"—")+" de "+smsHeure(e.start)+" à "+smsHeure(e.end)});
   });
  }catch(e){}
  return out.sort((a,b)=>a.ts-b.ts);
@@ -17308,6 +17308,7 @@ function smsNotifyCheck(){
   if(!first && !fresh.length) return;
   items.forEach(it=>seen.add(it.k));
   localStorage.setItem(KEY,JSON.stringify([...seen].slice(-1500)));
+  if(window.SRV_NOTIF) return;     // le serveur (Apps Script) envoie déjà les notifications : la page ne double pas
   fresh.slice(0,15).forEach((it,i)=>setTimeout(()=>smsSend(it.txt),i*700));
  }catch(e){ console.warn("sms:",e); }
 }
@@ -17316,7 +17317,7 @@ function renderTimeline(){
  const host=$("homeTl"); if(!host) return;
  const items=tlItems();
  updateHomeBadges(items);
- smsNotifyCheck(items);
+ smsNotifyCheck();
  if(!items.length){ host.innerHTML='<p class="home-empty">Rien de nouveau pour le moment.</p>'; return; }
  let html='<div class="tl-list">', lastDay="";
  items.forEach(it=>{
