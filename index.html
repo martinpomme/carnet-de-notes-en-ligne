@@ -1887,6 +1887,40 @@ header .header-actions{margin-left:auto;align-items:center}
  .dr-foot #logoutBtn .lg-txt{display:inline;font-weight:600}
 }
 </style>
+
+<style id="patch-bys-v2">
+/* ═══ Gestion par matière : tableau ═══ */
+#classesView .bys-table{ --bys-line:#0a2540; border-collapse:separate; border-spacing:0; border-top:1px solid var(--bys-line); border-left:1px solid var(--bys-line); font-family:Arial,Helvetica,sans-serif }
+#classesView .bys-table th,#classesView .bys-table td{ border:0 !important; border-right:1px solid var(--bys-line) !important; border-bottom:1px solid var(--bys-line) !important; font-family:Arial,Helvetica,sans-serif }
+#classesView .bys-table .bys-head,#classesView .bys-table .bys-corner,#classesView .bys-table .bys-avg-head,#classesView .bys-table .bys-subhead th{ background:#f4f5f7 !important }
+#classesView .bys-table .bys-head:hover{ background:#eaecf0 !important }
+#classesView .bys-table td.bys-ro{ background:#e7eaee }
+#classesView .bys-table td.bys-cm{ background:#ffe2bd }
+#classesView .bys-table .bys-stu{ background:#e8f1fa !important; padding:4px 8px !important }
+#classesView .bys-table .bys-corner{ background:#f4f5f7 !important }
+#classesView .bys-table .bys-avg-head{ text-align:right; padding:4px 8px 4px 2px !important; font-size:14px }
+#classesView .bys-table .bys-avg{ text-align:right; padding:3px 8px 3px 2px !important; font-family:Arial,Helvetica,sans-serif; font-size:17px }
+#classesView .bys-table .bys-input{ text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; padding:3px 6px 3px 1px }
+/* dernière ligne : moyenne de classe */
+#classesView .bys-table tr.bys-classavg td{ position:sticky; bottom:0; z-index:2; background:#e8f1fa !important; text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:4px 8px 4px 2px }
+#classesView .bys-table tr.bys-classavg td.bys-cavg-lab{ left:0; z-index:4; text-align:left; font-size:15px; font-weight:600; padding:4px 8px !important }
+#classesView .bys-table tr.bys-classavg td.bys-avg{ z-index:4; background:#e8f1fa !important }
+
+/* ═══ Aperçu : même rendu que la vision / le compte élève ═══ */
+#classesView #classPreviewContent .matiere-line{ display:grid; grid-template-columns:minmax(300px,34%) minmax(0,1fr); gap:0; padding:0; align-items:stretch; margin-bottom:0; border-bottom:1px solid #08487f }
+#classesView #classPreviewContent .eleveLines .matiere-line:first-child{ border-top:1px solid #08487f }
+#classesView #classPreviewContent .matiere-line > .notes-list{ gap:15px 24px; padding:12px 16px; align-self:center }
+#classesView #classPreviewContent .note-pill{ font-family:Arial,Helvetica,sans-serif }
+#classesView #classPreviewContent .general-line{ justify-content:flex-start }
+#classesView #classPreviewContent .general-box{ width:max(300px,34%); min-width:0; flex-direction:row; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px }
+#classesView #classPreviewContent .general-box .avg-label{ margin:0; font-size:13px; text-align:left }
+#classesView #classPreviewContent .general-box .avg-value{ flex:0 0 112px; text-align:center }
+@media (max-width:900px){
+ #classesView #classPreviewContent .matiere-line{ grid-template-columns:minmax(0,1fr) !important }
+ #classesView #classPreviewContent .general-box{ width:100% }
+ #classesView #classPreviewContent .matiere-line > .notes-list{ column-gap:24px; row-gap:13px }
+}
+</style>
 </head>
 <body class="auth-pending">
 <header>
@@ -5332,6 +5366,7 @@ function renderClassPreviewContent(){
   const cls = classLike(CURRENT_PREVIEW_CLASS_ID);
   if(!container || !cls) return;
   container.innerHTML = "";
+  const lines = document.createElement("div"); lines.className = "eleveLines"; container.appendChild(lines);
   
   // Filtrer les évaluations
   let evals = (cls.evals || []).filter(ev => {
@@ -5361,14 +5396,8 @@ function renderClassPreviewContent(){
     
     // Gauche : Nom évaluation (gros), date & coef (petit)
     const info = document.createElement("div");
-    info.className = "matiere-name";
-    info.style.display = "flex";
-    info.style.flexDirection = "column";
-    info.style.gap = "2px";
-    info.innerHTML = `
-      <div style="font-size:1.1em; color:#1e293b;">${ev.label || "-"}</div>
-      <div style="font-size:0.75em; color:#64748b; font-weight:normal;">${formatDateAAAA(ev.dateJJMMAA)} — Coef. ${fmtCoef(ev.coef)}</div>
-    `;
+    info.className = "matiere-title";
+    info.innerHTML = `<div class="matiere-name">${escHtml(ev.label || "-")}</div><div class="matiere-coef">${formatDateAAAA(ev.dateJJMMAA)} — Coef. ${fmtCoef(ev.coef)}</div>`;
     
     // Milieu : Notes des élèves
     const notesWrap = document.createElement("div");
@@ -5382,6 +5411,7 @@ function renderClassPreviewContent(){
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "note-pill";
+      btn.style.cssText = "background:#fff;";
       const empty = !note || isSpecial(note);
       if(empty) btn.classList.add("empty-eval");
       if(note && note.noteText==="EA"){ btn.classList.add("red"); evalHasEA=true; }
@@ -5409,9 +5439,6 @@ function renderClassPreviewContent(){
         // Afficher le coefficient en exposant noir si != 1 (et != 0 : déjà entre parenthèses)
         if(note.coef !== 1 && !zeroCoef) {
           const sup = document.createElement("sup");
-          sup.style.color = "#000";
-          sup.style.fontWeight = "400";
-          sup.style.fontSize = "0.75em";
           sup.style.marginLeft = "1px";
           sup.textContent = `(${fmtCoef(note.coef)})`;
           btn.appendChild(sup);
@@ -5426,12 +5453,12 @@ function renderClassPreviewContent(){
         const linkedC = (DATA.competencies||[]).filter(c => c.noteId === note.id && c.studentId === stu.id && !!c.color);
         if(linkedC.length > 0){
           const dotsWrap = document.createElement("div");
-          dotsWrap.style.cssText = "display:flex; gap:2px; margin-left:4px;";
+          dotsWrap.style.cssText = "display:flex;gap:2px;margin-left:4px;align-items:center;line-height:1;";
           btn.appendChild(dotsWrap);
           linkedC.forEach(c => {
             const dot = document.createElement("div");
             dot.className = `color-dot ${c.color}`;
-            dot.style.cssText = "width:12px; height:12px; border-radius:50%;";
+            dot.style.cssText = "width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-bottom:1px;";
             dotsWrap.appendChild(dot);
           });
         }
@@ -5452,7 +5479,7 @@ function renderClassPreviewContent(){
     
     if(evalCount > 0){
       const avgVal = evalSum / evalCount;
-      avgBox.innerHTML = `<div class="avg-value"${evalHasEA?' style="color:var(--danger)"':""}>${fmt(avgVal, 2)}/20</div><div class="avg-coef">Moy. Classe</div>`;
+      avgBox.innerHTML = `<div class="avg-value"${evalHasEA?' style="color:var(--danger)"':""}>${fmt(avgVal, 2)}/20</div>`;
       totalSum += avgVal;
       totalCount++;
       
@@ -5461,13 +5488,14 @@ function renderClassPreviewContent(){
         showEvalStatsOnly(ev, cls.id);
       });
     } else {
-      avgBox.innerHTML = `<div class="avg-value">--</div><div class="avg-coef">Moy. Classe</div>`;
+      avgBox.innerHTML = `<div class="avg-value">--</div>`;
     }
     
-    line.appendChild(info);
+    const head = document.createElement("div"); head.className = "matiere-head";
+    head.appendChild(info); head.appendChild(avgBox);
+    line.appendChild(head);
     line.appendChild(notesWrap);
-    line.appendChild(avgBox);
-    container.appendChild(line);
+    lines.appendChild(line);
   });
 
   // Moyenne générale de la sélection (au bas de l'aperçu)
@@ -8691,7 +8719,7 @@ function openClass(clsId){
   let s=getS();
   if(s!==""&&!(names.includes(s)||(prev&&s==="__ALL__"))){ s=prev?"__ALL__":(names[0]||""); setS(s); }
   const pl=[["T1","Trimestre 1"],["T2","Trimestre 2"],["T3","Trimestre 3"],["T4","Trimestre 4"],["YEAR","Année"]];
-  pSel.innerHTML='<option value="">Trimestre…</option>'+pl.map(([v,l])=>opt(v,l,v==="YEAR"?{}:fl(v,null),v===p)).join("");
+  pSel.innerHTML=pl.map(([v,l])=>opt(v,l,v==="YEAR"?{}:fl(v,null),v===p)).join("");
   pSel.value=p;
   const sl=names.map(n=>[n,n]); if(prev) sl.unshift(["__ALL__","Toutes les matières"]);
   sSel.innerHTML='<option value="">Matière…</option>'+sl.map(([v,l])=>opt(v,l,v==="__ALL__"?{}:fl(p||"YEAR",v),v===s)).join("");
@@ -8768,10 +8796,10 @@ function renderClassBySubject(classId){
  const anyComp=evals.some(ev=>compIds.has(ev.id));
 
  // Largeurs : colonne des noms = nom le plus long ; colonne moyenne plus large ; notes = largeur fixe
- const COL_W=98, AVG_W=110;
+ const COL_W=88, AVG_W=110;
  const _cv=document.createElement("canvas").getContext("2d");
  _cv.font="600 15px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
- const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+22;
+ const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,_cv.measureText("Moyenne de classe").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+22;
  const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
  const avgOf=sid=>getStudentAverageForSubject(sid,active,period);
 
@@ -8794,7 +8822,10 @@ function renderClassBySubject(classId){
   return `<tr><td class="bys-stu" style="width:${NAME_W}px">${escHtml(stu.last)} ${escHtml(stu.first)}</td><td class="bys-avg" data-avg-stu="${stu.id}" style="left:${NAME_W}px;width:${AVG_W}px">${fmtAvg(avgOf(stu.id))}</td>${cells}</tr>`;
  }).join("");
 
- host.innerHTML=`<div class="bys-scroll" style="overflow:auto;max-height:75vh;"><table class="bys-table" style="width:${NAME_W+AVG_W+COL_W*evals.length}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${AVG_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moy.</th>${head}</tr>${subHead}</thead><tbody>${rows}</tbody></table></div>
+ const classAvgEv=ev=>{ const v=students.map(s=>findNote(s.id,ev)).filter(n=>n&&!isSpecial(n)&&typeof n.note==="number"&&!isNaN(n.note)).map(n=>n.note); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
+ const classAvgAll=()=>{ const v=students.map(s=>avgOf(s.id)).filter(x=>typeof x==="number"&&!isNaN(x)); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
+ const avgRow=`<tr class="bys-classavg"><td class="bys-stu bys-cavg-lab" style="width:${NAME_W}px">Moyenne de classe</td><td class="bys-avg" data-cavg-all="1" style="left:${NAME_W}px;width:${AVG_W}px">${fmtAvg(classAvgAll())}</td>${evals.map(ev=>`<td class="bys-cavg" data-cavg-ev="${ev.id}">${fmtAvg(classAvgEv(ev))}</td>`).join("")}</tr>`;
+ host.innerHTML=`<div class="bys-scroll" style="overflow:auto;max-height:75vh;"><table class="bys-table" style="width:${NAME_W+AVG_W+COL_W*evals.length}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${AVG_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moyenne</th>${head}</tr>${subHead}</thead><tbody>${rows}${avgRow}</tbody></table></div>
   <div style="margin-top:8px;color:#64748b;font-size:12px;">Cliquez sur une case pour saisir la note (Entrée = élève suivant). Valeurs spéciales : Abs, Disp, NE, NR, EA, X. Clic sur l'en-tête d'une évaluation pour la modifier · clic droit sur une note pour ajouter un commentaire.</div>`;
 
  const scroller=host.querySelector(".bys-scroll");
@@ -8840,6 +8871,10 @@ function renderClassBySubject(classId){
  });
  ["pointerup","pointercancel","pointermove"].forEach(n=>scroller.addEventListener(n,()=>clearTimeout(_lp)));
 
+ const updateClassAvgRow=()=>{
+  host.querySelectorAll("td[data-cavg-ev]").forEach(td=>{ const ev=evals.find(e=>e.id===td.dataset.cavgEv); td.textContent=ev?fmtAvg(classAvgEv(ev)):""; });
+  const all=host.querySelector("td[data-cavg-all]"); if(all) all.textContent=fmtAvg(classAvgAll());
+ };
  const inputs=Array.from(host.querySelectorAll("input.bys-input"));
  const aliases={a:"Abs",d:"Disp",ne:"NE",nr:"NR",ea:"EA",x:"X",abs:"Abs",disp:"Disp"};
  inputs.forEach(inp=>{
@@ -8865,6 +8900,7 @@ function renderClassBySubject(classId){
    }
    const _ac=host.querySelector(`td[data-avg-stu="${inp.dataset.stu}"]`);
    if(_ac) _ac.textContent=fmtAvg(avgOf(inp.dataset.stu));
+   updateClassAvgRow();
    saveData();
   };
   inp.addEventListener("change",commit);
