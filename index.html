@@ -109,6 +109,15 @@ h1{margin:0; font-size:24px; font-weight:700; letter-spacing:-.01em }
 .bys-comp-btn{ width:100%; box-sizing:border-box; padding:3px 2px; border:1px solid #10b981; background:#10b981; color:#fff; border-radius:6px; font:600 12px Arial,Helvetica,sans-serif; cursor:pointer; white-space:nowrap }
 .bys-comp-btn:hover{ background:#059669; border-color:#059669 }
 .bys-bad{ background:#fee2e2 !important }
+.bys-table .bys-input.bys-x,#classesView .bys-table .bys-input.bys-x{ color:#b8bec7 }
+/* Évaluations de compétences dans le tableau de gestion */
+#classesView .bys-table th.bys-head.bys-head-comp,#classesView .bys-table .bys-subhead th.bys-head-comp-sub{ background:#d1fae5 !important }
+#classesView .bys-table th.bys-head.bys-head-comp:hover{ background:#a7f3d0 !important }
+.bys-table td.bys-cell-comp{ cursor:pointer; text-align:center; vertical-align:middle }
+.bys-table td.bys-cell-comp:hover{ background:#f0fdf4 }
+.bys-dots{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:3px; padding:4px 2px; min-height:28px }
+.bys-dots .color-dot{ width:14px; height:14px; cursor:inherit }
+.bys-dots .color-dot:hover{ transform:none }
 .bys-over{ color:#dc2626; font-weight:700 }
 /* Barre de contrôle de la classe : Élèves · Gestion/Aperçu · Trimestre · Matière · Nouvelle évaluation */
 .cls-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px }
@@ -445,6 +454,8 @@ body.student-mode #onlineTestsView{ display:none !important }
  background: #ef4444; transform: rotate(-45deg); pointer-events: none; opacity: 0.8;
 }
 .clickable-row:hover { background: #f1f5f9; }
+.clickable-row{ user-select:none; -webkit-user-select:none; -webkit-touch-callout:none }
+.clickable-row.row-selected, .clickable-row.row-selected:hover { background:#dbeafe !important }
 .prof-item-select { width: 22px; height: 22px; cursor: pointer; border: 2px solid #cbd5e1; }
 .tab-btn, .subtab-btn, .period-btn { position: relative; }
 /* Pastille : nombre de copies (élève × test) en attente de correction */
@@ -1858,6 +1869,7 @@ body:not(.student-mode) .tab-btn[data-target="classesView"]{ display:none !impor
 .carnet-sub{ max-width:1400px; margin:10px auto 0; padding:0 12px; position:relative; z-index:2 }
 .carnet-sub .subtabs{ margin-bottom:0 }
 .carnet-sub .subtab-btn{ display:inline-flex; align-items:center; gap:8px }
+.carnet-sub .subtabs{ gap:24px }
 .carnet-sub .subtab-btn svg{ display:block; flex:none }
 @media (max-width:900px){ .carnet-sub{ display:none !important } }
 .dr-grp-head .dr-chev{ flex:0 0 auto; display:inline-flex; transition:transform .2s }
@@ -2958,12 +2970,12 @@ header .header-actions{margin-left:auto;align-items:center}
 <div id="classActionChoiceModal" class="modal" aria-hidden="true">
  <div class="modal-card" style="width:300px;">
   <div class="modal-header">
-   <h3>Ajouter...</h3>
+   <h3>Nouvelle évaluation</h3>
    <button class="modal-close" id="classActionChoiceClose">×</button>
   </div>
   <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
-   <button class="btn btn-primary" id="choiceAddNote" style="padding:12px;">Une évaluation (Note)</button>
-   <button class="btn" id="choiceAddComp" style="padding:12px;background:#fff;border:1px solid #ccc;">Une compétence</button>
+   <button class="btn btn-primary" id="choiceAddNote" style="padding:12px;">Évaluation de note</button>
+   <button class="btn" id="choiceAddComp" style="padding:12px;background:#fff;border:1px solid #ccc;">Évaluation de compétences</button>
   </div>
  </div>
 </div>
@@ -3079,8 +3091,26 @@ header .header-actions{margin-left:auto;align-items:center}
    </div>
    <div id="classCompSetupList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
    <div class="modal-actions">
+    <button type="button" class="btn btn-danger" id="classCompSetupDeleteBtn" style="display:none;margin-right:auto;">Supprimer</button>
     <button class="btn" id="classCompSetupCancel">Annuler</button>
     <button class="btn btn-primary" id="classCompSetupNext">Suivant (Saisir résultats)</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="stuCompCellModal" class="modal" aria-hidden="true" style="z-index:70;">
+ <div class="modal-card" style="width:560px;max-width:95%;">
+  <div class="modal-header">
+   <h3 id="stuCompCellTitle">Compétences de l'élève</h3>
+   <button type="button" class="modal-close" id="stuCompCellClose">×</button>
+  </div>
+  <div class="modal-body">
+   <div id="stuCompCellSub" style="font-size:13px;color:#64748b;margin-bottom:10px;"></div>
+   <div id="stuCompCellList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto;"></div>
+   <div class="modal-actions" style="margin-top:14px;">
+    <button type="button" class="btn" id="stuCompCellCancel">Annuler</button>
+    <button type="button" class="btn btn-primary" id="stuCompCellSave">Enregistrer</button>
    </div>
   </div>
  </div>
@@ -5738,6 +5768,7 @@ function openStudent(studentId){
    <input type="checkbox" id="profShowMissing"> Résultats non saisis
   </label>
  </div>
+ <div style="font-size:12px;color:#64748b;margin:-2px 0 8px;">Clic : sélectionner la ligne · clic droit ou appui prolongé : ouvrir les détails</div>
  <div class="prof-batch-actions" id="profBatchActions">
   <span id="profBatchCount" style="font-weight:600;margin-right:8px;color:#475569;">0 sélectionnés</span>
   <button class="btn btn-primary" id="profBatchEditBtn">Modifier</button>
@@ -5897,6 +5928,30 @@ function openStudent(studentId){
  applyLocksEffects();
 }
 
+/* Vision prof : clic = sélectionner la ligne ; clic droit / appui prolongé = ouvrir les détails */
+function profRowBind(tr,check,openDetail){
+ let lpTimer=null, lpFired=false, sx=0, sy=0;
+ const clear=()=>{ clearTimeout(lpTimer); lpTimer=null; };
+ tr.addEventListener("click",e=>{
+  if(lpFired){ lpFired=false; return; }
+  if(e.target.closest("button,input,select,a,label,textarea")) return;
+  if(!check||check.disabled) return;
+  check.checked=!check.checked;
+  check.dispatchEvent(new Event("change",{bubbles:true}));
+ });
+ tr.addEventListener("contextmenu",e=>{
+  if(e.target.closest("button,input,select,a,textarea")) return;
+  e.preventDefault(); clear(); openDetail();
+ });
+ tr.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"||e.target.closest("button,input,select,a,textarea")) return;
+  lpFired=false; sx=e.clientX; sy=e.clientY; clear();
+  lpTimer=setTimeout(()=>{ lpFired=true; lpTimer=null; openDetail(); },550);
+ });
+ tr.addEventListener("pointermove",e=>{ if(lpTimer&&(Math.abs(e.clientX-sx)>8||Math.abs(e.clientY-sy)>8)) clear(); });
+ ["pointerup","pointercancel","pointerleave"].forEach(n=>tr.addEventListener(n,clear));
+}
+
 function renderProfViewForPeriod(studentId,periodKey){
  const notesRoot=document.querySelector(`#prof-period-${periodKey} .notes-body`);
  const compsRoot=document.querySelector(`#prof-period-${periodKey} .comps-body`);
@@ -5954,7 +6009,37 @@ function renderProfViewForPeriod(studentId,periodKey){
  });
  let finalArr=[...filteredNotes.map(n=>({...n,type:'note'})),...Object.values(compGroups)];
  if(showMissing) {
-   finalArr = finalArr.filter(item => !isFullyEvaluated(item, null, studentId));
+   // Filtre « Résultats non saisis » : n'affiche QUE les évaluations dont le résultat de CET élève manque
+   const _srcs=[clsObjRef,...grpEns().filter(g=>(g.memberIds||[]).includes(studentId))].filter(Boolean);
+   const _tplOf=id=>{ for(const c of _srcs){ const e=(c.compEvals||[]).find(x=>x.id===id)||(c.evals||[]).find(x=>x.id===id); if(e) return e.template||e.compTemplate||[]; } return []; };
+   const _comps=(DATA.competencies||[]).filter(c=>c.studentId===studentId);
+   const _missing=item=>{
+    if(item.type==='note'){
+     const hasNote=(typeof item.note==='number'&&!isNaN(item.note))||isSpecial(item);
+     if(!hasNote) return true;
+     const linked=_comps.filter(c=>c.noteId===item.id);
+     const tpl=item.classNoteId?_tplOf(item.classNoteId):[];
+     return linked.some(c=>!c.color)||(tpl.length>0&&linked.filter(c=>c.color).length<tpl.length);
+    }
+    const tpl=_tplOf(item.id);
+    return (item.items||[]).some(c=>!c.color)||(tpl.length>0&&(item.items||[]).filter(c=>c.color).length<tpl.length);
+   };
+   finalArr = finalArr.filter(_missing);
+   // Évaluations de la classe / du groupe sans aucun résultat pour cet élève : lignes « non saisi »
+   const _inPeriod=ev=>periodKey==="YEAR"||(ev.period||"YEAR")===periodKey;
+   const _okFilters=(ev,subj)=>(!showHidden||ev.hideFromStudent)&&(!subjFilter||subjFilter==="__ALL__"||subj===subjFilter);
+   _srcs.forEach(c=>{
+    (c.evals||[]).forEach(ev=>{
+     if(!_inPeriod(ev)||!_okFilters(ev,ev.subject)) return;
+     if(notes.some(n=>n.classCommon&&n.classId===c.id&&n.classNoteId===ev.id)) return;
+     finalArr.push({type:'virtual_note',id:'v_'+c.id+'_'+ev.id,label:ev.label,subject:ev.subject,dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,outof:ev.outof,coef:ev.coef,hideFromStudent:ev.hideFromStudent});
+    });
+    (c.compEvals||[]).forEach(ev=>{
+     if(!_inPeriod(ev)||!_okFilters(ev,ev.subject||"Compétences")) return;
+     if(_comps.some(x=>x.groupId===ev.id)) return;
+     finalArr.push({type:'virtual_comp',id:'v_'+c.id+'_'+ev.id,label:ev.label,subject:ev.subject||"Compétences",dateJJMMAA:ev.dateJJMMAA,isoDate:ev.isoDate,hideFromStudent:ev.hideFromStudent,items:[]});
+    });
+   });
  }
  if(searchTerm) finalArr=finalArr.filter(item=>{
   if(item.type==='note') return[item.label||"",item.subject||"",item.dateJJMMAA||"",isSpecial(item)?(item.noteText||""):""].some(f=>String(f).toLowerCase().includes(searchTerm));
@@ -5964,6 +6049,25 @@ function renderProfViewForPeriod(studentId,periodKey){
  finalArr.forEach(item=>{
   const tr=document.createElement("tr");
   tr.className = "clickable-row";
+  if(item.type==='virtual_note'||item.type==='virtual_comp'){
+   // Évaluation de classe sans résultat pour cet élève (affichée uniquement avec le filtre « Résultats non saisis »)
+   tr.className="";
+   const mk=(html,css)=>{ const td=document.createElement("td"); if(html!==undefined) td.innerHTML=html; if(css) td.style.cssText=css; return td; };
+   const eye=item.hideFromStudent?'<span class="hidden-icon" title="Masqué pour l\'élève">👁️</span>':"";
+   const lab=escHtml(item.label||"");
+   tr.appendChild(mk(""));
+   tr.appendChild(mk(eye+'<span title="Résultat non saisi" style="margin-right:4px;">⚠️</span>'+(item.type==='virtual_comp'?'<span style="border-left:4px solid #1a8ad0;padding-left:6px;display:inline-block;">'+lab+'</span>':lab)));
+   tr.appendChild(mk(escHtml(item.dateJJMMAA||"")));
+   tr.appendChild(mk("Non saisi","color:var(--danger);font-style:italic;"));
+   if(item.type==='virtual_note'){
+    tr.appendChild(mk(fmt(item.outof))); tr.appendChild(mk(item.coef===0?"":fmtCoef(item.coef))); tr.appendChild(mk("")); tr.appendChild(mk(""));
+    notesRoot.appendChild(tr);
+   } else {
+    tr.appendChild(mk(""));
+    compsRoot.appendChild(tr);
+   }
+   return;
+  }
   if(item.type==='note'){
    const n=item;
    const isRedVal=!isSpecial(n)&&(n.note/n.outof*20)<10;
@@ -6037,7 +6141,7 @@ function renderProfViewForPeriod(studentId,periodKey){
    tdActions.appendChild(btnEdit); tdActions.appendChild(btnDelete);
    tr.appendChild(tdLabel);tr.appendChild(tdDate);tr.appendChild(tdNote);tr.appendChild(tdOutof);tr.appendChild(tdCoef);tr.appendChild(tdImportant);tr.appendChild(tdActions);
    
-   tr.addEventListener("click", () => showNoteDetailByObj(n, studentId));
+   profRowBind(tr, check, () => showNoteDetailByObj(n, studentId));
    notesRoot.appendChild(tr);
   }else if(item.type==='competency_group'){
    const g=item;
@@ -6094,7 +6198,7 @@ function renderProfViewForPeriod(studentId,periodKey){
    }
    tr.appendChild(tdLabelC);tr.appendChild(tdDateC);tr.appendChild(tdNoteC);tr.appendChild(tdActionsC);
    
-   tr.addEventListener("click", () => {
+   profRowBind(tr, checkC, () => {
      const detailBody=document.getElementById("noteDetailBody");
      const detailModal=document.getElementById("noteDetailModal");
      if(detailBody&&detailModal){
@@ -6150,6 +6254,7 @@ function renderProfViewForPeriod(studentId,periodKey){
 }
 
 function updateProfBatchActions(){
+ document.querySelectorAll('.prof-item-select').forEach(c=>c.closest("tr")?.classList.toggle("row-selected",c.checked));
  const selected = document.querySelectorAll('.prof-item-select:checked');
  const bar = document.getElementById("profBatchActions");
  const count = document.getElementById("profBatchCount");
@@ -6521,6 +6626,26 @@ function openClassCompSetupModal(classId,prefillSubject=null,periodKey=null,exis
  }
  const cWrap=document.getElementById("classCompSetupCommentWrap"),cInp=document.getElementById("classCompSetupComment");
  if(cWrap&&cInp){cWrap.style.display="none";cInp.value="";}
+ // Bouton « Supprimer » : uniquement pour une éval de compétences existante (modification)
+ const _cdel=document.getElementById("classCompSetupDeleteBtn");
+ if(_cdel){
+  const _clsDel=classLike(classId);
+  const _isExisting=!!existingCompEval&&!linkEvalId&&(_clsDel?.compEvals||[]).some(e=>e.id===existingCompEval.id);
+  const _lockedDel=!!existingCompEval&&existingCompEval.period!=="YEAR"&&!!LOCKED_PERIODS[existingCompEval.period];
+  _cdel.style.display=(_isExisting&&!_lockedDel)?"":"none";
+  _cdel.onclick=()=>{
+   if(!_isExisting) return;
+   openConfirmModal({message:`Supprimer l'évaluation de compétences « ${existingCompEval.label||'-'} » ? Les résultats saisis pour tous les élèves seront aussi supprimés.`,okLabel:"Supprimer",onConfirm:()=>{
+    const c=classLike(classId); if(!c) return;
+    c.compEvals=(c.compEvals||[]).filter(x=>x.id!==existingCompEval.id);
+    DATA.competencies=(DATA.competencies||[]).filter(x=>x.groupId!==existingCompEval.id);
+    EDITING_CLASS_COMP_GROUP_ID=null; CLASS_COMP_LINK_TO_EVAL_ID=null; EDITING_CLASS_COMP_SUBJECT=null;
+    closeClassCompSetupModal(); openClass(classId);
+    try{updateTabWarningIndicators();}catch(e){}
+    saveData();
+   }});
+  };
+ }
  renderClassCompSetupListUI();
  classCompSetupModal.classList.add("open"); classCompSetupModal.setAttribute("aria-hidden","false");
 }
@@ -8774,11 +8899,69 @@ function openClass(clsId){
  newBtn.addEventListener("click",()=>{
   const p=getP(), sj=getS(); if(!p||!sj||p==="YEAR") return;
   if(LOCKED_PERIODS[p]){ alert("Ce trimestre est verrouillé."); return; }
-  openClassEvalModal({prefillClassId:clsId,prefillPeriod:p,prefillSubject:sj});
+  // Choix : évaluation de note ou évaluation de compétences
+  const choiceModal=document.getElementById("classActionChoiceModal");
+  if(choiceModal){
+   choiceModal.dataset.classId=clsId; choiceModal.dataset.period=p; choiceModal.dataset.subject=sj;
+   choiceModal.classList.add("open"); choiceModal.setAttribute("aria-hidden","false");
+  } else openClassEvalModal({prefillClassId:clsId,prefillPeriod:p,prefillSubject:sj});
  });
 
  fillBar(); renderMain();
 }
+
+// Modification des compétences d'UN SEUL élève pour une éval de compétences (clic sur une case du tableau)
+let STU_COMP_CELL_CTX=null;
+function openStuCompCellModal(classId, ev, studentId, onSaved){
+ const stu=(DATA.students||[]).find(x=>x.id===studentId); if(!stu) return;
+ const tpl=ev.template||[];
+ const mine=(DATA.competencies||[]).filter(c=>c.studentId===studentId&&c.groupId===ev.id);
+ const grades={};
+ tpl.forEach((t,i)=>{ const r=mine.find(c=>c.domain===t.domain&&c.name===t.name); if(r&&r.color) grades[i]=r.color; });
+ STU_COMP_CELL_CTX={classId,ev,studentId,grades,onSaved,prev:mine};
+ document.getElementById("stuCompCellTitle").textContent=`${stu.last} ${stu.first}`;
+ document.getElementById("stuCompCellSub").textContent=`${ev.label||"(sans libellé)"} · ${ev.dateJJMMAA||""}`;
+ const list=document.getElementById("stuCompCellList");
+ list.innerHTML=tpl.map((t,i)=>`<div class="stu-comp-row" data-cidx="${i}" style="border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;">
+   <div style="font-weight:600;font-size:14px;">${escHtml(t.name||"")}</div>
+   <div style="font-size:12px;color:#64748b;margin-bottom:6px;">${escHtml(t.domain||"")}${(t.subDomain||t.level)?" - "+escHtml(t.subDomain||t.level):""}</div>
+   <div class="comp-grade-cell" style="display:flex;gap:4px;flex-wrap:wrap;">${renderColorDotsHtml(grades[i]||null)}</div>
+  </div>`).join("")||'<div style="color:#64748b;">Aucune compétence dans cette évaluation.</div>';
+ list.querySelectorAll(".stu-comp-row").forEach(row=>{
+  const i=row.dataset.cidx, wrap=row.querySelector(".comp-grade-cell");
+  wrap.querySelectorAll(".color-dot").forEach(dot=>dot.addEventListener("click",()=>{
+   const color=dot.dataset.color;
+   if(grades[i]===color) delete grades[i]; else grades[i]=color;
+   Array.from(wrap.children).forEach(d=>{
+    if(grades[i]&&d.dataset.color===grades[i]){ d.style.border="2px solid #000"; d.style.transform="scale(1.1)"; d.style.opacity="1"; }
+    else { d.style.border="1px solid #ccc"; d.style.transform="none"; d.style.opacity="0.4"; }
+   });
+  }));
+ });
+ const m=document.getElementById("stuCompCellModal"); m.classList.add("open"); m.setAttribute("aria-hidden","false");
+}
+function closeStuCompCellModal(){ const m=document.getElementById("stuCompCellModal"); m.classList.remove("open"); m.setAttribute("aria-hidden","true"); STU_COMP_CELL_CTX=null; }
+document.getElementById("stuCompCellClose")?.addEventListener("click",closeStuCompCellModal);
+document.getElementById("stuCompCellCancel")?.addEventListener("click",closeStuCompCellModal);
+document.getElementById("stuCompCellSave")?.addEventListener("click",()=>{
+ const x=STU_COMP_CELL_CTX; if(!x) return;
+ const {classId,ev,studentId,grades,prev}=x;
+ const tpl=ev.template||[];
+ const comment=(prev.find(c=>c.comment)||{}).comment;
+ const ref=prev[0]||{};
+ const dObj=parseDateJJMMAA(ev.dateJJMMAA||"");
+ const isoDate=ev.isoDate||ref.date||todayISOFromDate(dObj||new Date());
+ DATA.competencies=(DATA.competencies||[]).filter(c=>!(c.studentId===studentId&&c.groupId===ev.id));
+ tpl.forEach((t,i)=>{
+  if(!grades[i]) return;
+  DATA.competencies.push({id:'cp_'+Math.random().toString(36).slice(2),studentId,cycle:t.cycle,domain:t.domain,subDomain:t.subDomain,level:t.level,name:t.name,color:grades[i],date:isoDate,dateJJMMAA:ev.dateJJMMAA,label:ev.label,groupId:ev.id,subject:ev.subject,period:ev.period,noteId:null,comment:comment||undefined,hideFromStudent:!!ev.hideFromStudent,hideUntil:ev.hideUntil||undefined});
+ });
+ const cb=x.onSaved;
+ closeStuCompCellModal();
+ try{ cb&&cb(); }catch(e){ console.error(e); }
+ try{ updateTabWarningIndicators(); }catch(e){}
+ saveData();
+});
 
 // Saisie des compétences liées à une évaluation (bouton « Compétences » du tableau)
 function openCompGradingForEval(classId, ev){
@@ -8804,7 +8987,9 @@ function renderClassBySubject(classId){
  if(!clsSubjectNames(cls).length){ host.innerHTML='<div class="cls-empty">Aucune matière.</div>'; return; }
  if(!period||!active){ host.innerHTML='<div class="cls-empty">Sélectionnez un trimestre et une matière.</div>'; return; }
 
- const evals=(cls.evals||[]).filter(ev=>(ALL?clsSubjectNames(cls).includes(ev.subject):ev.subject===active)&&(period==="YEAR"||(ev.period||"YEAR")===period)).sort((a,b)=>(ALL?clsSubjectNames(cls).indexOf(a.subject)-clsSubjectNames(cls).indexOf(b.subject):0)||dateKey(a)-dateKey(b));
+ const COMPEV_IDS=new Set((cls.compEvals||[]).map(e=>e.id));
+ const isCE=ev=>COMPEV_IDS.has(ev.id);   // évaluation de compétences « pure » (sans note)
+ const evals=[...(cls.evals||[]),...(cls.compEvals||[])].filter(ev=>(ALL?clsSubjectNames(cls).includes(ev.subject):ev.subject===active)&&(period==="YEAR"||(ev.period||"YEAR")===period)).sort((a,b)=>(ALL?clsSubjectNames(cls).indexOf(a.subject)-clsSubjectNames(cls).indexOf(b.subject):0)||dateKey(a)-dateKey(b));
  const students=(cls.memberIds||[]).map(id=>DATA.students.find(s=>s.id===id)).filter(Boolean)
    .sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first));
  if(!evals.length){ host.innerHTML='<div class="cls-empty">Aucune évaluation dans cette matière '+(period==="YEAR"?"sur l'année.":"pour ce trimestre. Utilisez « Nouvelle évaluation » pour en créer une.")+'</div>'; return; }
@@ -8818,31 +9003,44 @@ function renderClassBySubject(classId){
  };
  const isLockedEv=ev=>ev.period!=="YEAR"&&!!LOCKED_PERIODS[ev.period];
  const compIds=new Set((DATA.competencies||[]).map(c=>c.groupId));
- const anyComp=evals.some(ev=>compIds.has(ev.id));
+ const anyComp=evals.some(ev=>compIds.has(ev.id)||isCE(ev));
 
  // Largeurs : colonne des noms = nom le plus long ; colonne moyenne plus large ; notes = largeur fixe
  const COL_W=88, AVG_W=110;
+ // Ronds de couleur des compétences d'un élève (dans l'ordre de l'éval)
+ const compDotsHtml=(sid,ev)=>{
+  const tpl=ev.template||[];
+  return (DATA.competencies||[]).filter(c=>c.studentId===sid&&c.groupId===ev.id&&c.color)
+   .sort((a,b)=>{const ia=tpl.findIndex(t=>t.domain===a.domain&&t.name===a.name),ib=tpl.findIndex(t=>t.domain===b.domain&&t.name===b.name);return ia-ib;})
+   .map(c=>`<span class="color-dot ${c.color}" title="${escHtml(c.name||"")}"></span>`).join("");
+ };
+ // Largeur de colonne : s'élargit selon le nombre de compétences (17 px par rond), plafonnée à 280 px (au-delà, retour à la ligne)
+ const colW=ev=>isCE(ev)?Math.min(280,Math.max(COL_W,(ev.template||[]).length*17+14)):COL_W;
+ const TOTAL_COLS_W=evals.reduce((a,ev)=>a+colW(ev),0);
  const _cv=document.createElement("canvas").getContext("2d");
  _cv.font="600 15px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
  const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,_cv.measureText("Moyenne de classe").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+22;
  const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
  const avgOf=sid=>ALL?statsGenAvg(sid,period):getStudentAverageForSubject(sid,active,period);
 
- const head=evals.map(ev=>`<th class="bys-head${isFullyEvaluated(ev,classId)?"":" bys-incomplete"}${ev.hideFromStudent?" bys-hidden":""}" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
+ const head=evals.map(ev=>`<th class="bys-head${isCE(ev)?" bys-head-comp":""}${isFullyEvaluated(ev,classId)?"":" bys-incomplete"}${ev.hideFromStudent?" bys-hidden":""}" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
    <div class="bys-label">${escHtml(ev.label||"(sans libellé)")}${ev.hideFromStudent?" 👁️":""}</div>
-   ${ALL?`<div class="bys-meta bys-subj">${escHtml(ev.subject||"")}</div>`:""}<div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
-   <div class="bys-meta">/${fmt(ev.outof)}</div>
+   ${ALL?`<div class="bys-meta bys-subj">${escHtml(ev.subject||"")}</div>`:""}${isCE(ev)?"":`<div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
+   <div class="bys-meta">/${fmt(ev.outof)}</div>`}
    <div class="bys-meta">${formatDateAAAA(ev.dateJJMMAA)}</div>
   </th>`).join("");
- const subHead=anyComp?`<tr class="bys-subhead"><th class="bys-stu"></th><th class="bys-avg-head" style="left:${NAME_W}px"></th>${evals.map(ev=>compIds.has(ev.id)?`<th><button type="button" class="bys-comp-btn" data-evid="${ev.id}" title="Saisir les résultats des compétences">Compétences</button></th>`:`<th></th>`).join("")}</tr>`:"";
+ const subHead=anyComp?`<tr class="bys-subhead"><th class="bys-stu"></th><th class="bys-avg-head" style="left:${NAME_W}px"></th>${evals.map(ev=>(compIds.has(ev.id)||isCE(ev))?`<th${isCE(ev)?' class="bys-head-comp-sub"':""}><button type="button" class="bys-comp-btn" data-evid="${ev.id}" title="Saisir les résultats des compétences">Compétences</button></th>`:`<th></th>`).join("")}</tr>`:"";
 
  const rows=students.map((stu,ri)=>{
   const cells=evals.map((ev,ci)=>{
+   if(isCE(ev)){
+    return `<td class="bys-cell bys-cell-comp" data-ev="${ev.id}" data-stu="${stu.id}" title="Modifier les compétences de cet élève"><div class="bys-dots">${compDotsHtml(stu.id,ev)}</div></td>`;
+   }
    const hasBar=ev.bareme?.criteria?.length>0;
    const ro=hasBar||isLockedEv(ev);
    const cm=findNote(stu.id,ev)?.comment||"";
    const roTitle=hasBar?"Évaluation avec barème : cliquer sur l'en-tête de la colonne, puis « Saisir les points »":"Période verrouillée";
-   return `<td class="bys-cell${ro?" bys-ro":""}${cm?" bys-cm":""}"${cm?` title="${escHtml(cm)}"`:(ro?` title="${escHtml(roTitle)}"`:"")}><input type="text" class="bys-input" inputmode="decimal" autocomplete="off" data-stu="${stu.id}" data-ev="${ev.id}" data-r="${ri}" data-c="${ci}" value="${escHtml(cellValue(stu.id,ev))}" ${ro?"readonly":""}></td>`;
+   return `<td class="bys-cell${ro?" bys-ro":""}${cm?" bys-cm":""}"${cm?` title="${escHtml(cm)}"`:(ro?` title="${escHtml(roTitle)}"`:"")}><input type="text" class="bys-input${cellValue(stu.id,ev)==="X"?" bys-x":""}" inputmode="decimal" autocomplete="off" data-stu="${stu.id}" data-ev="${ev.id}" data-r="${ri}" data-c="${ci}" value="${escHtml(cellValue(stu.id,ev))}" ${ro?"readonly":""}></td>`;
   }).join("");
   return `<tr><td class="bys-stu bys-stu-click" data-stu-id="${stu.id}" title="Statistiques et classement de l'élève" style="width:${NAME_W}px">${escHtml(stu.last)} ${escHtml(stu.first)}</td><td class="bys-avg" data-avg-stu="${stu.id}" style="left:${NAME_W}px;width:${AVG_W}px">${fmtAvg(avgOf(stu.id))}</td>${cells}</tr>`;
  }).join("");
@@ -8850,7 +9048,7 @@ function renderClassBySubject(classId){
  const classAvgEv=ev=>{ const v=students.map(s=>findNote(s.id,ev)).filter(n=>n&&!isSpecial(n)&&typeof n.note==="number"&&!isNaN(n.note)).map(n=>n.note); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
  const classAvgAll=()=>{ const v=students.map(s=>avgOf(s.id)).filter(x=>typeof x==="number"&&!isNaN(x)); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
  const avgRow=`<tr class="bys-classavg"><td class="bys-stu bys-cavg-lab" style="width:${NAME_W}px">Moyenne de classe</td><td class="bys-avg" data-cavg-all="1" style="left:${NAME_W}px;width:${AVG_W}px">${fmtAvg(classAvgAll())}</td>${evals.map(ev=>`<td class="bys-cavg" data-cavg-ev="${ev.id}">${fmtAvg(classAvgEv(ev))}</td>`).join("")}</tr>`;
- host.innerHTML=`<div class="bys-scroll" style="overflow:auto;max-height:75vh;"><table class="bys-table" style="width:${NAME_W+AVG_W+COL_W*evals.length}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${AVG_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moyenne</th>${head}</tr>${subHead}</thead><tbody>${rows}${avgRow}</tbody></table></div>
+ host.innerHTML=`<div class="bys-scroll" style="overflow:auto;max-height:75vh;"><table class="bys-table" style="width:${NAME_W+AVG_W+TOTAL_COLS_W}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${AVG_W}px">${evals.map(ev=>`<col style="width:${colW(ev)}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moyenne</th>${head}</tr>${subHead}</thead><tbody>${rows}${avgRow}</tbody></table></div>
   <div style="margin-top:8px;color:#64748b;font-size:12px;">Cliquez sur une case pour saisir la note (Entrée = élève suivant). Valeurs spéciales : Abs, Disp, NE, NR, EA, X. Clic sur l'en-tête d'une évaluation pour la modifier · clic droit sur une note pour ajouter un commentaire.</div>`;
 
  const scroller=host.querySelector(".bys-scroll");
@@ -8863,12 +9061,22 @@ function renderClassBySubject(classId){
  // Clic sur l'en-tête : directement la fenêtre d'infos de l'évaluation
  host.querySelectorAll("th.bys-head").forEach(th=>th.addEventListener("click",()=>{
   const ev=evals.find(e=>e.id===th.dataset.evid);
-  if(ev) openClassEvalModal({prefillClassId:classId,prefillPeriod:ev.period||"T1",prefillSubject:ev.subject,evaluation:ev});
+  if(!ev) return;
+  if(isCE(ev)) openClassCompSetupModal(classId,ev.subject,ev.period||"T1",ev);
+  else openClassEvalModal({prefillClassId:classId,prefillPeriod:ev.period||"T1",prefillSubject:ev.subject,evaluation:ev});
  }));
  // Bouton « Compétences »
  host.querySelectorAll("button.bys-comp-btn").forEach(b=>b.addEventListener("click",e=>{
   e.stopPropagation();
-  const ev=evals.find(x=>x.id===b.dataset.evid); if(ev) openCompGradingForEval(classId,ev);
+  const ev=evals.find(x=>x.id===b.dataset.evid); if(!ev) return;
+  if(isCE(ev)) openClassCompGradingModal(classId,ev); else openCompGradingForEval(classId,ev);
+ }));
+ host.querySelectorAll("td.bys-cell-comp").forEach(td=>td.addEventListener("click",()=>{
+  const ev=evals.find(x=>x.id===td.dataset.ev); if(!ev||isLockedEv(ev)) return;
+  openStuCompCellModal(classId,ev,td.dataset.stu,()=>{
+   const d=td.querySelector(".bys-dots"); if(d) d.innerHTML=compDotsHtml(td.dataset.stu,ev);
+   host.querySelectorAll("th.bys-head").forEach(th=>{ if(th.dataset.evid===ev.id) th.classList.toggle("bys-incomplete",!isFullyEvaluated(ev,classId)); });
+  });
  }));
 
  // Commentaire individuel : clic droit (ou appui long) sur la note
@@ -8927,6 +9135,7 @@ function renderClassBySubject(classId){
     inp.value=fmtGrade2(n);
     inp.classList.toggle("bys-over",typeof ev.outof==="number"&&n>ev.outof);
    }
+   inp.classList.toggle("bys-x",inp.value==="X");
    const _ac=host.querySelector(`td[data-avg-stu="${inp.dataset.stu}"]`);
    if(_ac) _ac.textContent=fmtAvg(avgOf(inp.dataset.stu));
    updateClassAvgRow();
@@ -14701,6 +14910,12 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   if(t==="EA" && r.note.hwAuto) return "";   /* EA automatique ≠ marque posée par le professeur */
   return (CLASS_SPECIAL_VALUES.has(t)&&t!=="NR")?t:"";
  }
+ /* Note chiffrée posée à la main par le professeur sur un élève qui n'a pas rendu le test */
+ function hwManualGrade(homework,test,sid){
+  const r=hwFindEvalNote(homework.id,test.id,sid); if(!r) return "";
+  if(r.note.hwAuto!==false || typeof r.note.note!=="number" || isNaN(r.note.note)) return "";
+  return String(r.note.note).replace(".",",");
+ }
  /* Pose (ou retire, si value="") une note saisie à la main dans l'évaluation liée : elle n'est plus écrasée par le calcul automatique */
  function hwApplyManualMark(homeworkId,testId,sid,value){
   let r=hwFindEvalNote(homeworkId,testId,sid);
@@ -14962,8 +15177,9 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     const submission=getHomeworkSubmission(item.homework.id,item.test.id,stu.id);
     const done=!!submission?.submittedAt;
     const special=hwSpecialMark(item.homework,item.test,stu.id);
-    const grade=special||getHomeworkResolvedGrade(submission,item.test);
-    const validated=!!special||isHomeworkGradeValidated(submission,item.test);
+    const manualNum=(!submission||!submission.submittedAt)?hwManualGrade(item.homework,item.test,stu.id):"";
+    const grade=special||getHomeworkResolvedGrade(submission,item.test)||manualNum;
+    const validated=!!special||!!manualNum||isHomeworkGradeValidated(submission,item.test);
     return `
      <div class="homework-review-student">
       <span class="homework-status-dot ${done||special ? "is-done" : ""}"></span>
@@ -14975,7 +15191,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
       <div style="display:flex;align-items:center;gap:8px;">
        ${validated ? "" : '<span class="homework-review-warning" title="Note non validée">⚠</span>'}
        <button type="button" class="btn" data-hw-action="open-correction" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" ${done ? "" : "disabled"}>Corriger</button>
-       <button type="button" class="btn homework-reset-btn" data-hw-action="reset-submission" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" title="Annuler la soumission (l'élève pourra refaire le test)" aria-label="Annuler la soumission" ${done ? "" : "disabled"}>&#8635;</button>
+       <button type="button" class="btn homework-reset-btn" data-hw-action="reset-submission" data-homework-id="${escHtml(item.homework.id)}" data-test-id="${escHtml(item.test.id)}" data-student-id="${escHtml(stu.id)}" title="${done ? "Annuler la soumission (l'élève pourra refaire le test)" : "Retirer la note « "+escHtml(special||manualNum)+" » (l'élève pourra faire le test)"}" aria-label="Retenter" ${(done||special||manualNum) ? "" : "disabled"}>&#8635;</button>
       </div>
      </div>`;
   };
@@ -15194,11 +15410,18 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   if(AUTH.role!=="prof") return;
   const sub=getHomeworkSubmission(homeworkId,testId,studentId);
   const hw=getHomeworkById(homeworkId);
-  if(!sub || !hw) return;
+  if(!hw) return;
+  /* pas de rendu mais une valeur posée à la main (X, Abs, Disp, NE… ou note chiffrée) : « retenter » la retire et rouvre le test */
+  const testObj=getHomeworkTest(testId);
+  const special=(!sub && testObj) ? (hwSpecialMark(hw,testObj,studentId)||hwManualGrade(hw,testObj,studentId)) : "";
+  if(!sub && !special) return;
   const stu=homeworkStudentById(studentId);
   const name=stu ? `${stu.first} ${stu.last}` : "cet élève";
-  if(!confirm(`Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`)) return;
-  purgeHomeworkSubmission(hw,sub);
+  const msg=sub ? `Annuler la soumission de ${name} ?\n\nSes réponses seront effacées et il pourra refaire le test depuis son devoir. Sa note repassera à NR.`
+                : `Retirer la note « ${special} » de ${name} ?\n\nIl pourra faire le test depuis son devoir. Sa note repassera à NR.`;
+  if(!confirm(msg)) return;
+  if(sub) purgeHomeworkSubmission(hw,sub);
+  else { const r=hwFindEvalNote(homeworkId,testId,studentId); if(r){ applyHomeworkDirectValue(r.note,""); r.note.hwAuto=true; } }
   if(!Array.isArray(DATA.homeworkRedo)) DATA.homeworkRedo=[];
   DATA.homeworkRedo=DATA.homeworkRedo.filter(r=>!(r.hw===homeworkId&&r.test===testId&&r.stu===studentId));
   DATA.homeworkRedo.push({hw:homeworkId,test:testId,stu:studentId,at:new Date().toISOString()});
@@ -15267,7 +15490,12 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
      publishedCount += 1;
      return;
     }
-    if(!submission || !submission.submittedAt) return;
+    if(!submission || !submission.submittedAt){
+     /* pas de copie rendue : une note chiffrée saisie à la main est quand même prise en compte */
+     const num=parseFloat(typedRaw.replace(",","."));
+     if(typedRaw!=="" && !isNaN(num)){ specialMarks.push([studentId,typedRaw]); publishedCount += 1; }
+     return;
+    }
     const input=document.querySelector(`.homework-grade-input[data-homework-id="${CSS.escape(item.homework.id)}"][data-test-id="${CSS.escape(item.test.id)}"][data-student-id="${CSS.escape(studentId)}"]`);
     const resolved=getHomeworkResolvedGrade(submission,item.test);
     const value=(input?.value || resolved).trim();
@@ -18194,13 +18422,14 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 /* ── nom de l'établissement sous « Ecole Directe » ── */
 window.edSetEtab=function(n){ const el=$("etabName"); if(el) el.textContent=n||""; };
 
-/* ── œil « évaluations masquées » aussi sur les sous-onglets Élèves / Classes & groupes ── */
+/* ── œil « évaluations masquées » + panneau d'attention « évaluations incomplètes » aussi sur les sous-onglets Élèves / Classes & groupes ── */
 (function(){
- const map={eleves:["elevesView","Évaluations masquées pour l'élève"],classes:["classesView","Évaluations masquées pour la classe ou le groupe"]};
+ const map={eleves:["elevesView","Évaluations masquées pour l'élève","Évaluations incomplètes pour l'élève"],classes:["classesView","Évaluations masquées pour la classe ou le groupe","Évaluations incomplètes pour la classe ou le groupe"]};
  function sync(){ Object.keys(map).forEach(k=>{
   const real=document.querySelector('.tab-btn[data-target="'+map[k][0]+'"]'), subL=document.querySelectorAll('.carnet-sub [data-carnet="'+k+'"]');
-  if(!real||!subL.length) return; const on=real.classList.contains("has-hidden-eval");
-  subL.forEach(sub=>{ sub.classList.toggle("has-hidden-eval",on); if(on) sub.title=map[k][1]; else sub.removeAttribute("title"); }); }); }
+  if(!real||!subL.length) return; const on=real.classList.contains("has-hidden-eval"), warn=real.classList.contains("has-empty-eval");
+  subL.forEach(sub=>{ sub.classList.toggle("has-hidden-eval",on); sub.classList.toggle("has-empty-eval",warn);
+   const tt=[warn?map[k][2]:"",on?map[k][1]:""].filter(Boolean).join(" · "); if(tt) sub.title=tt; else sub.removeAttribute("title"); }); }); }
  const t=$("mainTabs"); if(t) new MutationObserver(sync).observe(t,{attributes:true,subtree:true,attributeFilter:["class"]}); sync();
 })();
 
