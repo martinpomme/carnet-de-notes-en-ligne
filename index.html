@@ -89,21 +89,39 @@ h1{margin:0; font-size:24px; font-weight:700; letter-spacing:-.01em }
 .subtab-btn{ padding:8px 12px; border:1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer }
 .subtab-btn.active{ background:var(--grad); color:#fff; border-color:#00508f }
 .subtab-view{ display:none }
-.bys-table{ border-collapse:separate; border-spacing:0; font-size:13px; table-layout:fixed }
+.bys-table{ border-collapse:separate; border-spacing:0; font-size:15px; table-layout:fixed }
 .bys-table th,.bys-table td{ border:1px solid var(--border); padding:0; background:#fff }
-.bys-head{ padding:5px 2px !important; overflow:hidden; background:#ecf7fd !important; text-align:center; cursor:pointer; position:sticky; top:0; z-index:2 }
-.bys-head:hover{ background:#d8eefb !important }
-.bys-label{ font-weight:700; color:#08487f; font-size:12px; line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere }
-.bys-meta{ font-weight:400; font-size:10px; line-height:1.25; color:#64748b; overflow:hidden; overflow-wrap:anywhere }
-.bys-stu{ padding:6px 10px !important; white-space:nowrap; overflow:hidden; position:sticky; left:0; z-index:1; background:#f8fafc !important; font-weight:600 }
-.bys-corner{ z-index:3; top:0 }
-.bys-input{ width:100%; min-width:0; box-sizing:border-box; border:0; padding:7px 2px; font-variant-numeric:tabular-nums; text-align:center; font:inherit; background:transparent }
+.bys-head{ padding:4px 3px !important; overflow:hidden; background:#e5e7eb !important; text-align:center; cursor:pointer; position:sticky; top:0; z-index:2 }
+.bys-head:hover{ background:#d5d9df !important }
+.bys-label{ font-weight:700; color:#08487f; font-size:14px; line-height:1.2; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere }
+.bys-meta{ font-weight:400; font-size:12px; line-height:1.25; color:#4b5563; overflow:hidden; overflow-wrap:anywhere }
+.bys-stu{ padding:4px 10px !important; white-space:nowrap; overflow:hidden; position:sticky; left:0; z-index:1; background:#e8f1fa !important; font-weight:600 }
+.bys-corner{ z-index:3; top:0; background:#e5e7eb !important }
+.bys-input{ width:100%; min-width:0; box-sizing:border-box; border:0; padding:4px 2px; font:inherit; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-variant-numeric:tabular-nums; text-align:center; background:transparent }
 .bys-input:focus{ outline:2px solid #1a8ad0; outline-offset:-2px; background:#fff }
-.bys-input[readonly]{ background:#f1f5f9; cursor:pointer }
-.bys-avg{ position:sticky; z-index:1; background:#f8fafc !important; text-align:center; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:6px 2px !important }
-.bys-avg-head{ position:sticky; top:0; z-index:3; background:#ecf7fd !important; text-align:center; font-weight:700; color:#08487f; padding:5px 2px !important; font-size:12px; cursor:default }
+.bys-input[readonly]{ cursor:default }
+.bys-table td.bys-ro{ background:#d5d9df }
+.bys-table td.bys-cm{ background:#ffe2bd }
+.bys-avg{ position:sticky; z-index:1; background:#c9ddf2 !important; text-align:center; font-weight:700; color:#08487f; font-size:16px; font-variant-numeric:tabular-nums; padding:4px 2px !important }
+.bys-avg-head{ position:sticky; top:0; z-index:3; background:#e5e7eb !important; text-align:center; font-weight:700; color:#08487f; padding:4px 2px !important; font-size:14px; cursor:default }
+.bys-subhead th{ position:sticky; z-index:2; background:#e5e7eb !important; padding:3px 3px !important; text-align:center }
+.bys-subhead th.bys-stu,.bys-subhead th.bys-avg-head{ z-index:3 }
+.bys-comp-btn{ width:100%; box-sizing:border-box; padding:3px 2px; border:1px solid #10b981; background:#10b981; color:#fff; border-radius:6px; font:600 12px Arial,Helvetica,sans-serif; cursor:pointer; white-space:nowrap }
+.bys-comp-btn:hover{ background:#059669; border-color:#059669 }
 .bys-bad{ background:#fee2e2 !important }
 .bys-over{ color:#dc2626; font-weight:700 }
+/* Barre de contrôle de la classe : Élèves · Gestion/Aperçu · Trimestre · Matière · Nouvelle évaluation */
+.cls-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px }
+.cls-count{ color:#64748b; font-weight:600; white-space:nowrap }
+.cls-mode{ display:inline-flex; padding:3px; background:#eaf0fb; border-radius:999px; gap:2px }
+.cls-mode .cls-mode-btn{ border:none; background:transparent; color:#334155; font-weight:600; padding:6px 18px; border-radius:999px; cursor:pointer; min-height:0 }
+.cls-mode .cls-mode-btn:hover:not(.active){ background:rgba(255,255,255,.75); color:#00508f }
+.cls-mode .cls-mode-btn.active{ background:var(--grad); color:#fff; box-shadow:0 2px 6px rgba(1,104,169,.35) }
+.cls-bar .cls-sel{ width:auto; min-width:150px; margin-bottom:0 }
+.cls-bar .cls-new{ margin-left:auto }
+.cls-empty{ color:#64748b; padding:16px 4px }
+.cls-toast{ position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:9999; background:#1f2937; color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; box-shadow:0 6px 20px rgba(0,0,0,.25) }
+.card-header .carnet-sub{ max-width:none; margin:0; padding:0; z-index:auto }
 .subtab-view.active{ display:block }
 .period-tabs{ display:flex; gap:8px; margin-bottom:12px }
 .period-btn{ padding:6px 10px; border: 1px solid var(--border); background:#fff; border-radius:8px; cursor:pointer; color:#1f2937 }
@@ -1902,7 +1920,6 @@ header .header-actions{margin-left:auto;align-items:center}
   </div>
  </div>
 </div>
-<div class="carnet-sub" id="carnetSub" style="display:none"><div class="subtabs" role="tablist" aria-label="Carnet de notes"><button type="button" class="subtab-btn" data-carnet="eleves" role="tab"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></svg><span>Élèves</span></button><button type="button" class="subtab-btn" data-carnet="classes" role="tab"><svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/></svg><span>Classes &amp; groupes</span></button></div></div>
 <div class="container">
 <section id="homeView" class="view active">
  <div class="home-grid">
@@ -1922,7 +1939,7 @@ header .header-actions{margin-left:auto;align-items:center}
  <section id="elevesView" class="view">
   <div class="card">
    <div class="card-header">
-    <div class="hdr-left"><strong>Gestion des élèves</strong></div>
+    <div class="hdr-left"><div class="carnet-sub" style="display:none"><div class="subtabs" role="tablist" aria-label="Carnet de notes"><button type="button" class="subtab-btn" data-carnet="eleves" role="tab"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></svg><span>Élèves</span></button><button type="button" class="subtab-btn" data-carnet="classes" role="tab"><svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/></svg><span>Classes &amp; groupes</span></button></div></div></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteStudentBtn">Supprimer élève</button>
     </div>
@@ -1978,7 +1995,7 @@ header .header-actions{margin-left:auto;align-items:center}
  <section id="classesView" class="view">
   <div class="card">
    <div class="card-header">
-    <div class="hdr-left"><strong>Gestion des classes et des matières</strong></div>
+    <div class="hdr-left"><div class="carnet-sub" style="display:none"><div class="subtabs" role="tablist" aria-label="Carnet de notes"><button type="button" class="subtab-btn" data-carnet="eleves" role="tab"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 21v-1.5a5.5 5.5 0 0 1 5.5-5.5h3a5.5 5.5 0 0 1 5.5 5.5V21z"/></svg><span>Élèves</span></button><button type="button" class="subtab-btn" data-carnet="classes" role="tab"><svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 21v-1.5a4.5 4.5 0 0 1 4.5-4.5h2a4.5 4.5 0 0 1 4.5 4.5V21z"/><circle cx="4.2" cy="9.5" r="2.2"/><path d="M1.5 21v-1.2a3 3 0 0 1 3-3"/><circle cx="19.8" cy="9.5" r="2.2"/><path d="M22.5 21v-1.2a3 3 0 0 0-3-3"/></svg><span>Classes &amp; groupes</span></button></div></div></div>
     <div style="display:flex;gap:8px;">
      <button class="btn btn-danger" id="deleteClassBtn">Supprimer classe</button>
     </div>
@@ -2470,7 +2487,7 @@ header .header-actions{margin-left:auto;align-items:center}
     <label>Date (JJ/MM/AA)</label><input id="classDate" placeholder="JJ/MM/AA">
     <div style="display:flex;gap:8px;align-items:center;">
      <div style="flex:1;"><label>Sur</label><input type="number" step="0.01" id="classOutof" value="20"></div>
-     <div style="flex:0;"><button type="button" class="btn btn-sm" id="classEvalCreateBaremeBtn" style="margin-top:18px;font-size:12px;white-space:nowrap;">Créer un barème</button></div>
+     <div style="flex:0;display:flex;gap:6px;"><button type="button" class="btn btn-sm" id="classEvalCreateBaremeBtn" style="margin-top:18px;font-size:12px;white-space:nowrap;">Créer un barème</button><button type="button" class="btn btn-sm btn-primary" id="classEvalPointsBtn" style="display:none;margin-top:18px;font-size:12px;white-space:nowrap;">Saisir les points</button></div>
     </div>
     <label>Coef</label><input type="number" step="any" id="classCoef" value="1">
     <label>Trimestre</label>
@@ -2492,6 +2509,7 @@ header .header-actions{margin-left:auto;align-items:center}
      </div>
     </div>
     <div class="modal-actions">
+     <button type="button" class="btn btn-danger" id="classEvalDeleteBtn" style="display:none;margin-right:auto;">Supprimer</button>
      <button type="button" class="btn" id="classEvalCancel">Annuler</button>
      <button type="submit" class="btn btn-primary" id="classEvalCreateBtn">Créer</button>
     </div>
@@ -8623,113 +8641,101 @@ function renderClassSelects(){
 
 let LAST_ACTIVE_CLASS_PERIOD="T1";
 
+let CLASS_VIEW_MODE="classBySubject";   // "classBySubject" = Gestion · "classPreview" = Aperçu
+function clsToast(msg){
+ const t=document.createElement("div"); t.className="cls-toast"; t.textContent=msg; document.body.appendChild(t);
+ setTimeout(()=>t.remove(),2800);
+}
+function clsSubjectNames(cls){ return (cls.subjects||[]).map(x=>typeof x==="object"?x.name:x).filter(x=>x!=="Compétences"); }
+
 function openClass(clsId){
  ensureSubjectRegistry();
  const content=document.getElementById("classContent"); const placeholder=document.getElementById("classPlaceholder");
  const cls=classLike(clsId);
  if(!cls){placeholder.style.display="block";content.style.display="none";content.innerHTML="";return;}
  placeholder.style.display="none"; content.style.display="block";
- 
- const previousSub=content.querySelector(".subtab-btn.active")?.dataset.sub||"classGestion";
- 
- // Helper to check if a trimester is incomplete
- const isTrimesterIncomplete = (period) => {
-   return (cls.evals || []).some(ev => (ev.period||"YEAR") === period && !isFullyEvaluated(ev, clsId)) ||
-          (cls.compEvals || []).some(ev => (ev.period||"YEAR") === period && !isFullyEvaluated(ev, clsId));
- };
- 
- const isTrimesterHidden = (period) => {
-   return (cls.evals || []).some(ev => (ev.period||"YEAR") === period && ev.hideFromStudent) ||
-          (cls.compEvals || []).some(ev => (ev.period||"YEAR") === period && ev.hideFromStudent);
- };
-
- const getPeriodClasses = (p) => {
-   let c = "period-btn";
-   if(p !== "YEAR") {
-     if(isTrimesterIncomplete(p)) c += " has-empty-eval";
-     if(isTrimesterHidden(p)) c += " has-hidden-eval";
-   }
-   return c;
- };
+ if(CLASS_VIEW_MODE!=="classPreview") CLASS_VIEW_MODE="classBySubject";
 
  content.innerHTML=`
- <div class="form-row" style="align-items:center;justify-content:space-between;margin-bottom:12px;">
-  <div style="color:#64748b;">Élèves: ${(cls.memberIds||[]).length}</div>
- </div>
- <div class="subtabs">
-  <button class="subtab-btn" data-sub="classGestion">Gestion générale</button>
-  <button class="subtab-btn" data-sub="classBySubject">Gestion par matière</button>
-  <button class="subtab-btn" data-sub="classPreview">Aperçu</button>
- </div>
- <div id="classBySubject" class="subtab-view">
-  <div id="classBySubjectTabs" class="period-tabs" style="margin-bottom:12px; gap:8px; overflow-x:auto; padding-bottom:8px; border-bottom:1px solid #e2e8f0;"></div>
-  <div id="classBySubjectContent"></div>
- </div>
- <div id="classGestion" class="subtab-view active">
-  <div class="period-tabs">
-   <button class="${getPeriodClasses("T1")}" data-period="T1">Trimestre 1</button>
-   <button class="${getPeriodClasses("T2")}" data-period="T2">Trimestre 2</button>
-   <button class="${getPeriodClasses("T3")}" data-period="T3">Trimestre 3</button>
-   <button class="${getPeriodClasses("T4")}" data-period="T4">Trimestre 4</button>
+ <div class="cls-bar">
+  <span class="cls-count">Élèves: ${(cls.memberIds||[]).length}</span>
+  <div class="cls-mode" role="tablist" aria-label="Mode d'affichage">
+   <button type="button" class="subtab-btn cls-mode-btn" data-sub="classBySubject" role="tab">Gestion</button>
+   <button type="button" class="subtab-btn cls-mode-btn" data-sub="classPreview" role="tab">Aperçu</button>
   </div>
-  <div id="classPeriodViews">
-   ${["T1","T2","T3","T4"].map(k=>`<div id="class-period-${k}" class="period-view"></div>`).join("")}
-  </div>
+  <select id="clsPeriodSel" class="modern-select cls-sel" aria-label="Trimestre"></select>
+  <select id="clsSubjectSel" class="modern-select cls-sel" aria-label="Matière"></select>
+  <button type="button" class="btn btn-primary cls-new" id="clsNewEvalBtn" style="display:none">＋ Nouvelle évaluation</button>
  </div>
- <div id="classPreview" class="subtab-view">
-  <div class="period-tabs">
-   <button class="${getPeriodClasses("T1")}" data-period="T1">Trimestre 1</button>
-   <button class="${getPeriodClasses("T2")}" data-period="T2">Trimestre 2</button>
-   <button class="${getPeriodClasses("T3")}" data-period="T3">Trimestre 3</button>
-   <button class="${getPeriodClasses("T4")}" data-period="T4">Trimestre 4</button>
-   <button class="${getPeriodClasses("YEAR")}" data-period="YEAR">Année</button>
-  </div>
-  <div id="classPreviewSubjectTabs" class="period-tabs" style="margin-bottom:15px; gap:8px; overflow-x:auto; padding-bottom:8px; border-bottom:1px solid #e2e8f0;"></div>
-  <div id="classPreviewContent"></div>
- </div>`;
+ <div id="classBySubject" class="subtab-view"><div id="classBySubjectContent"></div></div>
+ <div id="classPreview" class="subtab-view"><div id="classPreviewContent"></div></div>`;
 
- content.querySelectorAll(".subtab-btn").forEach(btn=>{
-  btn.classList.toggle("active",btn.dataset.sub===previousSub);
-  btn.addEventListener("click",()=>{
-   content.querySelectorAll(".subtab-btn").forEach(x=>x.classList.remove("active")); btn.classList.add("active");
-   content.querySelectorAll(".subtab-view").forEach(v=>v.classList.remove("active"));
-   const target = content.querySelector(`#${btn.dataset.sub}`);
-   target.classList.add("active");
-   if(btn.dataset.sub==="classPreview") renderClassPreview(clsId);
-   if(btn.dataset.sub==="classBySubject") renderClassBySubject(clsId);
-  });
+ const modeBtns=content.querySelectorAll(".cls-mode-btn");
+ const pSel=content.querySelector("#clsPeriodSel"), sSel=content.querySelector("#clsSubjectSel"), newBtn=content.querySelector("#clsNewEvalBtn");
+ const isPrev=()=>CLASS_VIEW_MODE==="classPreview";
+ const getP=()=>isPrev()?CURRENT_PREVIEW_PERIOD:LAST_ACTIVE_CLASS_PERIOD;
+ const getS=()=>isPrev()?CURRENT_PREVIEW_SUBJECT:CLASS_BYSUBJECT_ACTIVE[clsId];
+ const setP=v=>{ if(isPrev()) CURRENT_PREVIEW_PERIOD=v; else LAST_ACTIVE_CLASS_PERIOD=v; };
+ const setS=v=>{ if(isPrev()) CURRENT_PREVIEW_SUBJECT=v; else CLASS_BYSUBJECT_ACTIVE[clsId]=v; };
+
+ // Repères : rouge = évaluation incomplète, œil = masquée pour l'élève
+ const fl=(per,subj)=>{
+  const L=[...(cls.evals||[]),...(cls.compEvals||[])].filter(ev=>(per==="YEAR"||(ev.period||"YEAR")===per)&&(!subj||ev.subject===subj));
+  return {miss:L.some(ev=>!isFullyEvaluated(ev,clsId)),hid:L.some(ev=>ev.hideFromStudent)};
+ };
+ const opt=(v,label,f,sel)=>`<option value="${escHtml(v)}"${sel?" selected":""}${f.miss?' style="color:var(--danger)"':(f.hid?' style="color:var(--primary)"':"")}>${escHtml(label)}${f.miss?" ⚠":""}${f.hid?" 👁":""}</option>`;
+
+ const fillBar=()=>{
+  const prev=isPrev(), names=clsSubjectNames(cls);
+  let p=getP(); if(p!==""&&!["T1","T2","T3","T4","YEAR"].includes(p)){ p="T1"; setP(p); }
+  let s=getS();
+  if(s!==""&&!(names.includes(s)||(prev&&s==="__ALL__"))){ s=prev?"__ALL__":(names[0]||""); setS(s); }
+  const pl=[["T1","Trimestre 1"],["T2","Trimestre 2"],["T3","Trimestre 3"],["T4","Trimestre 4"],["YEAR","Année"]];
+  pSel.innerHTML='<option value="">Trimestre…</option>'+pl.map(([v,l])=>opt(v,l,v==="YEAR"?{}:fl(v,null),v===p)).join("");
+  pSel.value=p;
+  const sl=names.map(n=>[n,n]); if(prev) sl.unshift(["__ALL__","Toutes les matières"]);
+  sSel.innerHTML='<option value="">Matière…</option>'+sl.map(([v,l])=>opt(v,l,v==="__ALL__"?{}:fl(p||"YEAR",v),v===s)).join("");
+  sSel.value=s;
+  newBtn.style.display=(!prev&&p&&p!=="YEAR"&&s&&s!=="__ALL__")?"":"none";   // visible quand matière + trimestre choisis
+  modeBtns.forEach(b=>{ const a=b.dataset.sub===CLASS_VIEW_MODE; b.classList.toggle("active",a); b.setAttribute("aria-selected",a?"true":"false"); });
+  content.querySelector("#classBySubject").classList.toggle("active",!prev);
+  content.querySelector("#classPreview").classList.toggle("active",prev);
+ };
+ const renderMain=()=>{
+  if(isPrev()){
+   if(!getP()||!getS()){ content.querySelector("#classPreviewContent").innerHTML='<div class="cls-empty">Sélectionnez un trimestre et une matière.</div>'; return; }
+   renderClassPreview(clsId);
+  } else renderClassBySubject(clsId);
+ };
+
+ modeBtns.forEach(b=>b.addEventListener("click",e=>{
+  const next=b.dataset.sub; if(next===CLASS_VIEW_MODE) return;
+  if(e.isTrusted){   // on garde le même trimestre / la même matière en basculant
+   if(next==="classPreview"){ if(LAST_ACTIVE_CLASS_PERIOD) CURRENT_PREVIEW_PERIOD=LAST_ACTIVE_CLASS_PERIOD; const sj=CLASS_BYSUBJECT_ACTIVE[clsId]; if(sj) CURRENT_PREVIEW_SUBJECT=sj; }
+   else { if(CURRENT_PREVIEW_PERIOD) LAST_ACTIVE_CLASS_PERIOD=CURRENT_PREVIEW_PERIOD; if(CURRENT_PREVIEW_SUBJECT&&CURRENT_PREVIEW_SUBJECT!=="__ALL__") CLASS_BYSUBJECT_ACTIVE[clsId]=CURRENT_PREVIEW_SUBJECT; }
+  }
+  CLASS_VIEW_MODE=next; fillBar(); renderMain();
+ }));
+ pSel.addEventListener("change",()=>{ setP(pSel.value); fillBar(); renderMain(); });
+ sSel.addEventListener("change",()=>{ setS(sSel.value); fillBar(); renderMain(); });
+ newBtn.addEventListener("click",()=>{
+  const p=getP(), sj=getS(); if(!p||!sj||p==="YEAR") return;
+  if(LOCKED_PERIODS[p]){ alert("Ce trimestre est verrouillé."); return; }
+  openClassEvalModal({prefillClassId:clsId,prefillPeriod:p,prefillSubject:sj});
  });
- content.querySelectorAll(".subtab-view").forEach(v=>v.classList.toggle("active",v.id===previousSub));
 
- const pbtns=content.querySelectorAll("#classGestion .period-btn");
- pbtns.forEach(b=>{if(b.dataset.period===LAST_ACTIVE_CLASS_PERIOD) b.classList.add("active");});
- if(!content.querySelector("#classGestion .period-btn.active")) content.querySelector('#classGestion .period-btn[data-period="T1"]').classList.add('active');
- const activePeriod=content.querySelector("#classGestion .period-btn.active")?.dataset.period;
- if(activePeriod) ["T1","T2","T3","T4"].forEach(k=>content.querySelector(`#class-period-${k}`)?.classList.toggle("active",k===activePeriod));
- pbtns.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-   pbtns.forEach(x=>x.classList.remove("active")); btn.classList.add("active");
-   const key=btn.dataset.period; LAST_ACTIVE_CLASS_PERIOD=key;
-   ["T1","T2","T3","T4"].forEach(k=>content.querySelector(`#class-period-${k}`)?.classList.toggle("active",k===key));
-  });
+ fillBar(); renderMain();
+}
+
+// Saisie des compétences liées à une évaluation (bouton « Compétences » du tableau)
+function openCompGradingForEval(classId, ev){
+ const mock={id:ev.id,subject:ev.subject,label:ev.label,period:ev.period,template:[]};
+ const seen=new Set();
+ (DATA.competencies||[]).filter(c=>c.groupId===ev.id).forEach(lc=>{
+  const key=`${lc.domain}|${lc.name}`;
+  if(!seen.has(key)){ mock.template.push({cycle:lc.cycle,domain:lc.domain,subDomain:lc.subDomain,name:lc.name,level:lc.level}); seen.add(key); }
  });
-
- // Setup for Preview Period Buttons
- const previewPbtns = content.querySelectorAll("#classPreview .period-btn");
- previewPbtns.forEach(b => {
-   if(b.dataset.period === CURRENT_PREVIEW_PERIOD) b.classList.add("active");
-   b.addEventListener("click", () => {
-     previewPbtns.forEach(x => x.classList.remove("active"));
-     b.classList.add("active");
-     CURRENT_PREVIEW_PERIOD = b.dataset.period;
-     renderClassPreview(clsId);
-   });
- });
- if(!content.querySelector("#classPreview .period-btn.active")) content.querySelector('#classPreview .period-btn[data-period="T1"]').classList.add('active');
-
- ["T1","T2","T3","T4"].forEach(period=>renderClassPeriod(clsId,period));
- if(previousSub==="classPreview") renderClassPreview(clsId);
- if(previousSub==="classBySubject") renderClassBySubject(clsId);
+ openClassCompGradingModal(classId,mock);
 }
 
 // ── GESTION PAR MATIÈRE : tableau type tableur (élèves × évaluations) ─────────
@@ -8740,23 +8746,16 @@ function fmtGrade2(n){
 }
 function renderClassBySubject(classId){
  const cls=classLike(classId); if(!cls) return;
- const tabsHost=document.getElementById("classBySubjectTabs");
- const host=document.getElementById("classBySubjectContent");
- if(!tabsHost||!host) return;
- const subjects=(cls.subjects||[]).filter(s=>s!=="Compétences");
- if(!subjects.length){ tabsHost.innerHTML=""; host.innerHTML='<div style="color:#64748b;">Aucune matière.</div>'; return; }
- let active=CLASS_BYSUBJECT_ACTIVE[classId];
- if(!subjects.includes(active)) active=CLASS_BYSUBJECT_ACTIVE[classId]=subjects[0];
- tabsHost.innerHTML=subjects.map(s=>`<button class="period-btn${s===active?" active":""}" data-bysubj="${escHtml(s)}">${escHtml(s)}</button>`).join("");
- tabsHost.querySelectorAll("button[data-bysubj]").forEach(b=>b.addEventListener("click",()=>{
-  CLASS_BYSUBJECT_ACTIVE[classId]=b.dataset.bysubj; renderClassBySubject(classId);
- }));
+ const host=document.getElementById("classBySubjectContent"); if(!host) return;
+ const period=LAST_ACTIVE_CLASS_PERIOD, active=CLASS_BYSUBJECT_ACTIVE[classId];
+ if(!clsSubjectNames(cls).length){ host.innerHTML='<div class="cls-empty">Aucune matière.</div>'; return; }
+ if(!period||!active){ host.innerHTML='<div class="cls-empty">Sélectionnez un trimestre et une matière.</div>'; return; }
 
- const evals=(cls.evals||[]).filter(ev=>ev.subject===active).sort((a,b)=>dateKey(a)-dateKey(b));
+ const evals=(cls.evals||[]).filter(ev=>ev.subject===active&&(period==="YEAR"||(ev.period||"YEAR")===period)).sort((a,b)=>dateKey(a)-dateKey(b));
  const students=(cls.memberIds||[]).map(id=>DATA.students.find(s=>s.id===id)).filter(Boolean)
    .sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first));
- if(!evals.length){ host.innerHTML='<div style="color:#64748b;">Aucune évaluation dans cette matière.</div>'; return; }
- if(!students.length){ host.innerHTML='<div style="color:#64748b;">Aucun élève dans cette classe.</div>'; return; }
+ if(!evals.length){ host.innerHTML='<div class="cls-empty">Aucune évaluation dans cette matière '+(period==="YEAR"?"sur l'année.":"pour ce trimestre. Utilisez « Nouvelle évaluation » pour en créer une.")+'</div>'; return; }
+ if(!students.length){ host.innerHTML='<div class="cls-empty">Aucun élève dans cette classe.</div>'; return; }
 
  const findNote=(sid,ev)=>(DATA.notes[sid]||[]).find(m=>m.classCommon&&m.classId===classId&&m.classNoteId===ev.id);
  const cellValue=(sid,ev)=>{
@@ -8765,46 +8764,87 @@ function renderClassBySubject(classId){
   return typeof n.note==="number"?fmtGrade2(n.note):"";
  };
  const isLockedEv=ev=>ev.period!=="YEAR"&&!!LOCKED_PERIODS[ev.period];
+ const compIds=new Set((DATA.competencies||[]).map(c=>c.groupId));
+ const anyComp=evals.some(ev=>compIds.has(ev.id));
 
- // Largeurs : colonne des noms = nom le plus long ; toutes les autres colonnes = largeur FIXE
- const COL_W=64;
+ // Largeurs : colonne des noms = nom le plus long ; colonne moyenne plus large ; notes = largeur fixe
+ const COL_W=98, AVG_W=110;
  const _cv=document.createElement("canvas").getContext("2d");
- _cv.font="600 13px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
- const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+24;
+ _cv.font="600 15px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
+ const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+22;
  const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
- const avgOf=sid=>getStudentAverageForSubject(sid,active,"YEAR");
+ const avgOf=sid=>getStudentAverageForSubject(sid,active,period);
 
- const head=evals.map((ev,ci)=>`<th class="bys-head" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Ouvrir l'évaluation">
+ const head=evals.map(ev=>`<th class="bys-head" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
    <div class="bys-label">${escHtml(ev.label||"(sans libellé)")}${ev.hideFromStudent?" 👁️":""}</div>
    <div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
    <div class="bys-meta">/${fmt(ev.outof)}</div>
    <div class="bys-meta">${formatDateAAAA(ev.dateJJMMAA)}</div>
   </th>`).join("");
+ const subHead=anyComp?`<tr class="bys-subhead"><th class="bys-stu"></th><th class="bys-avg-head" style="left:${NAME_W}px"></th>${evals.map(ev=>compIds.has(ev.id)?`<th><button type="button" class="bys-comp-btn" data-evid="${ev.id}" title="Saisir les résultats des compétences">Compétences</button></th>`:`<th></th>`).join("")}</tr>`:"";
 
  const rows=students.map((stu,ri)=>{
   const cells=evals.map((ev,ci)=>{
    const hasBar=ev.bareme?.criteria?.length>0;
    const ro=hasBar||isLockedEv(ev);
-   return `<td class="bys-cell"><input type="text" class="bys-input" inputmode="decimal" autocomplete="off" data-stu="${stu.id}" data-ev="${ev.id}" data-r="${ri}" data-c="${ci}" value="${escHtml(cellValue(stu.id,ev))}" ${ro?`readonly ${hasBar?'title="Évaluation avec barème : cliquer pour saisir par critère"':'title="Période verrouillée"'}`:""}></td>`;
+   const cm=findNote(stu.id,ev)?.comment||"";
+   const roTitle=hasBar?"Évaluation avec barème : cliquer sur l'en-tête de la colonne, puis « Saisir les points »":"Période verrouillée";
+   return `<td class="bys-cell${ro?" bys-ro":""}${cm?" bys-cm":""}"${cm?` title="${escHtml(cm)}"`:(ro?` title="${escHtml(roTitle)}"`:"")}><input type="text" class="bys-input" inputmode="decimal" autocomplete="off" data-stu="${stu.id}" data-ev="${ev.id}" data-r="${ri}" data-c="${ci}" value="${escHtml(cellValue(stu.id,ev))}" ${ro?"readonly":""}></td>`;
   }).join("");
-  return `<tr><td class="bys-stu" style="width:${NAME_W}px">${escHtml(stu.last)} ${escHtml(stu.first)}</td><td class="bys-avg" data-avg-stu="${stu.id}" style="left:${NAME_W}px;width:${COL_W}px">${fmtAvg(avgOf(stu.id))}</td>${cells}</tr>`;
+  return `<tr><td class="bys-stu" style="width:${NAME_W}px">${escHtml(stu.last)} ${escHtml(stu.first)}</td><td class="bys-avg" data-avg-stu="${stu.id}" style="left:${NAME_W}px;width:${AVG_W}px">${fmtAvg(avgOf(stu.id))}</td>${cells}</tr>`;
  }).join("");
 
- host.innerHTML=`<div style="overflow:auto;max-height:70vh;"><table class="bys-table" style="width:${NAME_W+COL_W*(evals.length+1)}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${COL_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moy.</th>${head}</tr></thead><tbody>${rows}</tbody></table></div>
-  <div style="margin-top:8px;color:#64748b;font-size:12px;">Cliquez sur une case pour saisir la note (Entrée = élève suivant). Valeurs spéciales : Abs, Disp, NE, NR, EA, X.</div>`;
+ host.innerHTML=`<div class="bys-scroll" style="overflow:auto;max-height:75vh;"><table class="bys-table" style="width:${NAME_W+AVG_W+COL_W*evals.length}px"><colgroup><col style="width:${NAME_W}px"><col style="width:${AVG_W}px">${evals.map(()=>`<col style="width:${COL_W}px">`).join("")}</colgroup><thead><tr><th class="bys-stu bys-corner">Élève</th><th class="bys-avg-head" style="left:${NAME_W}px" title="Moyenne pondérée (sur 20) de la matière">Moy.</th>${head}</tr>${subHead}</thead><tbody>${rows}</tbody></table></div>
+  <div style="margin-top:8px;color:#64748b;font-size:12px;">Cliquez sur une case pour saisir la note (Entrée = élève suivant). Valeurs spéciales : Abs, Disp, NE, NR, EA, X. Clic sur l'en-tête d'une évaluation pour la modifier · clic droit sur une note pour ajouter un commentaire.</div>`;
 
+ const scroller=host.querySelector(".bys-scroll");
+ // 2e ligne d'en-tête collée sous la 1re
+ if(anyComp){
+  const h=host.querySelector("thead tr").getBoundingClientRect().height;
+  host.querySelectorAll(".bys-subhead th").forEach(th=>th.style.top=h+"px");
+ }
+
+ // Clic sur l'en-tête : directement la fenêtre d'infos de l'évaluation
  host.querySelectorAll("th.bys-head").forEach(th=>th.addEventListener("click",()=>{
-  const ev=evals.find(e=>e.id===th.dataset.evid); if(ev) openEvalTableModal(classId,ev);
+  const ev=evals.find(e=>e.id===th.dataset.evid);
+  if(ev) openClassEvalModal({prefillClassId:classId,prefillPeriod:ev.period||"T1",prefillSubject:ev.subject,evaluation:ev});
  }));
+ // Bouton « Compétences »
+ host.querySelectorAll("button.bys-comp-btn").forEach(b=>b.addEventListener("click",e=>{
+  e.stopPropagation();
+  const ev=evals.find(x=>x.id===b.dataset.evid); if(ev) openCompGradingForEval(classId,ev);
+ }));
+
+ // Commentaire individuel : clic droit (ou appui long) sur la note
+ const openCellComment=inp=>{
+  const ev=evals.find(e=>e.id===inp.dataset.ev); if(!ev||isLockedEv(ev)) return;
+  const stuId=inp.dataset.stu, n=findNote(stuId,ev);
+  if(!n){ clsToast("Saisissez d'abord une note (ou Abs, Disp…) avant d'ajouter un commentaire."); return; }
+  COMMENT_ON_SAVE=t=>{
+   const cur=findNote(stuId,ev)||n;
+   if(t) cur.comment=t; else delete cur.comment;
+   const td=inp.closest("td"); td.classList.toggle("bys-cm",!!t);
+   if(t) td.title=t; else td.removeAttribute("title");
+   saveData();
+  };
+  openCommentModal(n.comment||"");
+ };
+ scroller.addEventListener("contextmenu",e=>{
+  const inp=e.target.closest("input.bys-input"); if(!inp) return;
+  e.preventDefault(); openCellComment(inp);
+ });
+ let _lp=0;
+ scroller.addEventListener("pointerdown",e=>{
+  const i=e.target.closest("input.bys-input");
+  if(i&&e.pointerType==="touch"){ clearTimeout(_lp); _lp=setTimeout(()=>openCellComment(i),600); }
+ });
+ ["pointerup","pointercancel","pointermove"].forEach(n=>scroller.addEventListener(n,()=>clearTimeout(_lp)));
 
  const inputs=Array.from(host.querySelectorAll("input.bys-input"));
  const aliases={a:"Abs",d:"Disp",ne:"NE",nr:"NR",ea:"EA",x:"X",abs:"Abs",disp:"Disp"};
  inputs.forEach(inp=>{
   const ev=evals.find(e=>e.id===inp.dataset.ev);
-  if(inp.readOnly){
-   if(ev&&ev.bareme?.criteria?.length) inp.addEventListener("click",()=>openEvalTableModal(classId,ev));
-   return;
-  }
+  if(inp.readOnly) return;   // barème / période verrouillée : non modifiable ici
   inp.addEventListener("focus",()=>inp.select());
   const commit=()=>{
    let raw=inp.value.trim();
@@ -8815,6 +8855,7 @@ function renderClassBySubject(classId){
    } else if(raw===""){
     autosaveClassNote(inp.dataset.stu,classId,ev,"",!!ev.defaultImportant);
     inp.value=""; inp.classList.remove("bys-bad");
+    inp.closest("td").classList.remove("bys-cm"); inp.closest("td").removeAttribute("title");   // la note (et son commentaire) est supprimée
    } else {
     const n=parseFloat(raw.replace(",","."));
     if(isNaN(n)){ inp.classList.add("bys-bad"); inp.value=cellValue(inp.dataset.stu,ev); setTimeout(()=>inp.classList.remove("bys-bad"),800); return; }
@@ -8968,6 +9009,11 @@ const classEvalForm = document.getElementById("classEvalForm");
 let TEMP_BAREME_FOR_CLASS_CREATE = null;
 let BAREME_WAS_CHANGED_FOR_CLASS = false;
 let CURRENT_CLASS_EVAL_COMPS = [];
+let OPEN_POINTS_AFTER_SAVE = false;
+function syncClassEvalPointsBtn(){
+  const b=document.getElementById("classEvalPointsBtn");
+  if(b) b.style.display = TEMP_BAREME_FOR_CLASS_CREATE ? "" : "none";   // uniquement si un barème existe
+}
 
 function renderClassEvalComps(){
   const container = document.getElementById("classEvalCompsList");
@@ -9007,6 +9053,7 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
  document.getElementById("classOutof").value=20; document.getElementById("classCoef").value=1;
  TEMP_BAREME_FOR_CLASS_CREATE=null;
  BAREME_WAS_CHANGED_FOR_CLASS = false;
+ OPEN_POINTS_AFTER_SAVE = false;
  const btn=document.getElementById("classEvalCreateBaremeBtn");
  if(btn){btn.textContent="Créer un barème";btn.onclick=null;}
  if(prefillClassId) document.getElementById("classSelect").value=prefillClassId;
@@ -9058,6 +9105,7 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
   document.getElementById("classEvalModalTitle").textContent="Créer une évaluation de classe";
   document.getElementById("classEvalCreateBtn").textContent="Créer";
   document.getElementById("classOutof").disabled = false;
+  document.getElementById("classEvalPeriod").value = prefillPeriod || "T1";
  }
 
  // Barème pour classe — FIX-BAREME-5
@@ -9073,6 +9121,7 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
     openBaremeModal(classBaremeProxyId, (result) => {
       TEMP_BAREME_FOR_CLASS_CREATE = result.bareme;
       BAREME_WAS_CHANGED_FOR_CLASS = true;
+      syncClassEvalPointsBtn();
       const outofEl = document.getElementById("classOutof");
       if(result.bareme){
         outofEl.value = result.outof;
@@ -9087,8 +9136,33 @@ function openClassEvalModal({prefillClassId=null,prefillSubject=null,prefillPeri
   });
  }
 
+ // « Saisir les points » (si barème) et « Supprimer » (si modification)
+ syncClassEvalPointsBtn();
+ const _locked = !!evaluation && evaluation.period!=="YEAR" && !!LOCKED_PERIODS[evaluation.period];
+ const _del=document.getElementById("classEvalDeleteBtn");
+ if(_del){
+  _del.style.display = (evaluation && !_locked) ? "" : "none";
+  _del.onclick = ()=>{
+   if(!evaluation) return;
+   const _cid = prefillClassId || document.getElementById("classSelect").value;
+   openConfirmModal({message:`Supprimer l'évaluation « ${evaluation.label||'-'} » ?`,onConfirm:()=>{
+    const c=classLike(_cid); if(!c) return;
+    c.evals=(c.evals||[]).filter(x=>x.id!==evaluation.id);
+    Object.keys(DATA.notes).forEach(sid=>{DATA.notes[sid]=(DATA.notes[sid]||[]).filter(n=>!(n.classCommon&&n.classId===_cid&&n.classNoteId===evaluation.id));});
+    DATA.competencies=(DATA.competencies||[]).filter(x=>x.groupId!==evaluation.id);
+    EDITING_CLASS_EVAL=null; closeClassEvalModal(); openClass(_cid); try{updateTabWarningIndicators();}catch(e){} saveData();
+   }});
+  };
+ }
+ const _pts=document.getElementById("classEvalPointsBtn");
+ if(_pts) _pts.onclick = ()=>{
+  OPEN_POINTS_AFTER_SAVE = true;
+  if(classEvalForm.requestSubmit) classEvalForm.requestSubmit();
+  else classEvalForm.dispatchEvent(new Event("submit",{cancelable:true,bubbles:true}));
+ };
  classEvalModal.classList.add("open"); classEvalModal.setAttribute("aria-hidden","false");
 }
+document.getElementById("classEvalCreateBtn")?.addEventListener("click",()=>{ OPEN_POINTS_AFTER_SAVE=false; });
 function closeClassEvalModal(){classEvalModal.classList.remove("open");classEvalModal.setAttribute("aria-hidden","true");}
 document.getElementById("classEvalClose").addEventListener("click",closeClassEvalModal);
 document.getElementById("classEvalCancel").addEventListener("click",closeClassEvalModal);
@@ -9237,7 +9311,13 @@ classEvalForm.addEventListener("submit",e=>{
 
  TEMP_BAREME_FOR_CLASS_CREATE=null; EDITING_CLASS_EVAL=null; BAREME_WAS_CHANGED_FOR_CLASS=false;
  CURRENT_CLASS_EVAL_COMPS = [];
- closeClassEvalModal(); openClass(clsId); openEvalTableModal(clsId,targetEval);
+ const _openPts = OPEN_POINTS_AFTER_SAVE && !!targetEval.bareme; OPEN_POINTS_AFTER_SAVE=false;
+ if(LAST_ACTIVE_CLASS_PERIOD!=="YEAR") LAST_ACTIVE_CLASS_PERIOD=period;   // le tableau affiche le trimestre / la matière de l'évaluation
+ CLASS_BYSUBJECT_ACTIVE[clsId]=subject;
+ closeClassEvalModal(); openClass(clsId);
+ try{updateTabWarningIndicators();}catch(e){}
+ saveData();
+ if(_openPts) openEvalTableModal(clsId,targetEval);
 });
 
 function getOrCreateClassNoteIdForStudent(classId, classNoteId, studentId){
@@ -17965,9 +18045,9 @@ $("paramBtn")?.addEventListener("click",()=>{ openManageSubjectsModal(); paramSh
 $("paramTabs")?.addEventListener("click",e=>{ const b=e.target.closest("[data-p]"); if(b) paramShow(b.dataset.p); });
 })();
 
-/* ═══ Carnet de notes (prof) : un seul onglet, deux sous-onglets (Élèves / Classes & groupes) ═══ */
+/* ═══ Carnet de notes (prof) : un seul onglet, deux sous-onglets (Élèves / Classes & groupes) — désormais dans l'en-tête de chaque carte ═══ */
 (function(){
- const car=document.getElementById("carnetBtn"), sub=document.getElementById("carnetSub");
+ const car=document.getElementById("carnetBtn"), subs=[...document.querySelectorAll(".carnet-sub")];
  const bE=document.querySelector('#mainTabs .tab-btn[data-target="elevesView"]'), bC=document.querySelector('#mainTabs .tab-btn[data-target="classesView"]');
  if(!car||!bE||!bC) return;
  const isStu=()=>document.body.classList.contains("student-mode");
@@ -17975,14 +18055,14 @@ $("paramTabs")?.addEventListener("click",e=>{ const b=e.target.closest("[data-p]
   const eA=bE.classList.contains("active"), cA=bC.classList.contains("active");
   const on=!isStu()&&(eA||cA);
   car.classList.toggle("carnet-on",on);
-  if(sub){
+  subs.forEach(sub=>{
    sub.style.display=on?"":"none";
    sub.querySelectorAll("[data-carnet]").forEach(b=>{ const a=b.dataset.carnet==="eleves"?eA:cA; b.classList.toggle("active",a); b.setAttribute("aria-selected",a?"true":"false"); });
-  }
+  });
   ["has-empty-eval","has-hidden-eval"].forEach(c=>car.classList.toggle(c,bE.classList.contains(c)||bC.classList.contains(c)));
  }
  car.addEventListener("click",()=>{ if(!(bE.classList.contains("active")||bC.classList.contains("active"))) bE.click(); sync(); });
- if(sub) sub.querySelectorAll("[data-carnet]").forEach(b=>b.addEventListener("click",()=>(b.dataset.carnet==="eleves"?bE:bC).click()));
+ subs.forEach(sub=>sub.querySelectorAll("[data-carnet]").forEach(b=>b.addEventListener("click",()=>(b.dataset.carnet==="eleves"?bE:bC).click())));
  const mo=new MutationObserver(sync);
  [bE,bC].forEach(b=>mo.observe(b,{attributes:true,attributeFilter:["class"]}));
  mo.observe(document.body,{attributes:true,attributeFilter:["class"]});
@@ -18039,9 +18119,9 @@ window.edSetEtab=function(n){ const el=$("etabName"); if(el) el.textContent=n||"
 (function(){
  const map={eleves:["elevesView","Évaluations masquées pour l'élève"],classes:["classesView","Évaluations masquées pour la classe ou le groupe"]};
  function sync(){ Object.keys(map).forEach(k=>{
-  const real=document.querySelector('.tab-btn[data-target="'+map[k][0]+'"]'), sub=document.querySelector('#carnetSub [data-carnet="'+k+'"]');
-  if(!real||!sub) return; const on=real.classList.contains("has-hidden-eval");
-  sub.classList.toggle("has-hidden-eval",on); if(on) sub.title=map[k][1]; else sub.removeAttribute("title"); }); }
+  const real=document.querySelector('.tab-btn[data-target="'+map[k][0]+'"]'), subL=document.querySelectorAll('.carnet-sub [data-carnet="'+k+'"]');
+  if(!real||!subL.length) return; const on=real.classList.contains("has-hidden-eval");
+  subL.forEach(sub=>{ sub.classList.toggle("has-hidden-eval",on); if(on) sub.title=map[k][1]; else sub.removeAttribute("title"); }); }); }
  const t=$("mainTabs"); if(t) new MutationObserver(sync).observe(t,{attributes:true,subtree:true,attributeFilter:["class"]}); sync();
 })();
 
