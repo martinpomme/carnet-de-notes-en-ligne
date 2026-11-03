@@ -1905,14 +1905,19 @@ header .header-actions{margin-left:auto;align-items:center}
 #classesView .bys-table .bys-avg{ text-align:right; padding:3px 8px 3px 2px !important; font-family:Arial,Helvetica,sans-serif; font-size:17px }
 #classesView .bys-table .bys-input{ text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; padding:3px 6px 3px 1px }
 /* dernière ligne : moyenne de classe */
-#classesView .bys-table tr.bys-classavg td{ position:sticky; bottom:0; z-index:2; background:#f1f7fc !important; text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:4px 8px 4px 2px }
-#classesView .bys-table tr.bys-classavg td.bys-cavg-lab{ left:0; z-index:4; text-align:left; font-family:inherit; font-size:15px; font-weight:600; padding:4px 8px !important }
+#classesView .bys-table tr.bys-classavg td{ position:sticky; bottom:0; z-index:2; background:#e3eef9 !important; text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:4px 8px 4px 2px }
+#classesView .bys-table tr.bys-classavg td.bys-cavg-lab{ background:#f1f7fc !important; left:0; z-index:4; text-align:left; font-family:inherit; font-size:15px; font-weight:600; padding:4px 8px !important }
 #classesView .bys-table tr.bys-classavg td.bys-avg{ z-index:4; background:#c9ddf2 !important }
 /* traits gris entre les lignes d'élèves, bleu foncé conservé entre les colonnes */
 #classesView .bys-table tbody td{ border-bottom-color:#c9ced6 !important }
 #classesView .bys-table tbody tr.bys-classavg td{ border-bottom-color:var(--bys-line) !important }
 /* évaluation incomplète : case d'en-tête encadrée en rouge */
 #classesView .bys-table th.bys-incomplete{ box-shadow:inset 0 0 0 2px #dc2626 }
+/* évaluation masquée pour l'élève : bleuté (le rouge « incomplète » reste prioritaire) */
+#classesView .bys-table th.bys-hidden{ background:#dcedf8 !important; box-shadow:inset 0 0 0 2px #1a8ad0 }
+#classesView .bys-table th.bys-hidden:hover{ background:#cde4f5 !important }
+#classesView .bys-table th.bys-hidden.bys-incomplete{ box-shadow:inset 0 0 0 2px #dc2626 }
+.cls-sel.cls-hid{ border-color:#1a8ad0 !important; box-shadow:0 0 0 1px #1a8ad0; background-color:#dcedf8 }
 .cls-sel.cls-miss{ border-color:#dc2626 !important; box-shadow:0 0 0 1px #dc2626 }
 .bys-subj{ font-weight:600; color:#08487f }
 
@@ -8738,10 +8743,12 @@ function openClass(clsId){
   pSel.innerHTML=pl.map(([v,l])=>opt(v,l,v==="YEAR"?{}:fl(v,null),v===p)).join("");
   pSel.value=p;
   pSel.classList.toggle("cls-miss",p!=="YEAR"&&fl(p,null).miss);
+  pSel.classList.toggle("cls-hid",p!=="YEAR"&&fl(p,null).hid);
   const sl=names.map(n=>[n,n]); sl.unshift(["__ALL__","Toutes les matières"]);
   sSel.innerHTML=sl.map(([v,l])=>opt(v,l,v==="__ALL__"?fl(p||"YEAR",null):fl(p||"YEAR",v),v===s)).join("");
   sSel.value=s;
   sSel.classList.toggle("cls-miss",fl(p||"YEAR",s==="__ALL__"?null:s).miss);
+  sSel.classList.toggle("cls-hid",fl(p||"YEAR",s==="__ALL__"?null:s).hid);
   newBtn.style.display=(!prev&&p&&p!=="YEAR"&&s&&s!=="__ALL__")?"":"none";   // visible quand matière + trimestre choisis
   modeBtns.forEach(b=>{ const a=b.dataset.sub===CLASS_VIEW_MODE; b.classList.toggle("active",a); b.setAttribute("aria-selected",a?"true":"false"); });
   content.querySelector("#classBySubject").classList.toggle("active",!prev);
@@ -8821,7 +8828,7 @@ function renderClassBySubject(classId){
  const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
  const avgOf=sid=>ALL?statsGenAvg(sid,period):getStudentAverageForSubject(sid,active,period);
 
- const head=evals.map(ev=>`<th class="bys-head${isFullyEvaluated(ev,classId)?"":" bys-incomplete"}" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
+ const head=evals.map(ev=>`<th class="bys-head${isFullyEvaluated(ev,classId)?"":" bys-incomplete"}${ev.hideFromStudent?" bys-hidden":""}" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
    <div class="bys-label">${escHtml(ev.label||"(sans libellé)")}${ev.hideFromStudent?" 👁️":""}</div>
    ${ALL?`<div class="bys-meta bys-subj">${escHtml(ev.subject||"")}</div>`:""}<div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
    <div class="bys-meta">/${fmt(ev.outof)}</div>
