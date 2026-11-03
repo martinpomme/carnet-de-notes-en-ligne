@@ -1914,10 +1914,10 @@ header .header-actions{margin-left:auto;align-items:center}
 /* évaluation incomplète : case d'en-tête encadrée en rouge */
 #classesView .bys-table th.bys-incomplete{ box-shadow:inset 0 0 0 2px #dc2626 }
 /* évaluation masquée pour l'élève : bleuté (le rouge « incomplète » reste prioritaire) */
-#classesView .bys-table th.bys-hidden{ background:#dcedf8 !important; box-shadow:inset 0 0 0 2px #1a8ad0 }
+#classesView .bys-table th.bys-hidden{ background:#dcedf8 !important }
 #classesView .bys-table th.bys-hidden:hover{ background:#cde4f5 !important }
-#classesView .bys-table th.bys-hidden.bys-incomplete{ box-shadow:inset 0 0 0 2px #dc2626 }
-.cls-sel.cls-hid{ border-color:#1a8ad0 !important; box-shadow:0 0 0 1px #1a8ad0; background-color:#dcedf8 }
+.cls-sel.cls-hid{ background-color:#dcedf8 }
+.cls-sel option.opt-hid{ background-color:#dcedf8 }
 .cls-sel.cls-miss{ border-color:#dc2626 !important; box-shadow:0 0 0 1px #dc2626 }
 .bys-subj{ font-weight:600; color:#08487f }
 
@@ -8732,7 +8732,7 @@ function openClass(clsId){
   const L=[...(cls.evals||[]),...(cls.compEvals||[])].filter(ev=>(per==="YEAR"||(ev.period||"YEAR")===per)&&(!subj||ev.subject===subj));
   return {miss:L.some(ev=>!isFullyEvaluated(ev,clsId)),hid:L.some(ev=>ev.hideFromStudent)};
  };
- const opt=(v,label,f,sel)=>`<option value="${escHtml(v)}"${sel?" selected":""}${f.miss?' style="color:var(--danger)"':(f.hid?' style="color:var(--primary)"':"")}>${escHtml(label)}${f.miss?" ⚠":""}${f.hid?" 👁":""}</option>`;
+ const opt=(v,label,f,sel)=>`<option value="${escHtml(v)}"${sel?" selected":""}${f.miss?' style="color:var(--danger)"':(f.hid?' style="color:var(--primary)"':"")}${f.hid?' class="opt-hid"':""}>${escHtml(label)}${f.miss?" ⚠":""}${f.hid?" 👁":""}</option>`;
 
  const fillBar=()=>{
   const prev=isPrev(), names=clsSubjectNames(cls);
@@ -17219,7 +17219,7 @@ document.getElementById("schDelete").onclick=()=>{
   if(list.hidden){ if(e.key==="ArrowDown"&&inp.value.trim()){ render(); e.preventDefault(); } return; }
   if(e.key==="ArrowDown"){ e.preventDefault(); if(items.length) setAct((act+1)%items.length); }
   else if(e.key==="ArrowUp"){ e.preventDefault(); if(items.length) setAct((act-1+items.length)%items.length); }
-  else if(e.key==="Enter"){ e.preventDefault(); if(act>=0) select(act); }
+  else if(e.key==="Enter"){ e.preventDefault(); if(act>=0) select(act); else if(items.length) select(0); }
   else if(e.key==="Escape"){ closeList(); }
  });
  list.addEventListener("mousedown",e=>{ const el=e.target.closest(".cs-it"); if(!el) return; e.preventDefault(); select(+el.dataset.i); });
@@ -18150,10 +18150,17 @@ $("paramTabs")?.addEventListener("click",e=>{ const b=e.target.closest("[data-p]
 body.admin-mode #adminRoot{display:block}
 body.admin-mode .topbar,body.admin-mode .container,body.admin-mode #locksBar,body.admin-mode #settingsBtn,body.admin-mode #saveActions,body.admin-mode #saveStatusBanner,body.admin-mode #carnetSub{display:none!important}
 .ad-wrap{max-width:1200px;margin:18px auto;padding:0 12px}
-.ad-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.ad-tab{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:#08487f;cursor:pointer;font-weight:600}
-.ad-tab.on{background:#08487f;color:#fff;border-color:#08487f}
-.ad-new{border-style:dashed;margin-left:auto}
+/* onglets : même mise en forme que sur les comptes (.tabs / .tab-btn) */
+.ad-wrap .ad-tabs{flex-wrap:wrap;margin-bottom:0;position:relative;z-index:2}
+.ad-wrap > .card{border-top-left-radius:0;margin-top:0}
+.tab-btn.ad-new{margin-left:auto;border-style:dashed;background:#fff}
+#adConsult .cs-wrap{position:relative;max-width:560px;margin:0 0 6px}
+#adSearch{display:block;width:100%;padding:12px 40px 12px 42px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px center;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+#adSearch:focus{outline:none;border-color:#4fb0e0;box-shadow:0 0 0 3px rgba(1,104,169,.15)}
+#adSearch.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:#4fb0e0}
+#adConsult .cs-clear{position:absolute;right:8px;top:0;height:46px;margin:0;width:28px;padding:0;border:0;border-radius:50%;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#adConsult .cs-clear[hidden]{display:none}
+#adConsult .cs-clear:hover{background:#e2e8f0;color:#0f172a}
 .ad-h{margin:6px 0 12px;color:#08487f;font-size:18px}
 .ad-note{color:var(--muted);font-size:13px;margin:10px 0}
 .ad-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
@@ -18254,9 +18261,11 @@ function render(){
  const root=$("adminRoot"); if(!root||!S.reg) return;
  const cur=S.reg.etabs.find(e=>e.id===S.tab);
  if(!cur&&S.tab!=="#c") S.tab=(S.reg.etabs[0]||{}).id||"#c";
- const tabs='<div class="ad-tabs">'+S.reg.etabs.map(e=>'<button type="button" class="ad-tab'+(S.tab===e.id?" on":"")+'" data-a="tab" data-id="'+e.id+'">'+E(e.name)+'</button>').join("")+
-  '<button type="button" class="ad-tab'+(S.tab==="#c"?" on":"")+'" data-a="tab" data-id="#c">🔍 Consultation</button><button type="button" class="ad-tab ad-new" data-a="new">+ Nouvel établissement</button></div>';
+ const cico=(document.querySelector('.tab-btn[data-target="consultView"] svg')||{}).outerHTML||"🔍";
+ const tabs='<div class="tabs ad-tabs">'+S.reg.etabs.map(e=>'<button type="button" class="tab-btn'+(S.tab===e.id?" active":"")+'" data-a="tab" data-id="'+e.id+'">'+E(e.name)+'</button>').join("")+
+   '<button type="button" class="tab-btn'+(S.tab==="#c"?" active":"")+'" data-a="tab" data-id="#c">'+cico+'<span class="tab-lbl">Consultation</span></button><button type="button" class="tab-btn ad-new" data-a="new">+ Nouvel établissement</button></div>';
  root.innerHTML='<div class="ad-wrap">'+tabs+'<div class="card"><div class="card-body" id="adBody">'+(S.tab==="#c"?consultView():etabView(S.reg.etabs.find(e=>e.id===S.tab)))+'</div></div></div>';
+ if(S.tab==="#c"){ cStatus(); loadPeople(); }
 }
 function etabView(e){
  if(!e) return "<p>Aucun établissement. Créez-en un avec « + Nouvel établissement ».</p>";
@@ -18270,9 +18279,82 @@ function etabView(e){
  '<p class="ad-note">« Publier » sauvegarde d\'abord l\'état actuel (type « Automatique »), puis remplace les données en ligne de tous les professeurs de l\'établissement. « Consulter » ouvre la version en lecture seule, depuis le compte du professeur choisi.</p>';
 }
 function consultView(){
- return '<h3 class="ad-h">Consultation des comptes professeurs</h3><p class="ad-note">Ouvre le compte d\'un professeur tel qu\'il le voit, en lecture seule (rien ne peut être modifié).</p>'+
- S.reg.etabs.map(e=>'<div class="ad-etab"><strong>'+E(e.name)+'</strong><div class="ad-row">'+e.profs.map(p=>'<button type="button" class="btn" data-a="consult" data-e="'+e.id+'" data-p="'+E(p.pid)+'">'+E((p.civ==="Madame"?"Mme ":"M. ")+p.last+" "+p.first)+'</button>').join("")+'</div></div>').join("")+'<div id="adStage"></div>';
+ return '<h3 class="ad-h">Consultation des comptes</h3><p class="ad-note">Professeurs et élèves de tous les établissements. Tapez un nom ou un prénom : le compte s\'ouvre tel que la personne le voit, en lecture seule (rien ne peut être modifié).</p>'+
+ '<div id="adConsult"><div class="cs-wrap"><input type="text" id="adSearch" placeholder="Rechercher un professeur ou un élève (nom ou prénom)…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="adList"><button type="button" class="cs-clear" id="adClr" aria-label="Effacer la saisie" title="Effacer" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="cs-list" id="adList" role="listbox" hidden></div></div>'+
+ '<div class="ad-note" id="adCStatus"></div></div><div id="adStage"></div>';
 }
+/* annuaire : professeurs (registre) + élèves (lus dans le carnet de chaque professeur, en lecture seule) */
+const P={list:null,loading:false,done:0,total:0};
+const nrm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/œ/gi,"oe").replace(/æ/gi,"ae").toLowerCase();
+const wds=s=>nrm(s).split(/[^a-z0-9]+/).filter(Boolean);
+async function loadAs(u,p){
+ const r=await fetch(CLOUD_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"load",user:u,pass:p,ro:1,snap:""})});
+ return r.json();
+}
+function addStudents(e,p,j){
+ const acc={}; (j.accounts||[]).forEach(a=>{ acc[a.id]={u:a.login,p:a.pwd}; });
+ (j.lines||[]).forEach(line=>{
+  if(String(line).slice(0,8)!=="student;") return;
+  const c=parseCsvLine(line).map(s=>s.trim()), a=acc[c[1]]||{};
+  P.list.push({kind:"eleve",first:unescapeCsv(c[2]||""),last:unescapeCsv(c[3]||""),sub:(unescapeCsv(c[5]||"")?unescapeCsv(c[5])+" · ":"")+e.name,user:a.u||"",pass:a.p||""});
+ });
+}
+async function loadPeople(force){
+ if(P.loading||!S.reg) return; if(P.list&&!force) return;
+ P.loading=true; P.list=[]; const jobs=[];
+ S.reg.etabs.forEach(e=>e.profs.forEach(p=>{
+  P.list.push({kind:"prof",first:p.first,last:p.last,sub:"Professeur · "+e.name,user:p.user,pass:p.pass});
+  jobs.push({e,p});
+ }));
+ P.total=jobs.length; P.done=0; cStatus();
+ let k=0;
+ const worker=async()=>{ while(k<jobs.length){ const {e,p}=jobs[k++]; try{ const j=await loadAs(p.user,p.pass); if(j&&j.ok) addStudents(e,p,j); }catch(x){} P.done++; cStatus(); } };
+ await Promise.all([worker(),worker(),worker()]);
+ P.loading=false; cStatus(); cRender();
+}
+function cStatus(){
+ const el=$("adCStatus"); if(!el) return;
+ if(P.loading) el.textContent="Chargement des comptes… "+P.done+" / "+P.total+" professeurs";
+ else if(P.list) el.innerHTML=P.list.length+" comptes dans "+S.reg.etabs.length+" établissement(s). <a href=\"#\" data-a=\"cRefresh\">Actualiser</a>";
+}
+let cItems=[], cAct=-1;
+function cClose(){ const l=$("adList"), i=$("adSearch"); if(l) l.hidden=true; if(i){ i.classList.remove("open"); i.setAttribute("aria-expanded","false"); } cAct=-1; }
+function cSetAct(n){ cAct=n; const l=$("adList"); if(!l) return; l.querySelectorAll(".cs-it").forEach((el,k)=>el.classList.toggle("act",k===n)); const el=l.querySelectorAll(".cs-it")[n]; if(el&&el.scrollIntoView) el.scrollIntoView({block:"nearest"}); }
+function cRender(){
+ const inp=$("adSearch"), list=$("adList"); if(!inp||!list) return;
+ const q=wds(inp.value); if(!q.length){ cClose(); return; }
+ cItems=(P.list||[]).filter(it=>{ const w=wds(it.first+" "+it.last); return q.every(t=>w.some(x=>x.indexOf(t)===0)); })
+  .sort((a,b)=>(nrm(a.last)+" "+nrm(a.first)).localeCompare(nrm(b.last)+" "+nrm(b.first))).slice(0,200);
+ list.innerHTML=cItems.length
+  ? cItems.map((s,i)=>'<div class="cs-it'+(s.user&&s.pass?"":" off")+'" role="option" data-i="'+i+'"><span>'+E(s.first)+" <b>"+E(s.last)+'</b></span><span class="cs-cl">'+E(s.sub)+(s.user&&s.pass?"":" · pas de compte")+'</span></div>').join("")
+  : '<div class="cs-empty">'+(P.loading?"Chargement en cours…":"Aucun compte trouvé")+'</div>';
+ list.hidden=false; inp.classList.add("open"); inp.setAttribute("aria-expanded","true");
+ cSetAct(cItems.length?0:-1);
+}
+function cPick(i){
+ const s=cItems[i]; if(!s) return;
+ if(!s.user||!s.pass){ alert("Cet élève n'a pas de compte (identifiant et mot de passe vides)."); return; }
+ const inp=$("adSearch"); inp.value=s.first+" "+s.last; const c=$("adClr"); if(c) c.hidden=false;
+ cClose(); const st=$("adStage"); if(st) mountFrame(st,{user:s.user,pass:s.pass},"");
+}
+document.addEventListener("input",e=>{ if(e.target&&e.target.id==="adSearch"){ const c=$("adClr"); if(c) c.hidden=!e.target.value; cRender(); } });
+document.addEventListener("focusin",e=>{ if(e.target&&e.target.id==="adSearch"&&e.target.value.trim()) cRender(); });
+document.addEventListener("keydown",e=>{
+ if(!e.target||e.target.id!=="adSearch") return;
+ const list=$("adList");
+ if(list.hidden){ if((e.key==="ArrowDown"||e.key==="Enter")&&e.target.value.trim()){ e.preventDefault(); cRender(); if(e.key==="Enter"&&cItems.length) cPick(0); } return; }
+ if(e.key==="ArrowDown"){ e.preventDefault(); if(cItems.length) cSetAct((cAct+1)%cItems.length); }
+ else if(e.key==="ArrowUp"){ e.preventDefault(); if(cItems.length) cSetAct((cAct-1+cItems.length)%cItems.length); }
+ else if(e.key==="Enter"){ e.preventDefault(); if(cItems.length) cPick(cAct>=0?cAct:0); }
+ else if(e.key==="Escape"){ cClose(); }
+});
+document.addEventListener("mousedown",e=>{
+ const it=e.target.closest&&e.target.closest("#adList .cs-it"); if(it){ e.preventDefault(); cPick(+it.dataset.i); return; }
+ if(e.target.closest&&e.target.closest("#adClr")){ e.preventDefault(); const i=$("adSearch"); i.value=""; e.target.closest("#adClr").hidden=true; cClose(); i.focus(); return; }
+ if(!(e.target.closest&&e.target.closest("#adConsult .cs-wrap"))) cClose();
+});
+document.addEventListener("touchend",e=>{ const it=e.target.closest&&e.target.closest("#adList .cs-it"); if(it){ e.preventDefault(); cPick(+it.dataset.i); } });
+document.addEventListener("mousemove",e=>{ const it=e.target.closest&&e.target.closest("#adList .cs-it"); if(it&&+it.dataset.i!==cAct) cSetAct(+it.dataset.i); });
 function findProf(eid,pid){ const e=S.reg.etabs.find(x=>x.id===eid); return e&&e.profs.find(p=>p.pid===pid); }
 function overlay(p,snap,title){
  const o=document.createElement("div"); o.className="ad-ov";
@@ -18309,7 +18391,7 @@ document.addEventListener("click",async ev=>{
  else if(a==="snapDel"){ if(confirm("Supprimer cette sauvegarde ?")&&await call("adminSnapDel",{id:b.dataset.id})) render(); }
  else if(a==="publish"){ const s=S.snaps.find(x=>x.id===b.dataset.id); if(confirm("Publier la version « "+s.name+" » ?\nLes données actuelles de tous les professeurs de l'établissement seront remplacées (l'état actuel est sauvegardé avant).")&&await call("adminSnapRestore",{id:s.id})){ delete S.draft[e.id]; render(); alert("Version publiée."); } }
  else if(a==="csnap"){ const s=S.snaps.find(x=>x.id===b.dataset.id), sel=b.parentNode.querySelector("select"), p=e.profs.find(x=>x.pid===sel.value); overlay(p,s.id,"Version « "+s.name+" » — "+p.last); }
- else if(a==="consult"){ const p=findProf(b.dataset.e,b.dataset.p); const st=$("adStage"); if(p&&st) mountFrame(st,p,""); }
+ else if(a==="cRefresh"){ ev.preventDefault(); P.list=null; loadPeople(true); }
 });
 
 /* ── Paramétrage > Nouvelle année (compte professeur) ── */
