@@ -1896,18 +1896,25 @@ header .header-actions{margin-left:auto;align-items:center}
 #classesView .bys-table .bys-head:hover{ background:#eaecf0 !important }
 #classesView .bys-table td.bys-ro{ background:#e7eaee }
 #classesView .bys-table td.bys-cm{ background:#ffe2bd }
-#classesView .bys-table .bys-stu{ background:#e8f1fa !important; padding:4px 8px !important }
+#classesView .bys-table .bys-stu{ background:#f1f7fc !important; padding:4px 8px !important }
 #classesView .bys-table td.bys-stu-click{ cursor:pointer }
-#classesView .bys-table td.bys-stu-click:hover{ background:#d6e6f6 !important }
+#classesView .bys-table td.bys-stu-click:hover{ background:#e4eff9 !important }
 #classesView .bys-table .bys-corner{ background:#f4f5f7 !important }
 #classesView .bys-table .bys-avg-head{ text-align:center; padding:4px 2px !important; font-size:14px }
 /* notes et moyennes : Arial, alignées à droite */
 #classesView .bys-table .bys-avg{ text-align:right; padding:3px 8px 3px 2px !important; font-family:Arial,Helvetica,sans-serif; font-size:17px }
 #classesView .bys-table .bys-input{ text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; padding:3px 6px 3px 1px }
 /* dernière ligne : moyenne de classe */
-#classesView .bys-table tr.bys-classavg td{ position:sticky; bottom:0; z-index:2; background:#e8f1fa !important; text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:4px 8px 4px 2px }
+#classesView .bys-table tr.bys-classavg td{ position:sticky; bottom:0; z-index:2; background:#f1f7fc !important; text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:17px; font-weight:700; color:#08487f; font-variant-numeric:tabular-nums; padding:4px 8px 4px 2px }
 #classesView .bys-table tr.bys-classavg td.bys-cavg-lab{ left:0; z-index:4; text-align:left; font-family:inherit; font-size:15px; font-weight:600; padding:4px 8px !important }
 #classesView .bys-table tr.bys-classavg td.bys-avg{ z-index:4; background:#c9ddf2 !important }
+/* traits gris entre les lignes d'élèves, bleu foncé conservé entre les colonnes */
+#classesView .bys-table tbody td{ border-bottom-color:#c9ced6 !important }
+#classesView .bys-table tbody tr.bys-classavg td{ border-bottom-color:var(--bys-line) !important }
+/* évaluation incomplète : case d'en-tête encadrée en rouge */
+#classesView .bys-table th.bys-incomplete{ box-shadow:inset 0 0 0 2px #dc2626 }
+.cls-sel.cls-miss{ border-color:#dc2626 !important; box-shadow:0 0 0 1px #dc2626 }
+.bys-subj{ font-weight:600; color:#08487f }
 
 /* ═══ Aperçu : même rendu que la vision / le compte élève ═══ */
 #classesView #classPreviewContent .matiere-line{ display:grid; grid-template-columns:minmax(300px,34%) minmax(0,1fr); gap:0; padding:0; align-items:stretch; margin-bottom:0; border-bottom:1px solid #08487f }
@@ -8726,13 +8733,15 @@ function openClass(clsId){
   const prev=isPrev(), names=clsSubjectNames(cls);
   let p=getP(); if(p!==""&&!["T1","T2","T3","T4","YEAR"].includes(p)){ p="T1"; setP(p); }
   let s=getS();
-  if(s!==""&&!(names.includes(s)||(prev&&s==="__ALL__"))){ s=prev?"__ALL__":(names[0]||""); setS(s); }
+  if(s!==""&&!(names.includes(s)||s==="__ALL__")){ s=prev?"__ALL__":(names[0]||""); setS(s); }
   const pl=[["T1","Trimestre 1"],["T2","Trimestre 2"],["T3","Trimestre 3"],["T4","Trimestre 4"],["YEAR","Année"]];
   pSel.innerHTML=pl.map(([v,l])=>opt(v,l,v==="YEAR"?{}:fl(v,null),v===p)).join("");
   pSel.value=p;
-  const sl=names.map(n=>[n,n]); if(prev) sl.unshift(["__ALL__","Toutes les matières"]);
-  sSel.innerHTML=sl.map(([v,l])=>opt(v,l,v==="__ALL__"?{}:fl(p||"YEAR",v),v===s)).join("");
+  pSel.classList.toggle("cls-miss",p!=="YEAR"&&fl(p,null).miss);
+  const sl=names.map(n=>[n,n]); sl.unshift(["__ALL__","Toutes les matières"]);
+  sSel.innerHTML=sl.map(([v,l])=>opt(v,l,v==="__ALL__"?fl(p||"YEAR",null):fl(p||"YEAR",v),v===s)).join("");
   sSel.value=s;
+  sSel.classList.toggle("cls-miss",fl(p||"YEAR",s==="__ALL__"?null:s).miss);
   newBtn.style.display=(!prev&&p&&p!=="YEAR"&&s&&s!=="__ALL__")?"":"none";   // visible quand matière + trimestre choisis
   modeBtns.forEach(b=>{ const a=b.dataset.sub===CLASS_VIEW_MODE; b.classList.toggle("active",a); b.setAttribute("aria-selected",a?"true":"false"); });
   content.querySelector("#classBySubject").classList.toggle("active",!prev);
@@ -8784,11 +8793,11 @@ function fmtGrade2(n){
 function renderClassBySubject(classId){
  const cls=classLike(classId); if(!cls) return;
  const host=document.getElementById("classBySubjectContent"); if(!host) return;
- const period=LAST_ACTIVE_CLASS_PERIOD, active=CLASS_BYSUBJECT_ACTIVE[classId];
+ const period=LAST_ACTIVE_CLASS_PERIOD, active=CLASS_BYSUBJECT_ACTIVE[classId], ALL=(active==="__ALL__");
  if(!clsSubjectNames(cls).length){ host.innerHTML='<div class="cls-empty">Aucune matière.</div>'; return; }
  if(!period||!active){ host.innerHTML='<div class="cls-empty">Sélectionnez un trimestre et une matière.</div>'; return; }
 
- const evals=(cls.evals||[]).filter(ev=>ev.subject===active&&(period==="YEAR"||(ev.period||"YEAR")===period)).sort((a,b)=>dateKey(a)-dateKey(b));
+ const evals=(cls.evals||[]).filter(ev=>(ALL?clsSubjectNames(cls).includes(ev.subject):ev.subject===active)&&(period==="YEAR"||(ev.period||"YEAR")===period)).sort((a,b)=>(ALL?clsSubjectNames(cls).indexOf(a.subject)-clsSubjectNames(cls).indexOf(b.subject):0)||dateKey(a)-dateKey(b));
  const students=(cls.memberIds||[]).map(id=>DATA.students.find(s=>s.id===id)).filter(Boolean)
    .sort((a,b)=>a.last.localeCompare(b.last)||a.first.localeCompare(b.first));
  if(!evals.length){ host.innerHTML='<div class="cls-empty">Aucune évaluation dans cette matière '+(period==="YEAR"?"sur l'année.":"pour ce trimestre. Utilisez « Nouvelle évaluation » pour en créer une.")+'</div>'; return; }
@@ -8810,11 +8819,11 @@ function renderClassBySubject(classId){
  _cv.font="600 15px "+(getComputedStyle(document.body).fontFamily||"sans-serif");
  const NAME_W=Math.ceil(Math.max(_cv.measureText("Élève").width,_cv.measureText("Moyenne de classe").width,...students.map(s=>_cv.measureText(s.last+" "+s.first).width)))+22;
  const fmtAvg=v=>(v===null||v===undefined||isNaN(v))?"":fmtGrade2(v);
- const avgOf=sid=>getStudentAverageForSubject(sid,active,period);
+ const avgOf=sid=>ALL?statsGenAvg(sid,period):getStudentAverageForSubject(sid,active,period);
 
- const head=evals.map(ev=>`<th class="bys-head" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
+ const head=evals.map(ev=>`<th class="bys-head${isFullyEvaluated(ev,classId)?"":" bys-incomplete"}" data-evid="${ev.id}" title="${escHtml(ev.label||"(sans libellé)")} — Modifier l'évaluation">
    <div class="bys-label">${escHtml(ev.label||"(sans libellé)")}${ev.hideFromStudent?" 👁️":""}</div>
-   <div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
+   ${ALL?`<div class="bys-meta bys-subj">${escHtml(ev.subject||"")}</div>`:""}<div class="bys-meta">Coef ${fmtCoef(ev.coef)}</div>
    <div class="bys-meta">/${fmt(ev.outof)}</div>
    <div class="bys-meta">${formatDateAAAA(ev.dateJJMMAA)}</div>
   </th>`).join("");
@@ -8881,11 +8890,12 @@ function renderClassBySubject(classId){
  ["pointerup","pointercancel","pointermove"].forEach(n=>scroller.addEventListener(n,()=>clearTimeout(_lp)));
 
  const updateClassAvgRow=()=>{
+  host.querySelectorAll("th.bys-head").forEach(th=>{ const ev=evals.find(e=>e.id===th.dataset.evid); if(ev) th.classList.toggle("bys-incomplete",!isFullyEvaluated(ev,classId)); });
   host.querySelectorAll("td[data-cavg-ev]").forEach(td=>{ const ev=evals.find(e=>e.id===td.dataset.cavgEv); td.textContent=ev?fmtAvg(classAvgEv(ev)):""; });
   const all=host.querySelector("td[data-cavg-all]"); if(all) all.textContent=fmtAvg(classAvgAll());
  };
  host.querySelectorAll("tbody td.bys-stu[data-stu-id]").forEach(td=>{
-  td.addEventListener("click",()=>openSubjectStats(td.dataset.stuId,active,period));
+  td.addEventListener("click",()=>openStatsPopup(td.dataset.stuId,ALL?"general":"subject",ALL?null:active,period,{label:cls.isGroup?"Groupe":"Classe",ids:cls.memberIds||[]}));
  });
  const inputs=Array.from(host.querySelectorAll("input.bys-input"));
  const aliases={a:"Abs",d:"Disp",ne:"NE",nr:"NR",ea:"EA",x:"X",abs:"Abs",disp:"Disp"};
@@ -10784,8 +10794,15 @@ function statsBlockHtml(title, who, averages, myVal, isGeneral){
     <div style="font-weight:bold; font-size:1.4em; color:#9a3412;">${myDisp}</div>
   </div>`;
 }
-function openStatsPopup(studentId, kind, subject, periodKey){
+function openStatsPopup(studentId, kind, subject, periodKey, scope){
  const stu=DATA.students.find(s=>s.id===studentId); if(!stu) return;
+ if(scope){   /* depuis l'onglet Classes/groupes : uniquement la matière affichée, sur la classe ou le groupe affiché */
+  const isG=kind==="general", f=sid=>isG?statsGenAvg(sid,periodKey):statsSubjAvg(sid,subject,periodKey);
+  const avgs=(scope.ids||[]).map(f).filter(a=>a!==null).sort((a,b)=>b-a); if(!avgs.length) return;
+  const m=document.getElementById("statsModal"), bd=document.getElementById("statsBody"); if(!m||!bd) return;
+  bd.innerHTML=statsBlockHtml(isG?"Général":subject,scope.label,avgs,f(studentId),isG);
+  m.classList.add("open"); return;
+ }
  const cls=DATA.classes.find(c=>c.id===stu.classId); if(!cls) return;
  const isGen=kind==="general";
  const avgOf=sid=>isGen?statsGenAvg(sid,periodKey):statsSubjAvg(sid,subject,periodKey);
