@@ -10866,7 +10866,7 @@ async function cloudPull(){
  if(!j.ok) throw new Error(j.error||"erreur");
  if(j.role==="admin"){ AUTH.role="admin"; window.edAdminBoot&&edAdminBoot(j); return j; }
  if(window.edSetEtab) edSetEtab(j.etabName);
- CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||""; window.SRV_NOTIF=!!j.notif;
+ CLOUD.rev=j.rev; CLOUD.srev=(j.srev!=null?j.srev:null); CLOUD.stale=false; if(j.profInfo) Object.assign(PROF_INFO,j.profInfo); if(j.role==="eleve") PROF_INFO.first=""; AUTH.role=j.role; AUTH.studentId=j.studentId||""; window.SRV_NOTIF=!!j.notif; window.SRV_NOTIF_ERR=j.notifErr||""; window.SRV_VER=j.ver||"";
  ACCOUNTS={}; (j.accounts||[]).forEach(a=>{ACCOUNTS[a.id]={login:a.login,pwd:a.pwd};});
  if(j.lines && j.lines.length>1){
   importCSV(j.lines.join("\n"));
@@ -17298,9 +17298,25 @@ function smsCollect(){
  }catch(e){}
  return out.sort((a,b)=>a.ts-b.ts);
 }
+function smsBanner(msg){
+ try{
+  const d=document.createElement("div"); d.textContent=msg;
+  d.style.cssText="position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;background:#7c2d12;color:#fff;padding:12px 14px;border-radius:10px;font:14px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.35);cursor:pointer";
+  d.onclick=()=>d.remove(); document.body.appendChild(d); setTimeout(()=>{try{d.remove()}catch(e){}},30000);
+ }catch(e){}
+}
+function smsServerCheck(){
+ if(window.__srvChk) return; window.__srvChk=1;
+ let m="";
+ if(!window.SRV_VER) m="⚠️ Le script serveur n'est pas à jour : redéployez-le (Déployer > Gérer les déploiements > Nouvelle version).";
+ else if(!window.SRV_NOTIF) m="⚠️ Notifications serveur inactives : "+(window.SRV_NOTIF_ERR||"aucun envoi réussi pour l'instant (autorisations Google à accorder ?)");
+ else if(window.SRV_NOTIF_ERR) m="ℹ️ Notifications serveur : "+window.SRV_NOTIF_ERR;
+ if(m){ console.warn(m); setTimeout(()=>smsBanner(m),1500); }
+}
 function smsNotifyCheck(){
  try{
   if(!SMS_CFG.enabled||typeof AUTH==="undefined"||AUTH.role!=="prof") return;
+  smsServerCheck();
   const KEY="sms_seen_tl4", raw=localStorage.getItem(KEY), first=(raw===null);
   const seen=new Set(first?[]:JSON.parse(raw||"[]"));
   const items=smsCollect();
