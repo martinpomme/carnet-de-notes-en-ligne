@@ -17197,8 +17197,7 @@ function tlItems(){
      const t=(DATA.onlineTests||[]).find(x=>x.id===tid); if(!t||(t.options&&t.options.trainingMode)) return;
      const sub=(DATA.homeworkSubmissions||[]).find(x=>x.homeworkId===h.id&&x.testId===tid&&x.studentId===sid);
      const done=!!(sub&&sub.submittedAt)||!!(window.hwSpecialFor&&window.hwSpecialFor(h,t,sid));   /* rendu, ou marque X/Abs/Disp/NE/EA par le prof = fait */
-     /* Le test apparaît à la date d'assignation du devoir (et non au jour où le prof l'a créé) ; pas avant cette date */
-     if(h.dateISO>today) return;
+     /* Le test apparaît à la date d'assignation du devoir (et non au jour où le prof l'a créé), même si cette date est dans le futur */
      let ts=new Date(h.dateISO+"T12:00:00").getTime();
      const r=redo.find(x=>x.hw===h.id&&x.test===tid&&x.stu===sid), rts=r?new Date(r.at).getTime():0;
      if(!done&&rts>ts) ts=rts;
