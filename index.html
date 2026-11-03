@@ -1541,6 +1541,7 @@ body.student-mode #homeNewPost{display:none}
 .tl-tx{min-width:0;display:flex;flex-direction:column;gap:2px}
 .tl-tx b{font-size:14px;font-weight:700;color:#0f172a;line-height:1.3}
 .tl-tx small{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-tag.late{background:#fde2e2;color:#b91c1c}
 .tl-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#fff1d6;color:#9a5b00;font-size:11px;font-weight:700;vertical-align:1px}
 
 /* ═══ Publications ═══ */
@@ -14039,6 +14040,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   setModalOpen(m,true);
  }
  window.hwOpenCorrectif=hwOpenCorrectif;
+ window.hwSyncGrades=function(){ try{ return syncHomeworkDirectGrades(); }catch(e){ return false; } };
  window.hwSpecialFor=function(h,t,sid){ try{ return hwSpecialMark(h,t,sid)||""; }catch(e){ return ""; } };
  window.hwMatchesStudent=function(h){ try{ return homeworkMatchesStudentClass(h); }catch(e){ return false; } };
  /* Fil d'actualite eleve : onglet Devoirs sur le jour du devoir, puis pop-up du test */
@@ -14519,6 +14521,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    if(note.notReturned) return false;
    if(typeof note.note==="number" && !isNaN(note.note)) return true;
    const t=String(note.noteText||"").trim();
+   if(t==="EA" && note.hwAuto) return false;   /* EA posé automatiquement (date dépassée) : reste à traiter */
    return t!=="" && t!=="NR";
   }
   return !!(sub && (sub.validatedAt||sub.manualOverride));
@@ -14543,6 +14546,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
  function hwSpecialMark(homework,test,sid){
   const r=hwFindEvalNote(homework.id,test.id,sid); if(!r) return "";
   const t=String(r.note.noteText||"").trim();
+  if(t==="EA" && r.note.hwAuto) return "";   /* EA automatique ≠ marque posée par le professeur */
   return (CLASS_SPECIAL_VALUES.has(t)&&t!=="NR")?t:"";
  }
  /* Pose (ou retire, si value="") une note saisie à la main dans l'évaluation liée : elle n'est plus écrasée par le calcul automatique */
@@ -14627,8 +14631,13 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   return isHomeworkDirectTest(test) ? subs.some(x=>x.submittedAt) : subs.some(x=>x.publishedAt);
  }
  /* Valeur de la note dans l'évaluation : "" (= NR) tant que la note n'est pas disponible. */
- function homeworkGradeForEval(sub,test){
-  if(!sub || !sub.submittedAt) return "";
+ /* Non rendu : NR jusqu'à la date d'assignation ; une fois cette date dépassée (jour strictement antérieur à aujourd'hui), NR devient EA (en attente). */
+ function homeworkIsOverdue(hw){
+  const d=String(hw&&hw.dateISO||"");
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) && d<todayISO();
+ }
+ function homeworkGradeForEval(sub,test,hw){
+  if(!sub || !sub.submittedAt) return (hw && homeworkIsOverdue(hw)) ? "EA" : "";
   if(isHomeworkDirectTest(test)) return getHomeworkResolvedGrade(sub,test);
   return sub.publishedAt ? getHomeworkResolvedGrade(sub,test) : "";
  }
@@ -14703,7 +14712,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     members.forEach(sid=>{
      const arr=DATA.notes[sid]||(DATA.notes[sid]=[]);
      const sub=getHomeworkSubmission(hw.id,test.id,sid);
-     const grade=homeworkGradeForEval(sub,test);
+     const grade=homeworkGradeForEval(sub,test,hw);
      let note=arr.find(m=>m.classCommon && m.classId===cls.id && m.classNoteId===ev.id);
      if(!note){
       if(ev.period!=="YEAR" && LOCKED_PERIODS[ev.period]) return;
@@ -17180,6 +17189,7 @@ function tlItems(){
    });
   /* Tests assignes en devoirs : "du jour" tant que le test n'est pas fait ; nouvelle notif si le prof annule la soumission (refaire) */
   try{
+   if(window.hwSyncGrades) window.hwSyncGrades();   /* met NR → EA pour les devoirs dont la date est dépassée */
    const sid=AUTH.studentId, tl=[], redo=DATA.homeworkRedo||[];
    (DATA.homework||[]).forEach(h=>{
     if(!h||!h.dateISO||!window.hwMatchesStudent||!window.hwMatchesStudent(h)) return;
@@ -17187,11 +17197,15 @@ function tlItems(){
      const t=(DATA.onlineTests||[]).find(x=>x.id===tid); if(!t||(t.options&&t.options.trainingMode)) return;
      const sub=(DATA.homeworkSubmissions||[]).find(x=>x.homeworkId===h.id&&x.testId===tid&&x.studentId===sid);
      const done=!!(sub&&sub.submittedAt)||!!(window.hwSpecialFor&&window.hwSpecialFor(h,t,sid));   /* rendu, ou marque X/Abs/Disp/NE/EA par le prof = fait */
-     let ts=new Date(h.createdAt||h.dateISO+"T12:00:00").getTime(); if(isNaN(ts)) ts=new Date(h.dateISO+"T12:00:00").getTime();
+     /* Le test apparaît à la date d'assignation du devoir (et non au jour où le prof l'a créé) ; pas avant cette date */
+     if(h.dateISO>today) return;
+     let ts=new Date(h.dateISO+"T12:00:00").getTime();
      const r=redo.find(x=>x.hw===h.id&&x.test===tid&&x.stu===sid), rts=r?new Date(r.at).getTime():0;
      if(!done&&rts>ts) ts=rts;
-     const iso=isoOf(new Date(ts)), day=new Date(h.dateISO+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
-     tl.push({k:"t"+h.id+"|"+tid,type:"hwt",act:"hwt",ts,iso,today:!done,todo:!done,tag:"À faire",hwId:h.id,testId:tid,stuId:sid,
+     /* Date d'assignation dépassée et test non fait : il remonte à « aujourd'hui » avec le label « En retard » */
+     const late=!done&&h.dateISO<today;
+     const iso=late?today:isoOf(new Date(ts)), day=new Date(h.dateISO+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+     tl.push({k:"t"+h.id+"|"+tid,type:"hwt",act:"hwt",ts,iso,today:!done,todo:!done,late,tag:late?"En retard":"À faire",hwId:h.id,testId:tid,stuId:sid,
       title:"Test à faire pour le "+day,sub:[t.title||"Test en ligne",h.subject].filter(Boolean).join(" · ")});
     });
    });
@@ -17264,7 +17278,7 @@ function renderTimeline(){
   else if(it.type==="appel") dot='<span class="tl-dot appel'+(isNew?" new":"")+'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg></span>';
   else dot='<span class="tl-dot msg'+(isNew?" new":"")+'">'+ICON_MAIL+'</span>';
   html+='<button type="button" class="tl-it" data-act="tl" data-kind="'+it.act+'" data-sid="'+esc(it.sid||"")+'" data-ev="'+esc(it.evId||"")+'" data-hw="'+esc(it.hwId||"")+'" data-test="'+esc(it.testId||"")+'" data-stu="'+esc(it.stuId||"")+'" data-day="'+esc(it.type==="grade"?it.iso:"")+'" data-subj="'+esc(it.type==="grade"?(it.subject||""):"")+'" data-per="'+esc(it.type==="grade"?(it.period||""):"")+'">'+dot
-   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+((it.lines&&it.lines.length)?it.lines.map(l=>'<small>'+esc(l)+'</small>').join(""):(it.sub?'<small>'+esc(it.sub)+'</small>':""))+'</span></button>';
+   +'<span class="tl-tx"><b>'+esc(it.title)+(it.todo?'<span class="tl-tag'+(it.late?" late":"")+'">'+esc(it.tag||"À corriger")+'</span>':"")+'</b>'+((it.lines&&it.lines.length)?it.lines.map(l=>'<small>'+esc(l)+'</small>').join(""):(it.sub?'<small>'+esc(it.sub)+'</small>':""))+'</span></button>';
  });
  host.innerHTML=html+'</div>';
 }
