@@ -14295,23 +14295,28 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
   const V=(review&&review.verdicts)||{}, q=d.question, nrm=normalizeOnlinePreviewText;
   if(q.type==="written" && !(d.expected||[]).length){
    d.manual=true; d.verdict=V[hwVerdictKey(q.id)]||""; d.correct=(d.verdict==="ok");
+  }else if(q.type==="written"){
+   /* réponse attendue définie : verdict automatique par défaut, modifiable par le professeur */
+   const sv=V[hwVerdictKey(q.id)];
+   if(sv){ d.verdict=sv; d.correct=(sv==="ok"); } else d.verdict=d.correct?"ok":"ko";
   }else if((q.type==="qcu"||q.type==="qcm") && !(q.choices||[]).some(c=>c.correct)){
    /* test basique : aucune bonne réponse cochée -> le professeur tranche avec le bouton glissant */
    d.manual=true; d.verdict=V[hwVerdictKey(q.id)]||""; d.correct=(d.verdict==="ok");
   }else if(q.type==="fillblank"){
    const blanks=(q.segments||[]).filter(sg=>sg.type==="blank");
-   if(blanks.some((b,i)=>!((d.expected||[])[i]||[]).length)){
-    const vals=Array.isArray(d.answer)?d.answer:[];
-    d.blankVerdicts={}; let all=blanks.length>0;
-    blanks.forEach((b,i)=>{
-     const acc=(d.expected||[])[i]||[];
-     let ok;
-     if(acc.length) ok=acc.some(x=>nrm(x)===nrm(vals[i]||""));
-     else{ const v=V[hwVerdictKey(q.id,b.id)]||""; d.blankVerdicts[b.id]=v; ok=(v==="ok"); }
-     if(!ok) all=false;
-    });
-    d.correct=all;
-   }
+   const vals=Array.isArray(d.answer)?d.answer:[];
+   d.blankVerdicts={}; let all=blanks.length>0;
+   blanks.forEach((b,i)=>{
+    const acc=(d.expected||[])[i]||[];
+    const sv=V[hwVerdictKey(q.id,b.id)];
+    let v;
+    if(sv) v=sv;
+    else if(acc.length) v=acc.some(x=>nrm(x)===nrm(vals[i]||""))?"ok":"ko";
+    else v="";
+    d.blankVerdicts[b.id]=v;
+    if(v!=="ok") all=false;
+   });
+   d.correct=all;
   }
   return d;
  }
@@ -14330,6 +14335,48 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
    }).join("")}</div>`;
   }
   return `<div class="homework-correction-expected"><strong>Réponse(s) attendue(s) :</strong> ${formatHomeworkExpectedAnswer(question, detail)}</div>`;
+ }
+
+ /* ── Popup de correction (prof) : même présentation que ce que voit l'élève ── */
+ function hwtBody(q,d){
+  const sOf=n=>n>1?"s":"";
+  if(q.type==="written"){
+   const ans=String(d.answer||""), exp=d.expected||[];
+   const st=d.verdict==="ok"?"is-ok":(d.verdict==="ko"?"is-ko":"");
+   return `<div class="hwt-written ${st}">
+    <input type="text" class="homework-quiz-text hwt-input" value="${escHtml(ans)}" placeholder="Aucune réponse" readonly tabindex="-1">
+    ${exp.length?`<div class="hwt-exp">Réponse${sOf(exp.length)} attendue${sOf(exp.length)} : ${exp.map(escHtml).join(" · ")}</div>`:`<div class="hwt-exp hwt-exp-none">Aucune réponse attendue définie</div>`}
+    <div class="hwt-verdict-row">${hwSwitchHtml(hwVerdictKey(q.id),d.verdict)}</div>
+   </div>`;
+  }
+  if(q.type==="fillblank"){
+   let bi=0;
+   const vals=Array.isArray(d.answer)?d.answer:[];
+   const rows=(q.segments||[]).map(seg=>{
+    if(seg.type!=="blank") return `<div class="homework-quiz-blank-row">${escHtml(seg.text||"").replace(/\n/g,"<br>")}</div>`;
+    const i=bi++, val=vals[i]||"", acc=(d.expected||[])[i]||[];
+    const st=(d.blankVerdicts||{})[seg.id]||"";
+    const cls=st==="ok"?"is-ok":(st==="ko"?"is-ko":"");
+    return `<div class="hwt-blank-wrap">
+     <div class="homework-quiz-blank hwt-blank ${cls}" role="button" tabindex="0" data-hwt-blank="1" data-n="${i+1}" title="Cliquer pour corriger ce trou">${val?escHtml(val):'<i class="hwt-empty">Aucune réponse</i>'}</div>
+     <small class="hwt-exp">${acc.length?"Attendu : "+acc.map(escHtml).join(" / "):"Pas de réponse attendue"}</small>
+     <input type="checkbox" hidden data-verdict-key="${escHtml(hwVerdictKey(q.id,seg.id))}" ${st==="ok"?"checked":""} ${st?"":'data-hwt-none="1"'}>
+    </div>`;
+   }).join("");
+   return `<div class="hwt-fill">
+    <div class="hwt-banner" hidden><span class="hwt-bn-t"></span>
+     <span class="hwt-seg" hidden data-state=""><button type="button" data-hwt-v="ok">✓ Correct</button><button type="button" data-hwt-v="ko">✗ Incorrect</button></span></div>
+    <div class="homework-quiz-options">${rows}</div>
+   </div>`;
+  }
+  const sel=new Set(Array.isArray(d.answer)?d.answer:[]);
+  const type=q.type==="qcm"?"checkbox":"radio";
+  const opts=(q.choices||[]).map(c=>{
+   const picked=sel.has(c.id), good=!!c.correct;
+   return `<label class="homework-quiz-option hwt-opt${picked?" is-picked":""}${good?" is-expected":""}"><input type="${type}" disabled ${picked?"checked":""}><span>${escHtml(c.text||"")}</span></label>`;
+  }).join("");
+  const manual=d.manual?`<div class="hwt-verdict-row"><span class="hwt-exp">Aucune bonne réponse définie — ta correction :</span> ${hwSwitchHtml(hwVerdictKey(q.id),d.verdict)}</div>`:"";
+  return `<div class="hwt-legend"><span class="hwt-lg-pick">Réponse de l’élève</span><span class="hwt-lg-exp">Réponse attendue</span></div><div class="homework-quiz-options">${opts}</div>${manual}`;
  }
  function hwAutoDetails(submission,test){
   const snap=(submission&&submission.autoResult&&Array.isArray(submission.autoResult.details)) ? submission.autoResult.details.map(d=>d&&d.question).filter(Boolean) : [];
@@ -14359,7 +14406,7 @@ function syncTeacherHomeworkDate(force=false){ if(AUTH.role==="prof" && force &&
     inner='<div class="hwc-blanks">'+(q.segments||[]).map(seg=>{
      if(seg.type!=="blank") return `<span>${escHtml(seg.text||"").replace(/\n/g,"<br>")}</span>`;
      const val=(Array.isArray(d.answer)?d.answer[bi]:"")||"", acc=d.expected[bi]||[]; bi++;
-     const good=acc.length ? acc.some(x=>nrm(x)===nrm(val)) : ((d.blankVerdicts||{})[seg.id]==="ok");
+     const good=d.blankVerdicts ? (d.blankVerdicts[seg.id]==="ok") : (acc.length ? acc.some(x=>nrm(x)===nrm(val)) : false);
      const note=!acc.length ? "" : good ? (acc.filter(x=>nrm(x)!==nrm(val)).length ? `<small>aussi accepté : ${acc.filter(x=>nrm(x)!==nrm(val)).map(escHtml).join(" / ")}</small>` : "") : `<small>attendu : ${acc.length?acc.map(escHtml).join(" / "):"—"}</small>`;
      return `<span class="hwc-blank ${good?"is-ok":"is-ko"}">${val?escHtml(val):"—"}${note}</span>`;
     }).join(" ")+'</div>';
@@ -15230,8 +15277,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
     <section class="homework-correction-question">
      <h4>Question ${index+1}</h4>
      <div class="online-preview-prompt">${escHtml(question.prompt||"").replace(/\n/g,"<br>")}</div>
-     <div class="homework-correction-answer"><strong>Réponse de l’élève :</strong> ${formatHomeworkUserAnswer(question, detail.answer)}</div>
-     ${hwExpectedBlock(question, detail)}
+     ${hwtBody(question, detail)}
      <div class="homework-correction-score">
       <label>Points</label>
       <input type="number" min="0" max="${Number(question.points)||0}" step="0.25" data-question-id="${escHtml(question.id)}" value="${escHtml(String(defaultScore))}" placeholder="—">
@@ -15331,6 +15377,48 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
   pts.value=t.checked ? String(Number(pts.max)||0) : "0";
   pts.dispatchEvent(new Event("input",{bubbles:true}));
  });
+
+ /* Texte à trous (correction) : clic sur un trou -> bannière Correct / Incorrect ; réponse à saisir : cadre vert/rouge */
+ document.addEventListener("click",e=>{
+  const root=e.target.closest && e.target.closest("#homeworkCorrectionBody"); if(!root) return;
+  const blank=e.target.closest(".hwt-blank");
+  if(blank){
+   const fill=blank.closest(".hwt-fill");
+   fill.querySelectorAll(".hwt-blank.is-sel").forEach(x=>x.classList.remove("is-sel"));
+   blank.classList.add("is-sel");
+   hwtSyncBanner(fill);
+   return;
+  }
+  const v=e.target.closest("[data-hwt-v]");
+  if(v){
+   const fill=v.closest(".hwt-fill"), sel=fill&&fill.querySelector(".hwt-blank.is-sel"); if(!sel) return;
+   const ok=v.dataset.hwtV==="ok";
+   sel.classList.toggle("is-ok",ok); sel.classList.toggle("is-ko",!ok);
+   const cb=sel.parentElement.querySelector("input[data-verdict-key]");
+   if(cb){ cb.checked=ok; delete cb.dataset.hwtNone; }
+   hwtSyncBanner(fill);
+  }
+ });
+ document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ") && e.target.classList && e.target.classList.contains("hwt-blank")){ e.preventDefault(); e.target.click(); }
+ });
+ function hwtSyncBanner(fill){
+  /* la bannière est déplacée juste au-dessus du trou sélectionné */
+  const sel=fill.querySelector(".hwt-blank.is-sel"), ban=fill.querySelector(".hwt-banner");
+  if(!ban) return;
+  if(!sel){ ban.hidden=true; return; }
+  const wrap=sel.parentElement;
+  if(wrap.previousElementSibling!==ban) wrap.parentNode.insertBefore(ban,wrap);
+  ban.hidden=false;
+  ban.querySelector(".hwt-bn-t").textContent="Trou "+sel.dataset.n+" :";
+  const seg=ban.querySelector(".hwt-seg"); seg.hidden=false;
+  seg.dataset.state=sel.classList.contains("is-ok")?"ok":(sel.classList.contains("is-ko")?"ko":"");
+ }
+ document.addEventListener("change",e=>{
+  const t=e.target;
+  if(!t || !t.matches || !t.matches("#homeworkCorrectionBody .hwt-written input[data-verdict-key]")) return;
+  const w=t.closest(".hwt-written"); w.classList.toggle("is-ok",t.checked); w.classList.toggle("is-ko",!t.checked);
+ });
  function closeHomeworkCorrectionModal(){
   HOMEWORK_STATE.correction=null;
   setModalOpen(homeworkCorrectionModal,false);
@@ -15353,7 +15441,7 @@ function openHomeworkStudentSubmittedState(homework,test,submission){
    total += value;
   });
   const verdicts={};
-  document.querySelectorAll("#homeworkCorrectionBody input[data-verdict-key]").forEach(inp=>{ verdicts[inp.dataset.verdictKey]=inp.checked?"ok":"ko"; });
+  document.querySelectorAll("#homeworkCorrectionBody input[data-verdict-key]").forEach(inp=>{ if(inp.dataset.hwtNone==="1") return; verdicts[inp.dataset.verdictKey]=inp.checked?"ok":"ko"; });
   const qComments={};
   Object.keys(ctx.comments||{}).forEach(k=>{ const t=String(ctx.comments[k]||"").trim(); if(t) qComments[k]=t; });
   let finalScore=hwcFmt(total), finalCustom=false;
@@ -18412,6 +18500,37 @@ body.admin-mode .topbar,body.admin-mode .container,body.admin-mode #locksBar,bod
 .ad-ovbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border)}
 .ad-ovbox{flex:1;padding:10px}.ad-ovbox .ad-frame{height:100%}
 .ed-ro-flag{position:fixed;bottom:10px;left:10px;z-index:500;background:#92400e;color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;pointer-events:none;opacity:.92}
+
+/* ═══ Popup de correction prof : présentation identique à celle de l'élève ═══ */
+.hwt-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin:2px 0 8px;color:#475569}
+.hwt-legend span{display:inline-flex;align-items:center;gap:6px}
+.hwt-legend span::before{content:"";width:14px;height:14px;border-radius:4px;box-sizing:border-box}
+.hwt-lg-pick::before{background:#dbeafe;border:1px solid #bfdbfe}
+.hwt-lg-exp::before{background:#fff;border:2px solid #0068aa}
+.homework-correction-question .homework-quiz-option{background:#fff;cursor:default;align-items:center}
+.homework-correction-question .hwt-opt input{accent-color:#0068aa;flex:none}
+.homework-correction-question .hwt-opt.is-picked{background:#dbeafe;border-color:#93c5fd}
+.homework-correction-question .hwt-opt.is-expected{border:2px solid #0068aa;padding:11px}
+.hwt-exp{display:block;margin-top:4px;font-size:12.5px;color:#0068aa;line-height:1.35}
+.hwt-exp-none{color:#64748b;font-style:italic}
+.hwt-verdict-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.hwt-written .hwt-input{background:#fff;box-sizing:border-box;border-width:2px}
+.hwt-written.is-ok .hwt-input{border-color:#22c55e;background:#f0fdf4}
+.hwt-written.is-ko .hwt-input{border-color:#ef4444;background:#fef2f2}
+.hwt-banner[hidden]{display:none}
+.hwt-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:44px;box-sizing:border-box;padding:6px 12px;margin-bottom:-4px;border-radius:12px;background:#ecf7fd;border:1px solid #b9e0f5;color:#08487f;font-size:14px;font-weight:600}
+.hwt-seg{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid #cbd5e1;background:#e2e8f0}
+.hwt-seg[hidden]{display:none}
+.hwt-seg button{border:0;background:transparent;padding:7px 16px;font:inherit;font-size:13px;font-weight:700;color:#475569;cursor:pointer}
+.hwt-seg[data-state="ok"] [data-hwt-v="ok"]{background:#22c55e;color:#fff}
+.hwt-seg[data-state="ko"] [data-hwt-v="ko"]{background:#ef4444;color:#fff}
+.hwt-blank-wrap{display:flex;flex-direction:column}
+.hwt-blank{cursor:pointer;background:#fff;min-height:42px;box-sizing:border-box;border-width:2px;display:flex;align-items:center}
+.hwt-blank:hover{border-color:#7dc3ea}
+.hwt-blank.is-ok{border-color:#22c55e;background:#f0fdf4}
+.hwt-blank.is-ko{border-color:#ef4444;background:#fef2f2}
+.hwt-blank.is-sel{box-shadow:0 0 0 3px rgba(0,104,170,.3)}
+.hwt-empty{color:#94a3b8}
 </style>
 <script id="ed-admin">
 (function(){
